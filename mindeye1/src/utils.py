@@ -16,7 +16,10 @@ import requests
 import io
 from urllib.request import Request, urlopen
 import socket
-from clip_retrieval.clip_client import ClipClient
+try:
+    from clip_retrieval.clip_client import ClipClient
+except ImportError:  # benchmark-modelos: so a busca no LAION-5B usa; o servico dela saiu do ar
+    ClipClient = None
 import time 
 import braceexpand
 from models import Clipper,OpenClipper
