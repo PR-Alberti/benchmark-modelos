@@ -16,6 +16,7 @@ cd "$(dirname "$0")"
 ENV_PATH="${ENV_PATH:-$HOME/envs/fmri}"
 DATA_PATH="${DATA_PATH:-$HOME/mindeyev2}"
 CKPT_RELEASE="${CKPT_RELEASE:-checkpoints-v1}"
+# os checkpoints treinados ficam no release do repositorio de origem do MindEye2 ridge-only
 REPO_URL="https://github.com/PR-Alberti/mindeye2-ridge"
 
 STAGES=(finetune)

@@ -1,8 +1,9 @@
-# MindEye2 — preparar uma máquina do zero
+# MindEye2 e FRR — preparar uma máquina do zero
 
-Este é o **único arquivo** que você precisa ler para deixar um computador pronto
-para rodar o MindEye2. Ele lista todas as bibliotecas, todos os arquivos externos
-e a ordem em que tudo é instalado.
+Este arquivo deixa um computador pronto para rodar o MindEye2 e o FRR, que usam o
+mesmo ambiente e os mesmos dados. Ele lista todas as bibliotecas, todos os arquivos
+externos e a ordem em que tudo é instalado. O MindEye1 se instala por cima disto:
+veja o [MINDEYE1.md](MINDEYE1.md).
 
 Índice: [1. Requisitos](#1-requisitos) · [2. Instalação](#2-instalação-em-2-comandos) ·
 [3. Bibliotecas](#3-todas-as-bibliotecas) · [4. Arquivos externos](#4-todos-os-arquivos-externos) ·
@@ -37,8 +38,8 @@ O `setup_env.sh` cria um ambiente 3.11 isolado, então a versão do sistema não
 ## 2. Instalação em 2 comandos
 
 ```bash
-git clone https://github.com/PR-Alberti/mindeye2-ridge.git
-cd mindeye2-ridge && ./bootstrap.sh --all --ckpts
+git clone https://github.com/PR-Alberti/benchmark-modelos.git
+cd benchmark-modelos && ./bootstrap.sh --all --ckpts
 ```
 
 É isso. O `bootstrap.sh` cria o ambiente, baixa os 62 GB de dados e traz os
@@ -229,9 +230,10 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 ## 5. Onde cada coisa fica
 
 ```
-~/mindeye2-ridge/                 ← este repositório (código)
+~/benchmark-modelos/             ← este repositório (código)
 ├── README.md                    o que é e como rodar
 ├── SETUP.md                     este arquivo
+├── MINDEYE1.md                  instalação e ajustes do MindEye1
 ├── EXPERIMENTO.md               o que foi feito e por quê
 ├── BENCHMARK.md                 tabelas do benchmark (gerado)
 ├── README-original.md           README do MindEye2, como referência
@@ -245,7 +247,10 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   ├── run_recon.sh             reconstruções (recon + refinamento)
 │   ├── run_evals.sh             métricas finais
 │   ├── run_frr.sh               baseline linear FRR
+│   ├── me1_setup.sh  me1_run.sh   MindEye1: preparação e execução (MINDEYE1.md)
 │   └── run_benchmark.sh         roda tudo o que o benchmark precisa (seção 6)
+├── mindeye1/                    MindEye1: src/ (código original + ajustes), download.py,
+│                                train_logs/ (links e saídas, fora do git)
 ├── src/                         pontos de entrada (rodam de qualquer diretório)
 │   ├── train_ridgeonly.py       treino
 │   ├── recon_inference.py       gera as reconstruções
@@ -269,7 +274,7 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 ├── tests/                       testes (python -m unittest discover -s tests)
 ├── notebooks/                   notebooks do MindEye2 original, de referência
 ├── legacy/                      o que já não é usado, com um README dizendo o que era
-├── tools/                       utilitários avulsos
+├── tools/                       utilitários avulsos (me1_fake_data.py, inspect_ckpt.py)
 ├── train_logs/<modelo>/         saída: last.pth + metrics.csv + train.log  (fora do git)
 └── logs/                        logs de execução                            (fora do git)
 
@@ -280,6 +285,8 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 ├── train_logs/                  checkpoints prontos (multi-sujeito e do artigo)
 ├── evals/                       imagens e legendas de referência
 └── .cache/                      modelos da seção 4.2
+
+~/mindeye1/                  ← dados e modelos publicados do MindEye1 (MINDEYE1.md), até 58 GB
 
 ~/envs/fmri/                 ← ambiente Python, 6,5 GB
 ```
