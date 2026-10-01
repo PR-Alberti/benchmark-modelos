@@ -169,6 +169,15 @@ parser.add_argument(
     "--vd_cache_dir", type=str, default='/fsx/proj-medarc/fmri/cache/models--shi-labs--versatile-diffusion/snapshots/2926f8e11ea526b562cd592b099fcf9c2985d0b7',
     help="Where is cached Versatile Diffusion model; if not cached will download to this path",
 )
+# benchmark-modelos: as duas opcoes abaixo fazem o treino caber numa GPU de 20 GB (ver MINDEYE1.md)
+parser.add_argument(
+    "--adam8bit",action=argparse.BooleanOptionalAction,default=False,
+    help="AdamW de 8 bits (bitsandbytes): estados do otimizador em 2 GB em vez de 8. Muda o treino em relacao ao artigo",
+)
+parser.add_argument(
+    "--val_chunk",type=int,default=0,
+    help="se > 0, a validacao (batch 300) passa pelo modelo em blocos deste tamanho; o retrieval continua entre os 300",
+)
 
 if utils.is_interactive():
     args = parser.parse_args(jupyter_args)
@@ -256,6 +265,9 @@ if hidden:
     if not norm_embs:
         print("WARNING: YOU WANT NORMED EMBEDDINGS FOR VERSATILE DIFFUSION!")
     clip_extractor = Clipper(clip_variant, device=device, hidden_state=True, norm_embs=norm_embs)
+    # benchmark-modelos: no modo hidden so o image_encoder (HF) e usado; o CLIP OpenAI completo
+    # que o Clipper tambem carrega ocuparia 1,7 GB da GPU a toa
+    clip_extractor.clip.to('cpu'); torch.cuda.empty_cache()
     out_dim = 257 * clip_size
 else:
     print("Using final layer CLIP space (Stable Diffusion Img Variations)")
@@ -355,7 +367,11 @@ opt_grouped_parameters = [
     {'params': [p for n, p in diffusion_prior.voxel2clip.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': 1e-2},
     {'params': [p for n, p in diffusion_prior.voxel2clip.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
 ]
-optimizer = torch.optim.AdamW(opt_grouped_parameters, lr=max_lr)
+if adam8bit:
+    import bitsandbytes as bnb
+    optimizer = bnb.optim.AdamW8bit(opt_grouped_parameters, lr=max_lr)
+else:
+    optimizer = torch.optim.AdamW(opt_grouped_parameters, lr=max_lr)
 
 global_batch_size = batch_size * num_devices
 if lr_scheduler_type == 'linear':
@@ -557,9 +573,16 @@ torch.cuda.empty_cache()
 # In[10]:
 
 
-diffusion_prior, optimizer, train_dl, val_dl, lr_scheduler = accelerator.prepare(
-diffusion_prior, optimizer, train_dl, val_dl, lr_scheduler
-)
+# benchmark-modelos: o accelerate atual (0.24) quebra com estes DataLoaders (batch_size=None).
+# Numa GPU so, o prepare deles apenas movia cada batch para a GPU; _NaGPU faz isso.
+diffusion_prior, optimizer, lr_scheduler = accelerator.prepare(diffusion_prior, optimizer, lr_scheduler)
+
+class _NaGPU:
+    def __init__(self, dl): self.dl = dl
+    def __iter__(self):
+        for b in self.dl: yield tuple(x.to(device) for x in b)
+
+train_dl, val_dl = _NaGPU(train_dl), _NaGPU(val_dl)
 
 
 # In[11]:
@@ -570,6 +593,13 @@ progress_bar = tqdm(range(epoch,num_epochs), ncols=1200, disable=(local_rank!=0)
 
 for epoch in progress_bar:
     diffusion_prior.train()
+    # benchmark-modelos: os tensores de batch 300 da validacao anterior ainda estao vivos aqui
+    # e, numa GPU de 20 GB, fazem a epoca seguinte estourar
+    for _nome in ["clip_voxels", "clip_voxels_proj", "aligned_clip_voxels", "clip_target",
+                  "clip_voxels_norm", "clip_target_norm", "voxel", "image", "val_loss",
+                  "val_loss_prior", "val_loss_nce", "fwd_sim", "bwd_sim"]:
+        globals().pop(_nome, None)
+    torch.cuda.empty_cache()
 
     sims_base = 0.
     val_sims_base = 0.
@@ -676,14 +706,34 @@ for epoch in progress_bar:
 
                 clip_target = clip_extractor.embed_image(image).float()
 
-                clip_voxels, clip_voxels_proj = diffusion_prior.module.voxel2clip(voxel) if distributed else diffusion_prior.voxel2clip(voxel)
-                if hidden:
-                    clip_voxels = clip_voxels.view(len(voxel),-1,clip_size)
-                
-                if prior:
-                    val_loss_prior, aligned_clip_voxels = diffusion_prior(text_embed=clip_voxels, image_embed=clip_target)
-                    aligned_clip_voxels /= diffusion_prior.module.image_embed_scale if distributed else diffusion_prior.image_embed_scale
+                if val_chunk > 0:
+                    # benchmark-modelos: o modelo ve blocos de val_chunk exemplos; perda e retrieval
+                    # continuam calculados sobre os 300
+                    _cv, _cp, _lp, _al = [], [], [], []
+                    for _i in range(0, len(voxel), val_chunk):
+                        _a, _b = diffusion_prior.voxel2clip(voxel[_i:_i+val_chunk])
+                        if hidden:
+                            _a = _a.view(len(_a),-1,clip_size)
+                        _cv.append(_a); _cp.append(_b)
+                        if prior:
+                            _l, _x = diffusion_prior(text_embed=_a, image_embed=clip_target[_i:_i+val_chunk])
+                            _lp.append(_l); _al.append(_x)
+                    clip_voxels, clip_voxels_proj = torch.cat(_cv), torch.cat(_cp)
+                    if prior:
+                        val_loss_prior, aligned_clip_voxels = torch.stack(_lp).mean(), torch.cat(_al)
+                        aligned_clip_voxels /= diffusion_prior.image_embed_scale
+                    del _cv, _cp, _lp, _al, _a, _b
+                    if prior:
+                        del _l, _x
                 else:
+                    clip_voxels, clip_voxels_proj = diffusion_prior.module.voxel2clip(voxel) if distributed else diffusion_prior.voxel2clip(voxel)
+                    if hidden:
+                        clip_voxels = clip_voxels.view(len(voxel),-1,clip_size)
+
+                    if prior:
+                        val_loss_prior, aligned_clip_voxels = diffusion_prior(text_embed=clip_voxels, image_embed=clip_target)
+                        aligned_clip_voxels /= diffusion_prior.module.image_embed_scale if distributed else diffusion_prior.image_embed_scale
+                if not prior:
                     aligned_clip_voxels = clip_voxels
 
                 clip_voxels_norm = nn.functional.normalize(clip_voxels_proj.flatten(1), dim=-1)

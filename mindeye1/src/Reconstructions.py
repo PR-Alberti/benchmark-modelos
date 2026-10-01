@@ -89,6 +89,10 @@ parser.add_argument(
     "--vd_cache_dir", type=str, default='/fsx/proj-medarc/fmri/cache/models--shi-labs--versatile-diffusion/snapshots/2926f8e11ea526b562cd592b099fcf9c2985d0b7',
     help="Where is cached Versatile Diffusion model; if not cached will download to this path",
 )
+parser.add_argument(  # benchmark-modelos
+    "--max_images", type=int, default=None,
+    help="reconstroi so as primeiras N imagens de teste (para testar o pipeline); padrao: as 982",
+)
 
 if utils.is_interactive():
     args = parser.parse_args(jupyter_args)
@@ -162,7 +166,7 @@ outdir = f'../train_logs/{autoencoder_name}'
 ckpt_path = os.path.join(outdir, f'epoch120.pth')
 
 if os.path.exists(ckpt_path):
-    checkpoint = torch.load(ckpt_path, map_location=device)
+    checkpoint = torch.load(ckpt_path, map_location='cpu')  # benchmark-modelos: o ckpt traz o otimizador junto
     state_dict = checkpoint['model_state_dict']
 
     voxel2sd = Voxel2StableDiffusionModel(in_dim=num_voxels)
@@ -260,7 +264,8 @@ outdir = f'../train_logs/{model_name}'
 ckpt_path = os.path.join(outdir, f'last.pth')
 
 print("ckpt_path",ckpt_path)
-checkpoint = torch.load(ckpt_path, map_location=device)
+# benchmark-modelos: o last.pth tem 12 GB (modelo + otimizador); carregado na GPU nao cabe em 20 GB
+checkpoint = torch.load(ckpt_path, map_location='cpu')
 state_dict = checkpoint['model_state_dict']
 print("EPOCH: ",checkpoint['epoch'])
 diffusion_prior.load_state_dict(state_dict,strict=False)
@@ -346,7 +351,7 @@ if img_variations:
 else:
     guidance_scale = 3.5
     
-ind_include = np.arange(num_val)
+ind_include = np.arange(num_val if max_images is None else max_images)  # benchmark-modelos
 all_brain_recons = None
     
 only_lowlevel = False

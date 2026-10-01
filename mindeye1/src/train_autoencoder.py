@@ -181,9 +181,11 @@ except:
 
 if local_rank == 0: print('Pulling NSD webdataset data...')
 
-train_url = f"{{/fsx/proj-fmri/shared/natural-scenes-dataset/webdataset_avg_split/train/train_subj{subj_id}_{{0..17}}.tar,/fsx/proj-fmri/shared/natural-scenes-dataset/webdataset_avg_split/val/val_subj{subj_id}_0.tar}}"
-val_url = f"/fsx/proj-fmri/shared/natural-scenes-dataset/webdataset_avg_split/test/test_subj{subj_id}_{{0..1}}.tar"
-meta_url = f"/fsx/proj-fmri/shared/natural-scenes-dataset/webdataset_avg_split/metadata_subj{subj_id}.json"
+# benchmark-modelos: o caminho dos dados era fixo no cluster dos autores; agora vem de ME1_DATA
+data_path = os.environ.get("ME1_DATA", "/fsx/proj-fmri/shared/natural-scenes-dataset")
+train_url = f"{{{data_path}/webdataset_avg_split/train/train_subj{subj_id}_{{0..17}}.tar,{data_path}/webdataset_avg_split/val/val_subj{subj_id}_0.tar}}"
+val_url = f"{data_path}/webdataset_avg_split/test/test_subj{subj_id}_{{0..1}}.tar"
+meta_url = f"{data_path}/webdataset_avg_split/metadata_subj{subj_id}.json"
 
 if local_rank == 0: print('Prepping train and validation dataloaders...')
 num_train = 8559 + 300
