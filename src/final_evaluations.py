@@ -104,6 +104,12 @@ all_recons = torch.load(all_recons_path)
 
 # Residual submodule
 all_clipvoxels = torch.load(f"{paths.EVALS}/{model_name}/{model_name}_all_clipvoxels.pt")
+# Modelo que nao vive no espaco do CLIP bigG (o MindEye1 usa o ViT-L/14) grava o alvo do
+# retrieval no espaco dele, alinhado com o all_images.pt; o sorteio (30 x 300) e o mesmo.
+_clipimg_path = f"{paths.EVALS}/{model_name}/{model_name}_all_clipimages.pt"
+all_clipimages = torch.load(_clipimg_path) if os.path.exists(_clipimg_path) else None
+if all_clipimages is not None:
+    print("retrieval no espaco do proprio modelo:", _clipimg_path, tuple(all_clipimages.shape), flush=True)
 # Low-level submodule
 _blurry_path = f"{paths.EVALS}/{model_name}/{model_name}_all_blurryrecons.pt"
 all_blurryrecons = torch.load(_blurry_path) if os.path.exists(_blurry_path) else None
@@ -187,13 +193,14 @@ for j in np.array([2,165,119,619,231,791]):
         kk+=1; jj=-1
 
 # Load embedding model
-clip_img_embedder = FrozenOpenCLIPImageEmbedder(
-    arch="ViT-bigG-14",
-    version="laion2b_s39b_b160k",
-    output_tokens=True,
-    only_tokens=True,
-)
-clip_img_embedder.to(device)
+if all_clipimages is None:
+    clip_img_embedder = FrozenOpenCLIPImageEmbedder(
+        arch="ViT-bigG-14",
+        version="laion2b_s39b_b160k",
+        output_tokens=True,
+        only_tokens=True,
+    )
+    clip_img_embedder.to(device)
 import gc; gc.collect()
 
 clip_seq_dim = 256
@@ -206,7 +213,10 @@ percent_correct_fwd, percent_correct_bwd = None, None
 with torch.cuda.amp.autocast(dtype=torch.float16):
     for test_i, loop in enumerate(tqdm(range(30))):
         random_samps = np.random.choice(np.arange(len(all_images)), size=300, replace=False)
-        emb = clip_img_embedder(all_images[random_samps].to(device)).float() # CLIP-Image
+        if all_clipimages is None:
+            emb = clip_img_embedder(all_images[random_samps].to(device)).float() # CLIP-Image
+        else:
+            emb = all_clipimages[random_samps].to(device).float()
 
         emb_ = all_clipvoxels[random_samps].to(device).float() # CLIP-Brain
 

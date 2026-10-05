@@ -93,6 +93,20 @@ def tabela_modelos(dados):
                 f'<td class="num-l">{tempo}<small>CV + ajuste final, GPU</small></td>'
                 "</tr>")
             continue
+        if m.get("me1"):
+            tempo = esc(m["tempo"]) if m["tempo"] else '<span class="falta">—</span>'
+            corpo.append(
+                "<tr>"
+                f'<td class="modelo">{esc(m["rotulo"])}<small class="mono">{esc(m["id"])}</small></td>'
+                f'<td class="num-l">{m["sessoes"]} {"sessão" if m["sessoes"] == 1 else "sessões"}</td>'
+                f'<td class="num-l">hidden {m["hidden"]}<small>com ramo blurry · CLIP ViT-L/14</small></td>'
+                f'<td class="cfg">tudo, do zero<small>{mi(sum(p.values())) if p else ""}'
+                f'{" · " if p else ""}{esc(m["prior"])}</small></td>'
+                f'<td class="cfg">{esc(m["treino"])}<small>sem pré-treino; imagem pelo Versatile '
+                'Diffusion</small></td>'
+                f'<td class="num-l">{tempo}<small>alto + baixo nível</small></td>'
+                "</tr>")
+            continue
         if m.get("paper"):
             treinado = "tudo" + (f"<small>{mi(sum(p.values()))}</small>" if p else "")
         elif p:
@@ -236,6 +250,8 @@ def galeria(dados):
                     imgs.append(f'<img class="k-{tipo}" src="{data_uri(c["img"][tipo][j])}" '
                                 f'alt="{esc(nome)}: {esc(c["rotulo"])}, {esc(rot)}" loading="lazy" '
                                 f'width="224" height="224">')
+                elif tipo == "blur" and c["img"] and c.get("me1"):
+                    imgs.append('<div class="k-blur sem">a borrada só entra no img2img</div>')
                 elif tipo == "blur" and c["img"]:
                     imgs.append('<div class="k-blur sem">sem ramo blurry</div>')
                 else:
@@ -358,7 +374,8 @@ def pagina(dados, args):
     <h1>Benchmark ridge-only</h1>
     <p class="lede">Quatro variações do fine-tune que treina só a camada ridge (a única parte do
       MindEye2 que é própria de cada pessoa), comparadas entre si, com os modelos publicados no
-      artigo, que retreinam a rede inteira, e com um baseline linear (FRR) que não usa rede nenhuma.
+      artigo, que retreinam a rede inteira, com um baseline linear (FRR) que não usa rede nenhuma e
+      com o MindEye1, treinado do zero.
       Mesmo conjunto de teste, mesmo pipeline de reconstrução e as mesmas métricas para todos.</p>
     <dl class="fatos">
       <div><dt>Teste</dt><dd>1.000 imagens · 3 repetições cada</dd></div>
@@ -380,7 +397,9 @@ def pagina(dados, args):
     <header><h2>Modelos</h2>
       <p class="nota">Os ridge-only congelam backbone e prior e treinam só a ridge. Os dois do
       artigo partem do mesmo pré-treino multi-sujeito e treinam tudo. O FRR é uma regressão linear
-      de forma fechada, sem treino por gradiente.</p></header>
+      de forma fechada, sem treino por gradiente. O MindEye1 treina tudo do zero, nas mesmas
+      sessões e com o mesmo teste, com a receita do artigo dele em batch 16 e Adam de 8 bits para
+      caber na placa.</p></header>
     {tabela_modelos(dados)}
   </section>
 
@@ -390,7 +409,10 @@ def pagina(dados, args):
       reconstruções publicadas (que repetem um modelo já listado). ↑ maior é melhor, ↓ menor é
       melhor. O retrieval não depende da reconstrução e é igual nas duas abas. <b>Img→cér</b>: para
       cada imagem, achar o seu cérebro entre 300 previsões; <b>Cér→img</b>: para cada previsão, achar
-      a sua imagem (no código, fwd e bwd). O FRR só tem retrieval.</p></header>
+      a sua imagem (no código, fwd e bwd). O FRR só tem retrieval. Cada modelo é medido no seu
+      espaço CLIP: o MindEye1 no ViT-L/14 (257 × 768), os outros no ViT-bigG/14. O MindEye1 não tem
+      refinamento e usa a imagem borrada no img2img: a mesma reconstrução aparece nas duas abas,
+      sem a mistura 75/25.</p></header>
     <div class="controles">
       <div class="seletor" role="group" aria-label="Reconstruções avaliadas" data-alvo="metricas" data-chave="tipo">
         <button type="button" aria-pressed="true" data-valor="enh">Refinadas</button>

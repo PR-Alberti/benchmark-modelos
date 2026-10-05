@@ -24,6 +24,11 @@ def linhas_de(dados, grupo):
             linhas.append({"rotulo": m["rotulo"], "sub": "só retrieval, sem reconstrução", "pub": False,
                            "enh": tab, "base": tab, "id": m["id"]})
             continue
+        if m.get("me1"):
+            linhas.append({"rotulo": m["rotulo"], "sub": "sem refinamento: a mesma reconstrução nas duas abas",
+                           "pub": False, "enh": m["tabelas"]["enh"], "base": m["tabelas"]["base"],
+                           "id": m["id"]})
+            continue
         linhas.append({"rotulo": m["rotulo"], "sub": "nossa execução" if m.get("paper") else "",
                        "pub": False, "enh": m["tabelas"]["enh"], "base": m["tabelas"]["base"],
                        "id": m["id"]})

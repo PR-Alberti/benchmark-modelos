@@ -178,6 +178,15 @@ parser.add_argument(
     "--val_chunk",type=int,default=0,
     help="se > 0, a validacao (batch 300) passa pelo modelo em blocos deste tamanho; o retrieval continua entre os 300",
 )
+parser.add_argument(
+    "--num_sessions",type=int,default=0,
+    help="se > 0, treina nas N primeiras sessoes do benchmark (dados do MindEye2 em --data_path, "
+         "teste de 1.000 imagens) em vez do webdataset_avg_split; ver nsd_benchmark.py",
+)
+parser.add_argument(
+    "--save_last_every",type=int,default=1,
+    help="grava o last.pth a cada N epocas (e na ultima); cada um tem ~6 GB",
+)
 
 if utils.is_interactive():
     args = parser.parse_args(jupyter_args)
@@ -225,33 +234,43 @@ if use_image_aug:
 # In[6]:
 
 
-print('Pulling NSD webdataset data...')
+if num_sessions > 0:
+    # benchmark-modelos: os mesmos dados de treino e teste dos outros modelos do benchmark
+    import nsd_benchmark
+    print(f'Dados do benchmark: {num_sessions} sessoes de {data_path}')
+    _treino, _teste = nsd_benchmark.carrega(data_path, num_sessions)
+    num_train, num_val = len(_treino["coco"]), len(_teste["coco"])
+    train_dl = nsd_benchmark.Lotes(_treino, batch_size, embaralha=True, device=device, seed=seed)
+    val_dl = nsd_benchmark.Lotes(_teste, 300, embaralha=False, device=device)
+    print(f'treino: {num_train} imagens ({len(train_dl)} lotes por epoca); validacao: {num_val} imagens')
+else:
+  print('Pulling NSD webdataset data...')
 
-train_url = "{" + f"{data_path}/webdataset_avg_split/train/train_subj0{subj}_" + "{0..17}.tar," + f"{data_path}/webdataset_avg_split/val/val_subj0{subj}_0.tar" + "}"
-val_url = f"{data_path}/webdataset_avg_split/test/test_subj0{subj}_" + "{0..1}.tar"
-print(train_url,"\n",val_url)
-meta_url = f"{data_path}/webdataset_avg_split/metadata_subj0{subj}.json"
-num_train = 8559 + 300
-num_val = 982
+  train_url = "{" + f"{data_path}/webdataset_avg_split/train/train_subj0{subj}_" + "{0..17}.tar," + f"{data_path}/webdataset_avg_split/val/val_subj0{subj}_0.tar" + "}"
+  val_url = f"{data_path}/webdataset_avg_split/test/test_subj0{subj}_" + "{0..1}.tar"
+  print(train_url,"\n",val_url)
+  meta_url = f"{data_path}/webdataset_avg_split/metadata_subj0{subj}.json"
+  num_train = 8559 + 300
+  num_val = 982
 
-print('Prepping train and validation dataloaders...')
-train_dl, val_dl, num_train, num_val = utils.get_dataloaders(
-    batch_size,'images',
-    num_devices=num_devices,
-    num_workers=num_workers,
-    train_url=train_url,
-    val_url=val_url,
-    meta_url=meta_url,
-    num_train=num_train,
-    num_val=num_val,
-    val_batch_size=300,
-    cache_dir=data_path, #"/tmp/wds-cache",
-    seed=seed,
-    voxels_key='nsdgeneral.npy',
-    to_tuple=["voxels", "images", "coco"],
-    local_rank=local_rank,
-    world_size=world_size,
-)
+  print('Prepping train and validation dataloaders...')
+  train_dl, val_dl, num_train, num_val = utils.get_dataloaders(
+      batch_size,'images',
+      num_devices=num_devices,
+      num_workers=num_workers,
+      train_url=train_url,
+      val_url=val_url,
+      meta_url=meta_url,
+      num_train=num_train,
+      num_val=num_val,
+      val_batch_size=300,
+      cache_dir=data_path, #"/tmp/wds-cache",
+      seed=seed,
+      voxels_key='nsdgeneral.npy',
+      to_tuple=["voxels", "images", "coco"],
+      local_rank=local_rank,
+      world_size=world_size,
+  )
 
 
 # In[7]:
@@ -396,6 +415,7 @@ if plot_umap:
 if n_samples_save > 0 and hidden:
     print('Creating versatile diffusion reconstruction pipeline...')
     from diffusers import VersatileDiffusionDualGuidedPipeline, UniPCMultistepScheduler
+    import vd_compat  # benchmark-modelos: defeito do diffusers 0.23 no text_unet
     from diffusers.models import DualTransformer2DModel
     try:
         vd_pipe =  VersatileDiffusionDualGuidedPipeline.from_pretrained(vd_cache_dir).to('cpu')
@@ -547,11 +567,12 @@ if resume_from_ckpt:
     except:
         print('last.pth failed... trying last_backup.pth')
         checkpoint = torch.load(outdir+'/last_backup.pth', map_location='cpu')
-    epoch = checkpoint['epoch']
+    epoch = checkpoint['epoch'] + 1  # benchmark-modelos: o ckpt guarda a epoca ja concluida
     print("Epoch",epoch)
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
     diffusion_prior.load_state_dict(checkpoint['model_state_dict'])
+    losses, val_losses, lrs = checkpoint['train_losses'], checkpoint['val_losses'], checkpoint['lrs']
     del checkpoint
 elif wandb_log:
     if wandb.run.resumed:
@@ -805,7 +826,8 @@ for epoch in progress_bar:
         progress_bar.set_postfix(**logs)
 
         # Save model checkpoint and reconstruct
-        save_ckpt(f'last')
+        if (epoch + 1) % save_last_every == 0 or epoch == num_epochs - 1:  # benchmark-modelos
+            save_ckpt(f'last')
         if epoch % ckpt_interval == 0:
             save_ckpt(f'last_backup')
             if n_samples_save > 0:

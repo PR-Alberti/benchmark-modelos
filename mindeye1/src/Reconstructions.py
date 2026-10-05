@@ -91,7 +91,16 @@ parser.add_argument(
 )
 parser.add_argument(  # benchmark-modelos
     "--max_images", type=int, default=None,
-    help="reconstroi so as primeiras N imagens de teste (para testar o pipeline); padrao: as 982",
+    help="reconstroi so as primeiras N imagens de teste (para testar o pipeline); padrao: todas",
+)
+parser.add_argument(  # benchmark-modelos
+    "--benchmark",action=argparse.BooleanOptionalAction,default=False,
+    help="usa o teste do benchmark (1.000 imagens, dados do MindEye2 em --data_path) e grava em "
+         "results/evals/<out_name>/ no formato do final_evaluations.py",
+)
+parser.add_argument(  # benchmark-modelos
+    "--out_name", type=str, default=None,
+    help="nome da saida com --benchmark (padrao: --model_name)",
 )
 
 if utils.is_interactive():
@@ -132,20 +141,28 @@ print("subj",subj,"num_voxels",num_voxels)
 # In[5]:
 
 
-val_url = f"{data_path}/webdataset_avg_split/test/test_subj0{subj}_" + "{0..1}.tar"
-meta_url = f"{data_path}/webdataset_avg_split/metadata_subj0{subj}.json"
-num_train = 8559 + 300
-num_val = 982
 batch_size = val_batch_size = 1
-voxels_key = 'nsdgeneral.npy' # 1d inputs
+if benchmark:
+    # benchmark-modelos: as 1.000 imagens de teste dos outros modelos, em ordem crescente de id
+    import nsd_benchmark
+    _teste = nsd_benchmark.carrega_teste(data_path)
+    num_val = len(_teste["coco"])
+    val_dl = nsd_benchmark.Lotes(_teste, 1, embaralha=False, device='cpu')
+    out_name = out_name or model_name
+else:
+  val_url = f"{data_path}/webdataset_avg_split/test/test_subj0{subj}_" + "{0..1}.tar"
+  meta_url = f"{data_path}/webdataset_avg_split/metadata_subj0{subj}.json"
+  num_train = 8559 + 300
+  num_val = 982
+  voxels_key = 'nsdgeneral.npy' # 1d inputs
 
-val_data = wds.WebDataset(val_url, resampled=False)\
-    .decode("torch")\
-    .rename(images="jpg;png", voxels=voxels_key, trial="trial.npy", coco="coco73k.npy", reps="num_uniques.npy")\
-    .to_tuple("voxels", "images", "coco")\
-    .batched(val_batch_size, partial=False)
+  val_data = wds.WebDataset(val_url, resampled=False)\
+      .decode("torch")\
+      .rename(images="jpg;png", voxels=voxels_key, trial="trial.npy", coco="coco73k.npy", reps="num_uniques.npy")\
+      .to_tuple("voxels", "images", "coco")\
+      .batched(val_batch_size, partial=False)
 
-val_dl = torch.utils.data.DataLoader(val_data, batch_size=None, shuffle=False)
+  val_dl = torch.utils.data.DataLoader(val_data, batch_size=None, shuffle=False)
 
 # check that your data loader is working
 for val_i, (voxel, img_input, coco) in enumerate(val_dl):
@@ -187,6 +204,7 @@ else:
 
 print('Creating versatile diffusion reconstruction pipeline...')
 from diffusers import VersatileDiffusionDualGuidedPipeline, UniPCMultistepScheduler
+import vd_compat  # benchmark-modelos: defeito do diffusers 0.23 no text_unet
 from diffusers.models import DualTransformer2DModel
 try:
     vd_pipe =  VersatileDiffusionDualGuidedPipeline.from_pretrained(vd_cache_dir).to(device).to(torch.float16)
@@ -422,10 +440,28 @@ for val_i, (voxel, img, coco) in enumerate(tqdm(val_dl,total=len(ind_include))):
 all_brain_recons = all_brain_recons.view(-1,3,imsize,imsize)
 print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
-if saving:
+if saving and benchmark:
+    # benchmark-modelos: o formato do final_evaluations.py. Reconstrucoes em 256 x 256, como as do
+    # MindEye2 (o final_evaluations reduz tudo a 256). Para o retrieval, o embedding que o
+    # MindEye1 usa no retrieval (a saida do projetor) e o alvo no espaco dele (CLIP ViT-L/14,
+    # 257 x 768, normalizado pelo token CLS), calculados nas 3 repeticoes promediadas.
+    _saida = os.path.abspath(f'../../results/evals/{out_name}')
+    os.makedirs(_saida, exist_ok=True)
+    _r256 = transforms.Resize((256, 256), antialias=True)
+    torch.save(_r256(all_brain_recons.float().cpu()), f'{_saida}/{out_name}_all_recons.pt')
+    _proj, _alvo = [], []
+    with torch.no_grad():
+        for _v, _img, _c in nsd_benchmark.Lotes(_teste, 50, embaralha=False, device=device):
+            _proj.append(diffusion_prior.voxel2clip(torch.mean(_v, axis=1).float())[1].float().cpu())
+            _alvo.append(clip_extractor.embed_image(_img).float().cpu())
+    _n = len(all_brain_recons)
+    torch.save(torch.cat(_proj)[:_n].clone(), f'{_saida}/{out_name}_all_clipvoxels.pt')
+    torch.save(torch.cat(_alvo)[:_n].clone(), f'{_saida}/{out_name}_all_clipimages.pt')
+    print(f'recon_path: {_saida}/{out_name}_all_recons.pt')
+elif saving:
     torch.save(all_images,f'all_images.pt')
     torch.save(all_brain_recons,f'{model_name}_recons_img2img{img2img_strength}_{recons_per_sample}samples.pt')
-print(f'recon_path: {model_name}_recons_img2img{img2img_strength}_{recons_per_sample}samples')
+    print(f'recon_path: {model_name}_recons_img2img{img2img_strength}_{recons_per_sample}samples')
 
 if not utils.is_interactive():
     sys.exit(0)

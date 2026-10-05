@@ -32,7 +32,7 @@ estão no [BENCHMARK.md](BENCHMARK.md), e o que foi feito e por quê, no [EXPERI
 
 | Tarefa do plano | Estado | Observação |
 |---|---|---|
-| Redução de dados por sessões | parcial | 1 e 40 sessões para o FRR e o ridge 1024; as condições de 25, 35 e 50 h do plano não foram rodadas |
+| Redução de dados por sessões | parcial | 1 e 40 sessões para o FRR, o ridge 1024 e o MindEye1; as condições de 25, 35 e 50 h do plano não foram rodadas |
 | Redução de dados por imagens únicas e por repetições | **pendente** | Depende do pipeline de subconjuntos |
 | Redução de variedade (por categoria, aleatória, maximizando distância) | **pendente** | Idem |
 | Mesmo teste e mesmo sujeito em todas as condições | feito | O benchmark inteiro usa o subj01 e as mesmas 1.000 imagens |

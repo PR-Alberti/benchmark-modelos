@@ -12,8 +12,8 @@ from .texts import FRR_NOTA_HUBNESS, leitura
 def markdown(dados, args):
     L = ["# Benchmark ridge-only", "",
          "MindEye2, sujeito 1 do NSD. Quatro variações do fine-tune só da camada ridge, comparadas "
-         "com os modelos publicados no artigo (fine-tune completo) e com um baseline linear (FRR) "
-         "que não usa rede nenhuma. Mesmo teste (1.000 imagens), mesmo pipeline de reconstrução e "
+         "com os modelos publicados no artigo (fine-tune completo), com um baseline linear (FRR) "
+         "que não usa rede nenhuma e com o MindEye1 treinado do zero. Mesmo teste (1.000 imagens), mesmo pipeline de reconstrução e "
          "mesmas métricas para todos.", "",
          "A versão completa, com a galeria de reconstruções, curvas de treino e seletor "
          "refinada/unCLIP, está em [benchmark/index.html](benchmark/index.html) — um arquivo "
@@ -28,6 +28,11 @@ def markdown(dados, args):
             f = m["frr_dados"]
             params = f"{bi(f['parametros_lineares'])} de coeficientes (forma fechada)" if f else "—"
             L.append(f"| {m['rotulo']} | {m['sessoes']} | — | não | {params} | {m['treino']} | {m['tempo'] or '—'} |")
+            continue
+        if m.get("me1"):
+            params = f"todos, do zero ({mi(sum(p.values()))})" if p else "todos, do zero"
+            L.append(f"| {m['rotulo']} | {m['sessoes']} | {m['hidden']} | sim | {params} | {m['treino']} "
+                     f"| {m['tempo'] or '—'} |")
             continue
         if p:
             total = sum(p.values())
@@ -67,7 +72,9 @@ def markdown(dados, args):
     tabela("base", METRICAS[:8], "Reconstrução — unCLIP (sem refinar)")
     tabela("enh", [(k, r, True, "dec") for k, r in CEREBRO], "Correlação cerebral (GNet) — refinadas")
     L += ["", "Negrito: melhor do grupo, sem contar as reconstruções publicadas. Modelos com ramo "
-          "blurry avaliam 75% refinada + 25% blurry, como no artigo.", "",
+          "blurry avaliam 75% refinada + 25% blurry, como no artigo; o MindEye1 não tem refinamento e "
+          "já usa a borrada no img2img, então a mesma reconstrução entra nas duas tabelas, sem mistura. "
+          "Cada modelo faz o retrieval no seu espaço CLIP: o MindEye1 no ViT-L/14, os outros no ViT-bigG/14.", "",
           f"Retrieval top-1 entre 300, média de 30 sorteios. **{ROT_FWD}** (fwd no código): para cada "
           f"imagem, achar o seu cérebro entre as 300 previsões. **{ROT_BWD}** (bwd): para cada previsão, "
           "achar a sua imagem. É o que o código calcula, o oposto do comentário do `final_evaluations.py` "

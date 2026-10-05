@@ -16,6 +16,14 @@ MODELOS = [
     dict(id="subj01_frr_40sess", rotulo="FRR · 40 sessões", frr=True, grupo=40, sessoes=40, hidden=None,
          blurry=False, prior="sem prior, sem rede",
          treino="20 frações · CV 5 dobras · uma fração por dimensão", partida=None),
+    # MindEye1 treinado do zero nas mesmas sessoes e testado no mesmo teste (MINDEYE1.md). Nao tem
+    # refinamento: a reconstrucao final (Versatile Diffusion + img2img da borrada) entra nas duas abas
+    dict(id="subj01_me1_1sess", rotulo="MindEye1 · 1 sessão", me1=True, grupo=1, sessoes=1, hidden=4096,
+         blurry=True, prior="do zero, com o prior", baixo="subj01_me1_lowlevel_1sess",
+         treino="240 épocas + 120 do baixo nível · batch 16 · Adam 8 bits", partida=None),
+    dict(id="subj01_me1_40sess", rotulo="MindEye1 · 40 sessões", me1=True, grupo=40, sessoes=40, hidden=4096,
+         blurry=True, prior="do zero, com o prior", baixo="subj01_me1_lowlevel_40sess",
+         treino="240 épocas + 120 do baixo nível · batch 16 · Adam 8 bits", partida=None),
     dict(id="subj01_ridgeonly_1sess_prior", rotulo="Ridge 1024 + prior",
          grupo=1, sessoes=1, hidden=1024, blurry=False, prior="com a loss do prior",
          treino="150 épocas · batch 16", partida="multisubject_subj01_1024hid_nolow_300ep",
