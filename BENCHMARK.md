@@ -1,10 +1,10 @@
 # Benchmark ridge-only
 
-MindEye2, sujeito 1 do NSD. Quatro variações do fine-tune só da camada ridge, comparadas com os modelos publicados no artigo (fine-tune completo) e com um baseline linear (FRR) que não usa rede nenhuma. Mesmo teste (1.000 imagens), mesmo pipeline de reconstrução e mesmas métricas para todos.
+MindEye2, sujeito 1 do NSD. Quatro variações do fine-tune só da camada ridge, comparadas com os modelos publicados no artigo (fine-tune completo), com um baseline linear (FRR) que não usa rede nenhuma e com o MindEye1 treinado do zero. Mesmo teste (1.000 imagens), mesmo pipeline de reconstrução e mesmas métricas para todos.
 
 A versão completa, com a galeria de reconstruções, curvas de treino e seletor refinada/unCLIP, está em [benchmark/index.html](benchmark/index.html) — um arquivo só, abre offline.
 
-Gerado por `src/make_benchmark.py` em 01/10/2026 19:00 (commit `4021cb7`).
+Gerado por `src/make_benchmark.py` em 05/10/2026 09:18 (commit `ff7744a`).
 
 ## Modelos
 
@@ -12,6 +12,8 @@ Gerado por `src/make_benchmark.py` em 01/10/2026 19:00 (commit `4021cb7`).
 |---|---:|---:|---|---|---|---|
 | FRR · 1 sessão | 1 | — | não | 6,70 bi de coeficientes (forma fechada) | 20 frações · CV 5 dobras · uma fração por dimensão | 10 s |
 | FRR · 40 sessões | 40 | — | não | 6,70 bi de coeficientes (forma fechada) | 20 frações · CV 5 dobras · uma fração por dimensão | 21 min |
+| MindEye1 · 1 sessão | 1 | 4096 | sim | todos, do zero (1.003,6 M) | 240 épocas + 120 do baixo nível · batch 16 · Adam 8 bits | 2 h 53 |
+| MindEye1 · 40 sessões | 40 | 4096 | sim | todos, do zero (1.003,6 M) | 240 épocas + 120 do baixo nível · batch 16 · Adam 8 bits | 32 h 38 |
 | Ridge 1024 + prior | 1 | 1024 | não | 16,1 M de 729,3 M (2,21%) | 150 épocas · batch 16 | ~1 h 50 (corrida anterior) |
 | Ridge 4096 + blurry | 1 | 4096 | sim | 64,4 M de 2.227,3 M (2,89%) | 150 épocas · batch 8 · congelados em fp16 | 2 h 41 |
 | Ridge 1024 sem prior | 1 | 1024 | não | 16,1 M de 469,5 M (3,43%) | 150 épocas · batch 16 | — |
@@ -25,6 +27,7 @@ Gerado por `src/make_benchmark.py` em 01/10/2026 19:00 (commit `4021cb7`).
 - **1024 contra 4096 + blurry.** A dimensão maior e o ramo blurry pesam sobretudo no baixo nível (PixCorr 0,181 → 0,253; Alex(2) 85,4% → 89,6%). No alto nível o 1024 já empata com o artigo: Incep e CLIP a menos de 1 ponto, Eff e SwAV a 0,003.
 - **O prior importa no treino da ridge.** Com o mesmo script e a mesma semente, tirar a loss do prior derruba o retrieval (Img→cér / Cér→img) de 92,9% / 88,1% para 78,4% / 72,6%, e todas as métricas de reconstrução caem junto. O retrieval nem passa pelo prior: o que muda é o sinal de treino, já que a loss do prior supervisiona a saída inteira do backbone (256 × 1.664), e não só a projeção contrastiva.
 - **40 sessões.** O ridge 1024 chega a 99,9% / 99,5% de retrieval e fica de 1 a 3 pontos do artigo nas identificações 2-way (CLIP 92,3% contra 93,6%). A distância maior é no baixo nível (PixCorr 0,277 contra 0,373), onde o artigo tem o ramo blurry e este não.
+- **MindEye1, treinado do zero.** Sem pré-treino, com 1 sessão ele quase não recupera (retrieval 30,6% / 23,2%, contra 92,9% / 88,1% do ridge 1024 + prior) e fica atrás do ridge 4096 + blurry nas identificações 2-way (CLIP 80,8% contra 83,8%, na tabela unCLIP), embora o PixCorr (0,252) seja maior. Com 40 sessões o retrieval sobe 64 pontos (94,5% / 87,6%) e o PixCorr chega a 0,382, acima do artigo reconstruído aqui (0,373 refinada, 0,324 unCLIP). O retrieval do MindEye1 é no espaço ViT-L/14 dele, não no bigG dos outros, então não é diretamente comparável.
 - **Ruído.** Trocar a semente do treino move o retrieval em menos de 0,5 ponto; reamostrar a reconstrução move as identificações 2-way em até 0,6 ponto e o PixCorr em até 0,006. O efeito da semente do treino nas métricas de imagem não foi medido.
 - **O pipeline reproduz o artigo.** Reconstruídos aqui, os dois modelos publicados ficam a até 1 ponto dos tensores divulgados pelos autores nas identificações 2-way, e a até 0,007 em PixCorr e SSIM.
 - **FRR, o baseline linear.** Uma regressão linear dos voxels para o embedding CLIP, sem rede nenhuma, acha o cérebro certo de cada imagem (Img→cér) em 55,0% dos casos com 1 sessão e 96,4% com 40, contra 92,8% e 99,9% do ridge 1024 + prior: com poucos dados falta muito, e o ganho de 1 para 40 sessões é de 41 pontos no FRR e 7 no ridge. Escolher uma fração para cada dimensão do alvo é o que sustenta o resultado com pouco dado: com uma fração só para todas, o de 1 sessão cai de 55,0% para 33,2%; com 40 sessões as duas coincidem.
@@ -37,6 +40,7 @@ Gerado por `src/make_benchmark.py` em 01/10/2026 19:00 (commit `4021cb7`).
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | **1 sessão · ~1 h de fMRI, 750 exibições** | | | | | | | | | | |
 | FRR · 1 sessão (só retrieval, sem reconstrução) | — | — | — | — | — | — | — | — | 55,0% | 3,1% |
+| MindEye1 · 1 sessão (sem refinamento: a mesma reconstrução nas duas abas) | 0,252 | 0,343 | 87,0% | 89,5% | 81,2% | 80,8% | 0,810 | 0,465 | 30,6% | 23,2% |
 | Ridge 1024 + prior | 0,181 | 0,346 | 85,4% | 92,5% | 83,6% | 82,6% | 0,802 | 0,460 | 92,8% | 88,1% |
 | Ridge 4096 + blurry | **0,253** | 0,414 | **89,6%** | **94,6%** | **85,2%** | **83,5%** | **0,785** | **0,443** | **95,5%** | **92,0%** |
 | Ridge 1024 sem prior | 0,111 | 0,310 | 75,0% | 83,8% | 72,8% | 72,6% | 0,889 | 0,525 | 78,5% | 72,1% |
@@ -44,8 +48,9 @@ Gerado por `src/make_benchmark.py` em 01/10/2026 19:00 (commit `4021cb7`).
 | ↳ reconstruções publicadas pelos autores | 0,235 | 0,428 | 88,0% | 93,3% | 83,6% | 80,7% | 0,798 | 0,459 | 93,9% | 77,6% |
 | **40 sessões · ~40 h de fMRI, 30.000 exibições** | | | | | | | | | | |
 | FRR · 40 sessões (só retrieval, sem reconstrução) | — | — | — | — | — | — | — | — | 96,4% | 37,7% |
+| MindEye1 · 40 sessões (sem refinamento: a mesma reconstrução nas duas abas) | **0,382** | 0,347 | 96,5% | 98,0% | 94,6% | 92,9% | 0,631 | 0,356 | 94,5% | 87,6% |
 | Ridge 1024 + prior · 40 sessões | 0,277 | 0,383 | 94,5% | 98,2% | 94,7% | 92,3% | 0,645 | 0,364 | 99,9% | 99,5% |
-| Paper · 40 sessões (nossa execução) | **0,373** | **0,432** | **97,5%** | **99,2%** | **96,0%** | **93,6%** | **0,606** | **0,331** | **100,0%** | **99,9%** |
+| Paper · 40 sessões (nossa execução) | 0,373 | **0,432** | **97,5%** | **99,2%** | **96,0%** | **93,6%** | **0,606** | **0,331** | **100,0%** | **99,9%** |
 | ↳ reconstruções publicadas pelos autores | 0,374 | 0,439 | 97,8% | 99,1% | 96,1% | 93,6% | 0,609 | 0,338 | 100,0% | 99,9% |
 
 ## Reconstrução — unCLIP (sem refinar)
@@ -53,14 +58,16 @@ Gerado por `src/make_benchmark.py` em 01/10/2026 19:00 (commit `4021cb7`).
 | Modelo | PixCorr ↑ | SSIM ↑ | Alex(2) ↑ | Alex(5) ↑ | Incep ↑ | CLIP ↑ | Eff ↓ | SwAV ↓ |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | **1 sessão · ~1 h de fMRI, 750 exibições** | | | | | | | | |
+| MindEye1 · 1 sessão (sem refinamento: a mesma reconstrução nas duas abas) | **0,252** | **0,343** | 87,0% | 89,5% | 81,2% | 80,8% | 0,810 | 0,465 |
 | Ridge 1024 + prior | 0,176 | 0,285 | 82,8% | 92,4% | 85,5% | 81,3% | 0,816 | 0,473 |
-| Ridge 4096 + blurry | **0,214** | 0,319 | **88,1%** | **94,7%** | **87,4%** | **83,8%** | **0,794** | **0,452** |
+| Ridge 4096 + blurry | 0,214 | 0,319 | **88,1%** | **94,7%** | **87,4%** | **83,8%** | **0,794** | **0,452** |
 | Ridge 1024 sem prior | 0,109 | 0,246 | 71,7% | 83,2% | 74,9% | 69,7% | 0,897 | 0,539 |
-| Paper · 1 sessão (nossa execução) | 0,201 | **0,337** | 86,8% | 93,9% | 84,1% | 82,4% | 0,808 | 0,454 |
+| Paper · 1 sessão (nossa execução) | 0,201 | 0,337 | 86,8% | 93,9% | 84,1% | 82,4% | 0,808 | 0,454 |
 | ↳ reconstruções publicadas pelos autores | — | — | — | — | — | — | — | — |
 | **40 sessões · ~40 h de fMRI, 30.000 exibições** | | | | | | | | |
+| MindEye1 · 40 sessões (sem refinamento: a mesma reconstrução nas duas abas) | **0,382** | **0,347** | 96,5% | 98,0% | 94,6% | 92,9% | 0,631 | 0,356 |
 | Ridge 1024 + prior · 40 sessões | 0,271 | 0,330 | 93,5% | 98,3% | 95,3% | 92,1% | 0,669 | 0,382 |
-| Paper · 40 sessões (nossa execução) | **0,324** | **0,332** | **96,9%** | **99,4%** | **96,7%** | **95,1%** | **0,610** | **0,332** |
+| Paper · 40 sessões (nossa execução) | 0,324 | 0,332 | **96,9%** | **99,4%** | **96,7%** | **95,1%** | **0,610** | **0,332** |
 | ↳ reconstruções publicadas pelos autores | 0,325 | 0,333 | 97,2% | 99,4% | 96,8% | 94,9% | 0,611 | 0,334 |
 
 ## Correlação cerebral (GNet) — refinadas
@@ -68,17 +75,19 @@ Gerado por `src/make_benchmark.py` em 01/10/2026 19:00 (commit `4021cb7`).
 | Modelo | nsdgeneral ↑ | V1 ↑ | V2 ↑ | V3 ↑ | V4 ↑ | Alto nível ↑ |
 |---|---:|---:|---:|---:|---:|---:|
 | **1 sessão · ~1 h de fMRI, 750 exibições** | | | | | | |
+| MindEye1 · 1 sessão (sem refinamento: a mesma reconstrução nas duas abas) | 0,344 | 0,282 | 0,271 | 0,277 | 0,279 | **0,355** |
 | Ridge 1024 + prior | 0,347 | 0,299 | 0,317 | 0,322 | 0,302 | 0,347 |
-| Ridge 4096 + blurry | **0,355** | **0,329** | 0,335 | 0,336 | **0,317** | **0,352** |
+| Ridge 4096 + blurry | **0,355** | **0,329** | 0,335 | 0,336 | **0,317** | 0,352 |
 | Ridge 1024 sem prior | 0,292 | 0,235 | 0,257 | 0,266 | 0,254 | 0,294 |
 | Paper · 1 sessão (nossa execução) | 0,350 | 0,320 | **0,339** | **0,344** | 0,316 | 0,347 |
 | ↳ reconstruções publicadas pelos autores | 0,347 | 0,318 | 0,337 | 0,341 | 0,316 | 0,345 |
 | **40 sessões · ~40 h de fMRI, 30.000 exibições** | | | | | | |
+| MindEye1 · 40 sessões (sem refinamento: a mesma reconstrução nas duas abas) | 0,354 | 0,334 | 0,317 | 0,310 | 0,302 | 0,352 |
 | Ridge 1024 + prior · 40 sessões | 0,371 | 0,357 | 0,361 | 0,354 | 0,332 | 0,362 |
 | Paper · 40 sessões (nossa execução) | **0,380** | **0,395** | **0,388** | **0,372** | **0,340** | **0,365** |
 | ↳ reconstruções publicadas pelos autores | 0,374 | 0,389 | 0,381 | 0,367 | 0,337 | 0,361 |
 
-Negrito: melhor do grupo, sem contar as reconstruções publicadas. Modelos com ramo blurry avaliam 75% refinada + 25% blurry, como no artigo.
+Negrito: melhor do grupo, sem contar as reconstruções publicadas. Modelos com ramo blurry avaliam 75% refinada + 25% blurry, como no artigo; o MindEye1 não tem refinamento e já usa a borrada no img2img, então a mesma reconstrução entra nas duas tabelas, sem mistura. Cada modelo faz o retrieval no seu espaço CLIP: o MindEye1 no ViT-L/14, os outros no ViT-bigG/14.
 
 Retrieval top-1 entre 300, média de 30 sorteios. **Img→cér** (fwd no código): para cada imagem, achar o seu cérebro entre as 300 previsões. **Cér→img** (bwd): para cada previsão, achar a sua imagem. É o que o código calcula, o oposto do comentário do `final_evaluations.py` e da definição de Image Retrieval no artigo (cérebro → imagem). O FRR só tem retrieval.
 
