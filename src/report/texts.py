@@ -34,6 +34,13 @@ LEITURA = [
     "<b>40 sessões.</b> O ridge 1024 chega a 99,9% / 99,5% de retrieval e fica de 1 a 3 pontos do "
     "artigo nas identificações 2-way (CLIP 92,3% contra 93,6%). A distância maior é no baixo "
     "nível (PixCorr 0,277 contra 0,373), onde o artigo tem o ramo blurry e este não.",
+    "<b>MindEye1, treinado do zero.</b> Sem pré-treino, com 1 sessão ele quase não recupera "
+    "(retrieval 30,6% / 23,2%, contra 92,9% / 88,1% do ridge 1024 + prior) e fica atrás do ridge "
+    "4096 + blurry nas identificações 2-way (CLIP 80,8% contra 83,8%, na tabela unCLIP), embora o "
+    "PixCorr (0,252) seja maior. Com 40 sessões o retrieval sobe 64 pontos (94,5% / 87,6%) e o "
+    "PixCorr chega a 0,382, acima do artigo reconstruído aqui (0,373 refinada, 0,324 unCLIP). O "
+    "retrieval do MindEye1 é no espaço ViT-L/14 dele, não no bigG dos outros, então não é "
+    "diretamente comparável.",
     "<b>Ruído.</b> Trocar a semente do treino move o retrieval em menos de 0,5 ponto; reamostrar a "
     "reconstrução move as identificações 2-way em até 0,6 ponto e o PixCorr em até 0,006. O "
     "efeito da semente do treino nas métricas de imagem não foi medido.",
