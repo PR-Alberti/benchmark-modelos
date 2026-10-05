@@ -106,6 +106,11 @@ ckpt_path = None
 cont_model = 'cnx'
 resume_from_ckpt = False
 ups_mode = '4x'
+# benchmark-modelos: --num_sessions=N treina nas N primeiras sessoes do benchmark (dados do
+# MindEye2 em --data_path); 0 le o webdataset_avg_split do original em ME1_DATA
+num_sessions = 0
+cache_alvos = True  # so com num_sessions > 0; ver abaixo
+data_path = os.environ.get("ME1_DATA", "/fsx/proj-fmri/shared/natural-scenes-dataset")
 
 # need non-deterministic CuDNN for conv3D to work
 utils.seed_everything(seed+local_rank, cudnn_deterministic=False)
@@ -117,8 +122,10 @@ try:
                    and isinstance(v, (int, float, bool, str))]
     exec(open('configurator.py').read()) # overrides from command line or config file
     config = {k: globals()[k] for k in config_keys} # will be useful for logging
-except:
-    pass
+except Exception:
+    # benchmark-modelos: o original ignorava o erro, e uma opcao com tipo errado (--num_epochs=1.5)
+    # sumia em silencio
+    traceback.print_exc(); sys.exit(1)
 
 if distributed:
     local_rank, device, num_devices = set_ddp()
@@ -181,31 +188,70 @@ except:
 
 if local_rank == 0: print('Pulling NSD webdataset data...')
 
-# benchmark-modelos: o caminho dos dados era fixo no cluster dos autores; agora vem de ME1_DATA
-data_path = os.environ.get("ME1_DATA", "/fsx/proj-fmri/shared/natural-scenes-dataset")
-train_url = f"{{{data_path}/webdataset_avg_split/train/train_subj{subj_id}_{{0..17}}.tar,{data_path}/webdataset_avg_split/val/val_subj{subj_id}_0.tar}}"
-val_url = f"{data_path}/webdataset_avg_split/test/test_subj{subj_id}_{{0..1}}.tar"
-meta_url = f"{data_path}/webdataset_avg_split/metadata_subj{subj_id}.json"
+if num_sessions > 0:
+    # benchmark-modelos: os mesmos dados de treino e teste dos outros modelos do benchmark
+    import nsd_benchmark
+    _treino, _teste = nsd_benchmark.carrega(data_path, num_sessions)
+    num_train, num_val = len(_treino["coco"]), len(_teste["coco"])
+    train_dl = nsd_benchmark.Lotes(_treino, batch_size, embaralha=True, device=device, seed=seed)
+    val_dl = nsd_benchmark.Lotes(_teste, max(16, batch_size), embaralha=False, device=device)
+    if local_rank == 0: print(f'Dados do benchmark: {num_sessions} sessoes, {num_train} imagens de treino, {num_val} de teste')
 
-if local_rank == 0: print('Prepping train and validation dataloaders...')
-num_train = 8559 + 300
-num_val = 982
+    # Alvos que nao dependem do passo -- o latente do VAE e o embedding do ConvNeXt da imagem
+    # limpa -- calculados uma vez por imagem, com as mesmas operacoes do laco. Sao ~1 s de
+    # 1,06 s por lote de 8 numa A4500; sem isso as 40 sessoes levariam ~42 h. O ConvNeXt da
+    # imagem aumentada continua sendo calculado a cada passo.
+    _posicao = {}
+    if cache_alvos:
+        _media = torch.tensor([0.485, 0.456, 0.406]).to(device).reshape(1,3,1,1)
+        _desvio = torch.tensor([0.228, 0.224, 0.225]).to(device).reshape(1,3,1,1)
+        def _alvos(dados, com_cnx):
+            vae, emb = [], []
+            with torch.inference_mode():
+                for i in range(0, len(dados["coco"]), batch_size):
+                    img = dados["imagem"][i:i+batch_size].to(device).float()
+                    img = F.interpolate(img, (512, 512), mode='bilinear', align_corners=False, antialias=True)
+                    vae.append((autoenc.encode(2*img-1).latent_dist.mode() * 0.18215).cpu())
+                    if com_cnx:
+                        emb.append(cnx((img - _media)/_desvio)[1].cpu())
+            return torch.cat(vae), (torch.cat(emb) if com_cnx else None)
+        for _nome, _dados in (("treino", _treino), ("teste", _teste)):
+            _vae, _cnx = _alvos(_dados, com_cnx=(_nome == "treino" and use_cont))
+            _posicao[_nome] = (torch.full((73000,), -1, dtype=torch.long), _vae, _cnx)
+            _posicao[_nome][0][_dados["coco"]] = torch.arange(len(_dados["coco"]))
+            if local_rank == 0: print(f'alvos em cache: {_nome}, {len(_vae)} imagens')
 
-train_dl, val_dl, num_train, num_val = utils.get_dataloaders(
-    batch_size,
-    num_devices=num_devices,
-    num_workers=num_workers,
-    train_url=train_url,
-    val_url=val_url,
-    meta_url=meta_url,
-    val_batch_size=max(16, batch_size),
-    cache_dir='/tmp/wds-cache',
-    seed=seed+local_rank,
-    voxels_key='nsdgeneral.npy',
-    local_rank=local_rank,
-    num_train=num_train,
-    num_val=num_val
-)
+    def alvo_cache(nome, coco, qual):
+        idx, vae, emb = _posicao[nome]
+        linhas = idx[coco.cpu()]
+        return (vae if qual == "vae" else emb)[linhas].to(device)
+else:
+    train_url = f"{{{data_path}/webdataset_avg_split/train/train_subj{subj_id}_{{0..17}}.tar,{data_path}/webdataset_avg_split/val/val_subj{subj_id}_0.tar}}"
+    val_url = f"{data_path}/webdataset_avg_split/test/test_subj{subj_id}_{{0..1}}.tar"
+    meta_url = f"{data_path}/webdataset_avg_split/metadata_subj{subj_id}.json"
+
+    if local_rank == 0: print('Prepping train and validation dataloaders...')
+    num_train = 8559 + 300
+    num_val = 982
+
+    train_dl, val_dl, num_train, num_val = utils.get_dataloaders(
+        batch_size,
+        num_devices=num_devices,
+        num_workers=num_workers,
+        train_url=train_url,
+        val_url=val_url,
+        meta_url=meta_url,
+        val_batch_size=max(16, batch_size),
+        cache_dir='/tmp/wds-cache',
+        seed=seed+local_rank,
+        voxels_key='nsdgeneral.npy',
+        local_rank=local_rank,
+        num_train=num_train,
+        num_val=num_val
+    )
+
+def _posicao_cache():  # benchmark-modelos: {} quando nao ha cache (webdataset original)
+    return globals().get("_posicao", {})
 
 no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
 opt_grouped_parameters = [
@@ -277,20 +323,8 @@ best_val_loss = 1e10
 best_ssim = 0
 mean = torch.tensor([0.485, 0.456, 0.406]).to(device).reshape(1,3,1,1)
 std = torch.tensor([0.228, 0.224, 0.225]).to(device).reshape(1,3,1,1)
-epoch = 0
-
-if ckpt_path is not None:
-    print("\n---resuming from ckpt_path---\n",ckpt_path)
-    checkpoint = torch.load(ckpt_path, map_location=device)
-    epoch = checkpoint['epoch']+1
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])        
-    voxel2sd.module.load_state_dict(checkpoint['model_state_dict'])
-    global_batch_size = batch_size * num_devices
-    total_steps_done = epoch*(num_train//global_batch_size)
-    for _ in range(total_steps_done):
-        lr_scheduler.step()
-    del checkpoint
-    torch.cuda.empty_cache()
+# benchmark-modelos: aqui havia uma segunda retomada que zerava a epoca e chamava
+# voxel2sd.module (so existe com DDP); a de cima ja faz tudo
 
 progress_bar = tqdm(range(epoch, num_epochs), ncols=150, disable=(local_rank!=0))
 
@@ -307,7 +341,7 @@ for epoch in progress_bar:
 
     reconst_fails = []
 
-    for train_i, (voxel, image, _) in enumerate(train_dl):
+    for train_i, (voxel, image, coco_ids) in enumerate(train_dl):
         optimizer.zero_grad()
 
         image = image.to(device).float()
@@ -321,7 +355,10 @@ for epoch in progress_bar:
 
         with torch.cuda.amp.autocast(enabled=use_mp):
             autoenc_image = kornia.filters.median_blur(image_512, (15, 15)) if use_blurred_training else image_512
-            image_enc = autoenc.encode(2*autoenc_image-1).latent_dist.mode() * 0.18215
+            if "treino" in _posicao_cache() and not use_blurred_training:
+                image_enc = alvo_cache("treino", coco_ids, "vae")
+            else:
+                image_enc = autoenc.encode(2*autoenc_image-1).latent_dist.mode() * 0.18215
             if use_cont:
                 image_enc_pred, transformer_feats = voxel2sd(voxel, return_transformer_feats=True)
             else:
@@ -336,7 +373,10 @@ for epoch in progress_bar:
             if use_cont:
                 image_norm = (image_512 - mean)/std
                 image_aug = (train_augs(image_512) - mean)/std
-                _, cnx_embeds = cnx(image_norm)
+                if "treino" in _posicao_cache():
+                    cnx_embeds = alvo_cache("treino", coco_ids, "cnx")
+                else:
+                    _, cnx_embeds = cnx(image_norm)
                 _, cnx_aug_embeds = cnx(image_aug)
 
                 cont_loss = utils.soft_cont_loss(
@@ -409,7 +449,7 @@ for epoch in progress_bar:
 
     if local_rank==0: 
         voxel2sd.eval()
-        for val_i, (voxel, image, _) in enumerate(val_dl): 
+        for val_i, (voxel, image, coco_ids) in enumerate(val_dl): 
             with torch.inference_mode():
                 image = image.to(device).float()
                 image = F.interpolate(image, (512, 512), mode='bilinear', align_corners=False, antialias=True)              
@@ -417,7 +457,10 @@ for epoch in progress_bar:
                 voxel = voxel.mean(1)
                 
                 with torch.cuda.amp.autocast(enabled=use_mp):
-                    image_enc = autoenc.encode(2*image-1).latent_dist.mode() * 0.18215
+                    if "teste" in _posicao_cache():
+                        image_enc = alvo_cache("teste", coco_ids, "vae")
+                    else:
+                        image_enc = autoenc.encode(2*image-1).latent_dist.mode() * 0.18215
                     if hasattr(voxel2sd, 'module'):
                         image_enc_pred = voxel2sd.module(voxel)
                     else:

@@ -48,10 +48,10 @@ def le_curva(p):
             "segundos": sum(tempo) if len(tempo) == len(linhas) else None}
 
 
-def conta_params(mid):
+def conta_params(mid, pasta=paths.TRAIN_LOGS):
     """Parametros por modulo (ridge/backbone/diffusion_prior) do last.pth."""
     import torch
-    p = paths.TRAIN_LOGS / mid / "last.pth"
+    p = pasta / mid / "last.pth"
     if not p.exists():
         return None
     try:
@@ -63,6 +63,24 @@ def conta_params(mid):
         g = k.split(".")[0]
         grupos[g] = grupos.get(g, 0) + v.numel()
     return grupos
+
+
+def tempo_me1(*etapas):
+    """Duracao somada das etapas (ids) no logs/me1_benchmark.log, em segundos; None se faltar alguma."""
+    import datetime
+    import re
+    p = paths.REPO / "logs" / "me1_benchmark.log"
+    if not p.exists():
+        return None
+    marcas = {}
+    for linha in p.read_text().splitlines():
+        r = re.match(r"\[(.{19})\] (\S+): treino .*: (comecando|feito)$", linha)
+        if r:
+            marcas[(r[2], r[3])] = datetime.datetime.strptime(r[1], "%Y-%m-%d %H:%M:%S")
+    try:
+        return sum((marcas[(e, "feito")] - marcas[(e, "comecando")]).total_seconds() for e in etapas)
+    except KeyError:
+        return None
 
 
 def ids_nsd():
@@ -102,6 +120,13 @@ def coleta(args):
             info.update(frr_dados=le_frr(mid), tabelas={"enh": None, "base": None}, publicada=None,
                         legendas=None, params=None)
             info["tempo"] = duracao(info["frr_dados"]["custo"]["segundos_ajuste"]) if info["frr_dados"] else None
+            dados["modelos"].append(info)
+            continue
+        if m.get("me1"):
+            tab = le_tabela(f"{mid}_all_recons")
+            info.update(tabelas={"enh": tab, "base": tab}, publicada=None, legendas=None,
+                        params=conta_params(mid, paths.REPO / "mindeye1" / "train_logs"))
+            info["tempo"] = tempo_fmt(tempo_me1(mid, m["baixo"]))
             dados["modelos"].append(info)
             continue
         info["tabelas"] = {
@@ -179,13 +204,15 @@ def coleta(args):
         mid = m["id"]
         if m.get("frr"):
             continue                      # sem reconstrucao, nao tem o que mostrar na galeria
-        col = {"id": mid, "rotulo": m["rotulo"], "img": {}, "legendas": None}
+        col = {"id": mid, "rotulo": m["rotulo"], "img": {}, "legendas": None, "me1": m.get("me1", False)}
         for tipo, sufixo in ARQ.items():
             p = paths.EVALS / mid / f"{mid}_{sufixo}.pt"
             if p.exists():
                 t = carrega_tensor(p)
                 col["img"][tipo] = [jpeg(t[i], args.lado, args.qualidade) for i in idx]
                 del t
+        if m.get("me1") and "base" in col["img"]:
+            col["img"]["enh"] = col["img"]["base"]     # sem refinamento: a mesma nas duas abas
         p = paths.EVALS / mid / f"{mid}_all_predcaptions.pt"
         if p.exists():
             leg = np.asarray(carrega_tensor(p)).astype(str)

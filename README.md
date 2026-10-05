@@ -8,7 +8,7 @@ avaliação para todos. Três modelos:
 |---|---|---|---|
 | **MindEye2** | MLP + diffusion prior → CLIP ViT-bigG, imagem por SDXL unCLIP ([Scotti et al., 2024](https://arxiv.org/abs/2403.11207)). Aqui: fine-tune só da camada ridge (1 e 40 sessões) e os modelos publicados | `src/` | treinado, reconstruído e avaliado — [BENCHMARK.md](BENCHMARK.md) |
 | **FRR** | regressão ridge fracionária, linear, dos voxels direto para o embedding CLIP ([Rokem & Kay, 2020](https://doi.org/10.1093/gigascience/giaa133); como em Doerig et al., 2025) | `src/run_frr.py`, `src/mindeye_ridge/frr.py` | rodado com 1 e 40 sessões — [BENCHMARK.md](BENCHMARK.md) |
-| **MindEye1** | MLP + diffusion prior → CLIP ViT-L/14, imagem por Versatile Diffusion ([Scotti et al., 2023](https://arxiv.org/abs/2305.18274)) | `mindeye1/` | instalado e adaptado para 20 GB; treino testado; inferência ainda não rodada — [MINDEYE1.md](MINDEYE1.md) |
+| **MindEye1** | MLP + diffusion prior → CLIP ViT-L/14, imagem por Versatile Diffusion ([Scotti et al., 2023](https://arxiv.org/abs/2305.18274)). Aqui: treinado do zero com 1 e 40 sessões, nos mesmos dados dos outros | `mindeye1/` | adaptado para 20 GB; treinado, reconstruído e avaliado com 1 e 40 sessões — [BENCHMARK.md](BENCHMARK.md), [MINDEYE1.md](MINDEYE1.md) |
 
 Este repositório junta o trabalho de [`mindeye2-ridge`](https://github.com/PR-Alberti/mindeye2-ridge)
 (que guarda o histórico completo do MindEye2 e do FRR) com o MindEye1. O que falta do plano de
@@ -98,25 +98,28 @@ outros modelos. Detalhes no [SETUP.md](SETUP.md#frr-baseline-linear-plano-de-est
 
 ### MindEye1
 
-Precisa de: `scripts/me1_setup.sh` e `mindeye1/download.py` (acima).
+Precisa de: `scripts/me1_setup.sh` e `mindeye1/download.py --stage vd` (acima). No benchmark, o
+MindEye1 usa os dados do MindEye2 — as mesmas sessões de treino e o mesmo teste dos outros modelos —
+e não precisa dos 39 GB de treino do `webdataset_avg_split`.
 
 ```bash
-scripts/me1_run.sh retrieval              # retrieval no teste com o modelo publicado
-scripts/me1_run.sh recon --max_images 8   # reconstruções (sem --max_images: as 982)
-scripts/me1_run.sh train                  # treino do alto nível, config para 20 GB (~17,5 h)
-scripts/me1_run.sh lowlevel               # treino do baixo nível
+scripts/run_me1_benchmark.sh               # 1 e 40 sessões: treino, reconstrução e métricas (~37 h)
+SESSOES=1 scripts/run_me1_benchmark.sh     # só 1 sessão (~5 h)
+NUM_SESSIONS=1 scripts/me1_run.sh train    # uma etapa: train | lowlevel | recon | metrics
 ```
 
-O treino como no artigo (batch 32, AdamW) não cabe em 20 GB; o `me1_run.sh train` usa batch 16 e
-Adam de 8 bits, o que muda o treino. Os ajustes, as medições de memória e o que ainda não foi
-testado estão no [MINDEYE1.md](MINDEYE1.md).
+O treino como no artigo (batch 32, AdamW) não cabe em 20 GB; aqui ele usa batch 16 e Adam de
+8 bits, o que muda o treino. O protocolo do benchmark, os ajustes e as medições de memória e tempo
+estão no [MINDEYE1.md](MINDEYE1.md). Sem `NUM_SESSIONS`, o `me1_run.sh` roda o MindEye1 original
+(dados do `webdataset_avg_split`, modelos publicados).
 
 ## Resultados
 
 [BENCHMARK.md](BENCHMARK.md) traz as tabelas do MindEye2 (quatro ridge-only e os dois modelos do
-artigo) e do FRR, todas com o mesmo pipeline e as mesmas métricas. `benchmark/index.html` é a
+artigo), do FRR e do MindEye1 (1 e 40 sessões), todas com o mesmo pipeline e as mesmas métricas. `benchmark/index.html` é a
 página completa (galeria de reconstruções, curvas de treino, ruído entre sementes; um arquivo
-só, abre offline). O MindEye1 ainda não entrou.
+só, abre offline). O MindEye1 não tem refinamento: a mesma reconstrução aparece nas duas
+abas e nas duas tabelas, e ele não entra nas métricas de legenda.
 
 ```bash
 scripts/run_benchmark.sh                 # regenera tudo do MindEye2 e do FRR (~50 h numa A4500)
@@ -137,7 +140,7 @@ ficam fora do git: num clone novo, sem eles, a página sai sem a galeria e sem a
 | `src/report/` | código da página do benchmark e do `BENCHMARK.md` |
 | `src/generative_models/`, `src/autoencoder/` | código de terceiros usado como está (Stability AI; ConvNeXt) |
 | `mindeye1/` | MindEye1: `src/` (código original + ajustes marcados `# benchmark-modelos`), `download.py`, `README-original.md` |
-| `scripts/` | `run_*.sh` (MindEye2 e FRR), `me1_setup.sh` e `me1_run.sh` (MindEye1); `common.sh` guarda caminhos e ambiente |
+| `scripts/` | `run_*.sh` (MindEye2 e FRR), `me1_setup.sh`, `me1_run.sh` e `run_me1_benchmark.sh` (MindEye1); `common.sh` guarda caminhos e ambiente |
 | `results/` | `tables/` (métricas finais, no git), `metrics/`, `figs/`, `evals/` (tensores, fora do git) |
 | `benchmark/` | a página do benchmark |
 | `tests/` | testes |
