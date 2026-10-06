@@ -19,6 +19,10 @@ Um nome de experimento nao muda de configuracao: se train_logs/<nome> ja tem out
 outros hiperparametros, o treino para (os tres modelos retomam do que encontram em disco, e
 misturar configuracoes estragaria a corrida). Mude o nome ou apague o diretorio.
 
+O dicionario e a configuracao inteira: as variaveis que os scripts leem do ambiente (BATCH_SIZE,
+RESUME, EXTRA...) nao passam do shell para o treino; o treina.py define as que o experimento pede
+e apaga as outras, avisando quais ignorou.
+
 Do Python (um notebook, por exemplo), o mesmo com um dicionario qualquer:
 
     from treina import roda
@@ -60,6 +64,7 @@ def _flags(d):
 class Modelo:
     """Como cada modelo recebe os hiperparametros: variaveis do script ou opcoes do treino."""
     script: list
+    variaveis: tuple                    # o que o script le do ambiente (tests/test_treina.py confere)
     padrao: dict
     traduz: callable                    # hiper completo -> (env, args extras)
     valida: callable = field(default=lambda h: None)
@@ -105,13 +110,16 @@ def _mindeye1(h):
 
 MODELOS = {
     # src/run_frr.py: validacao cruzada de 5 dobras sobre as 20 fracoes de Doerig et al.
-    "frr": Modelo(["run_frr.sh"],
+    "frr": Modelo(["run_frr.sh"], ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "EXTRA"),
                   {"folds": 5, "grid": "doerig", "fracs": None, "global_fraction": False,
                    "seed": 42, "chunk": 8192},
                   _frr),
     # src/train_ridgeonly.py: so a ridge do subj01, a partir do pre-treino nos outros 7 sujeitos.
     # batch_size None = o padrao do script (16 no 1024, 8 no 4096 + blurry); frozen_fp16 None = idem
     "mindeye2": Modelo(["run_ridgeonly_prior.sh"],
+                       ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "HIDDEN_DIM", "BLURRY", "MSCKPT", "FROZEN",
+                        "PRIOR", "RESUME", "GLOBAL_BATCH_SIZE", "BATCH_SIZE", "MAX_LR", "NUM_EPOCHS", "SEED",
+                        "CKPT_INTERVAL"),
                        {"hidden_dim": 1024, "num_epochs": 150, "batch_size": None, "max_lr": 3e-4,
                         "prior": True, "blurry": False, "frozen_fp16": None, "seed": 42,
                         "ckpt_interval": None},
@@ -119,6 +127,7 @@ MODELOS = {
     # mindeye1/src/Train_MindEye.py: treino do zero, CLIP ViT-L/14. batch_size None = 16 com AdamW de
     # 8 bits (cabe em 20 GB); paper=True usa batch 32 e AdamW normal, como no artigo
     "mindeye1": Modelo(["me1_run.sh", "train"],
+                       ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "AE_NAME", "PAPER", "SAVE_EVERY"),
                        {"num_epochs": 240, "max_lr": 3e-4, "seed": 42, "mixup_pct": 0.33,
                         "batch_size": None, "paper": False, "save_every": 1},
                        _mindeye1),
@@ -154,6 +163,8 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
         raise ValueError(f"modelo {exp.get('modelo')!r}: use um de {sorted(MODELOS)}")
     modelo = MODELOS[exp["modelo"]]
     cfg = dc.ConfigDataset.de_dict(exp.get("dataset"))
+    if cfg.subj != 1:
+        raise ValueError(f"dataset.subj = {cfg.subj}: os scripts de treino sao do subj01")
     hiper = modelo.completa(exp.get("hiper"))
 
     pasta = paths.TRAIN_LOGS / nome
@@ -179,6 +190,11 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
     env.update({"MODEL_NAME": nome, "NUM_SESSIONS": str(cfg.sessoes), "DATASET": str(manifesto)})
     if retoma:
         env["RESUME"] = "1"
+    ignoradas = {k: os.environ[k] for k in modelo.variaveis if k in os.environ and k not in env}
+    if ignoradas:
+        print(f"[{nome}] ignorando do ambiente (o experimento define tudo): "
+              f"{' '.join(f'{k}={v}' for k, v in ignoradas.items())}", flush=True)
+    ambiente = {**{k: v for k, v in os.environ.items() if k not in modelo.variaveis}, **env}
     cmd = ["bash", str(paths.REPO / "scripts" / modelo.script[0]), *modelo.script[1:], *args]
     print(f"[{nome}] {' '.join(f'{k}={shlex.quote(v)}' for k, v in env.items())} {shlex.join(cmd)}", flush=True)
     if dry_run:
@@ -188,7 +204,7 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
         json.dump({"nome": nome, "modelo": exp["modelo"], "hiper": hiper, "dataset": cfg.como_dict(),
                    "assinatura_dataset": cfg.assinatura(), "resumo_dataset": resumo, "commit": _commit(),
                    "comando": {"env": env, "cmd": cmd}}, f, indent=1, ensure_ascii=False)
-    subprocess.run(cmd, env={**os.environ, **env}, check=True)
+    subprocess.run(cmd, env=ambiente, check=True)
     return resumo
 
 
