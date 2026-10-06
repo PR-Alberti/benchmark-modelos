@@ -15,8 +15,9 @@
 #   sem NUM_SESSIONS        o MindEye1 original: webdataset_avg_split em $ME1_DATA, modelos
 #                           publicados como padrao.
 #
-# DATASET=<manifesto.json> (com NUM_SESSIONS) treina nas exibicoes de um dataset controlado
-# (src/mindeye_ridge/dataset_controlado.py) em vez das N primeiras sessoes; o teste nao muda.
+# DATASET=<manifesto.json> (com NUM_SESSIONS e MODEL_NAME) treina nas exibicoes de um dataset
+# controlado (src/mindeye_ridge/dataset_controlado.py) em vez das N primeiras sessoes; o teste nao
+# muda. O low-level passa a ser ${MODEL_NAME}_lowlevel: passe DATASET tambem no lowlevel e no recon.
 #
 # Variaveis: MODEL_NAME, AE_NAME (trocam os nomes), PAPER=1 (treino com batch 32 e AdamW normal,
 # como no artigo: nao cabe numa GPU de 20 GB), SAVE_EVERY (grava o last.pth a cada N epocas).
@@ -24,14 +25,20 @@
 set -e
 set -o pipefail
 source "$(dirname "$0")/common.sh"
+prepara_dataset   # com DATASET, MODEL_NAME e obrigatorio (os padroes abaixo sao modelos do benchmark)
 cd "$REPO/mindeye1/src"
 ME1_DATA="${ME1_DATA:-$HOME/mindeye1}"
 export ME1_DATA
 export MPLBACKEND=Agg   # o Reconstructions.py chama plt.show(); com tela, o TkAgg trava esperando a janela
 N="${NUM_SESSIONS:-0}"
+if [ -n "${DATASET:-}" ] && [ "$N" -le 0 ]; then
+    echo "ERRO: DATASET vale so com os dados do benchmark (NUM_SESSIONS > 0)" >&2; exit 1
+fi
 if [ "$N" -gt 0 ]; then
     MODEL_NAME="${MODEL_NAME:-subj01_me1_${N}sess}"
-    AE_NAME="${AE_NAME:-subj01_me1_lowlevel_${N}sess}"
+    # o low-level de um modelo controlado e treinado no mesmo dataset, nao o do benchmark
+    if [ -n "${DATASET:-}" ]; then AE_NAME="${AE_NAME:-${MODEL_NAME}_lowlevel}"
+    else AE_NAME="${AE_NAME:-subj01_me1_lowlevel_${N}sess}"; fi
     DADOS="$DATA"; BENCH="--num_sessions=$N"
 else
     MODEL_NAME="${MODEL_NAME:-prior_257_final_subj01_bimixco_softclip_byol}"
@@ -51,6 +58,7 @@ train)
     [ "$MODEL_NAME" = prior_257_final_subj01_bimixco_softclip_byol ] && MODEL_NAME=subj01_me1
     SAIDA="$REPO/mindeye1/train_logs/$MODEL_NAME"; mkdir -p "$SAIDA"
     RESUME=""; [ -f "$SAIDA/last.pth" ] && RESUME="--resume_from_ckpt"
+    confere_dataset "$SAIDA" "$([ -n "$RESUME" ] && echo 1 || echo 0)"
     # --save_at_end: o original grava o best.pth escolhido pela perda no teste; no benchmark vale o
     # ultimo, como nos outros modelos
     $PY Train_MindEye.py --data_path="$DADOS" $BENCH --model_name="$MODEL_NAME" --subj=1 \
@@ -60,6 +68,7 @@ train)
 lowlevel)
     # subj01, batch 8, 120 epocas, como no artigo; retoma sozinho se houver last.pth
     SAIDA="$REPO/mindeye1/train_logs/models/$AE_NAME"; mkdir -p "$SAIDA"
+    confere_dataset "$SAIDA" "$([ -f "$SAIDA/last.pth" ] && echo 1 || echo 0)"
     if [ "$N" -gt 0 ]; then ARGS="--num_sessions=$N --data_path=$DADOS ${DATASET:+--dataset=$DATASET}"; else ARGS=""; fi
     $PY train_autoencoder.py --model_name="$AE_NAME" $ARGS "$@" 2>&1 | filtra | tee -a "$SAIDA/train.log" ;;
 retrieval)

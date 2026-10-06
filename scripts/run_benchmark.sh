@@ -18,6 +18,8 @@
 set -e
 set -o pipefail
 source "$(dirname "$0")/common.sh"
+# o benchmark e o dataset completo: um DATASET exportado no shell nao pode vazar para estes treinos
+unset DATASET
 
 mkdir -p $LOGS
 LOG=$LOGS/benchmark.log

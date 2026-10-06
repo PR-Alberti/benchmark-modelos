@@ -10,6 +10,7 @@
 set -e
 set -o pipefail   # sem isso, falha do python fica mascarada pelo tee
 source "$(dirname "$0")/common.sh"
+prepara_dataset   # com DATASET, MODEL_NAME e obrigatorio (o padrao abaixo e um modelo do benchmark)
 
 MODEL_NAME=${MODEL_NAME:-subj01_ridgeonly_1sess_prior}
 
@@ -54,6 +55,7 @@ else PRIOR_FLAGS="--use_prior --prior_scale=30"; fi
 
 # DATASET=<manifesto.json> treina so nas exibicoes de um dataset controlado
 # (src/mindeye_ridge/dataset_controlado.py), dentro das NUM_SESSIONS sessoes; o teste nao muda.
+# Exige MODEL_NAME, e RESUME=1 so continua um modelo treinado com o mesmo manifesto.
 #
 # SEED muda a semente (padrao 42). Com a mesma semente e o mesmo codigo o treino
 # e deterministico: repetir a corrida reproduz as metricas epoca por epoca.
@@ -74,6 +76,7 @@ BATCH_SIZE=${BATCH_SIZE:-$DEFAULT_BATCH}   # 16 no 1024; 8 no 4096+blurry
 # arquivo so e protege contra perder a corrida inteira (a maquina e resetada
 # sem aviso -- ja aconteceu tres vezes).
 mkdir -p $TRAIN_LOGS/$MODEL_NAME
+confere_dataset "$TRAIN_LOGS/$MODEL_NAME" "$([ "$RESUME" = 1 ] && [ -f "$TRAIN_LOGS/$MODEL_NAME/last.pth" ] && echo 1 || echo 0)"
 
 $ENVP/bin/python train_ridgeonly.py \
     --data_path=$DATA \
