@@ -125,6 +125,7 @@ sessões. Cada experimento é um dicionário em `src/experimentos.py`:
                 "repeticoes": 1,           # exibições por imagem: 1, 2 ou 3
                 "classes": {"pessoa": ["sup_person"], "animal": ["sup_animal"]},
                 "minimo": 10, "maximo_outros": 2, "balanceado": True,
+                "agregacao": "media",      # como usar as repetições (abaixo)
                 "semente": 0},
 },
 ```
@@ -148,6 +149,23 @@ O `treina.py` grava o manifesto do dataset e a configuração completa (com o co
 `train_logs/<nome>/` e chama o script de treino do modelo com `DATASET` apontando para o
 manifesto. O dicionário é a configuração inteira: variáveis exportadas no shell (`BATCH_SIZE`,
 `RESUME`...) não chegam ao treino.
+
+`agregacao` escolhe como o treino usa as repetições de cada imagem
+(`src/mindeye_ridge/agregacao.py`). As quatro opções são os esquemas que os próprios modelos do
+benchmark usam:
+
+| `agregacao` | Amostra de treino | De onde vem |
+|---|---|---|
+| `"exibicoes"` | cada trial, separado | MindEye2 e FRR |
+| `"media"` | a média dos betas das repetições, uma por imagem | o protocolo de teste de todos |
+| `"sorteio"` | uma repetição sorteada por imagem, a cada época | o alto nível do MindEye1 (que faz rodízio) |
+| `"combinacao"` | combinação aleatória das repetições, a cada época | o baixo nível do MindEye1 (`voxel_select`) |
+
+`None` (o padrão) é o que cada modelo faz no benchmark: trials separados no FRR e no MindEye2,
+rodízio no MindEye1. O FRR só aceita `exibicoes` e `media`, porque ajusta numa passada só. O
+teste é sempre a média das 3 repetições. Nos modos por imagem a época tem uma amostra por imagem,
+não por trial: para comparar com `exibicoes` no mesmo número de passos, multiplique `num_epochs`
+(os experimentos `subj01_me2_1000img_3rep_*` fazem isso).
 
 Com o dicionário `"dataset"` vazio, o padrão, o treino é o dataset completo (as 40 sessões) e
 roda exatamente como o benchmark, o que foi conferido treinando com e sem o manifesto. Num
