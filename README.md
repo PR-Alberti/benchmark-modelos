@@ -111,10 +111,16 @@ O treino como no artigo (batch 32, AdamW) não cabe em 20 GB; aqui ele usa batch
 estão no [MINDEYE1.md](docs/MINDEYE1.md). Sem `NUM_SESSIONS`, o `me1_run.sh` roda o MindEye1 original
 (dados do `webdataset_avg_split`, modelos publicados).
 
-### Treino com dataset controlado
+### Treino por dicionário e dataset controlado
+
+O jeito mais simples de treinar é o [`notebooks/treino.ipynb`](notebooks/treino.ipynb): cada
+treino é um dicionário com o modelo, os hiperparâmetros e o dataset, e os modelos já treinados do
+benchmark estão lá como exemplo (o dicionário `BENCHMARK` de `src/experimentos.py`, que reproduz o
+treino de cada um). Os scripts acima continuam valendo; o dicionário só chama o script certo com as
+variáveis certas.
 
 Os três modelos também treinam num subconjunto controlado do treino, em vez das N primeiras
-sessões. Cada experimento é um dicionário em `src/experimentos.py`:
+sessões. Cada experimento é um dicionário em `src/experimentos.py` (`EXPERIMENTOS`):
 
 ```python
 "subj01_frr_5classes_300img_1rep": {
@@ -134,7 +140,7 @@ sessões. Cada experimento é um dicionário em `src/experimentos.py`:
 python src/treina.py --lista                       # os experimentos definidos
 python src/treina.py <nome> --so_dataset           # sorteia e resume o dataset, sem treinar
 python src/treina.py <nome> --dry_run              # mostra o comando que rodaria
-python src/treina.py <nome> [<nome> ...]           # treina, em sequência
+python src/treina.py <nome> [<nome> ...]           # treina, em sequência (o que já terminou é pulado)
 ```
 
 O sorteio é feito sobre as exibições (`src/mindeye_ridge/dataset_controlado.py`), com semente:
@@ -205,7 +211,7 @@ ficam fora do git: num clone novo, sem eles, a página sai sem a galeria e sem a
 | | |
 |---|---|
 | `src/` | MindEye2 e FRR: `train_ridgeonly.py`, `recon_inference.py`, `enhanced_recon_inference.py`, `final_evaluations.py`, `verify_retrieval.py`, `run_frr.py`, `make_benchmark.py`, `make_comparison.py`; treino com dataset controlado: `experimentos.py` (os dicionários) e `treina.py` |
-| `src/mindeye_ridge/` | biblioteca: `utils`, `models` e `modeling_git` (do MindEye2) e o que foi acrescentado — `paths`, `nsd_data`, `clip_targets`, `frr`, `embedding_metrics`, `semantica` (fração da tela e rótulos), `dataset_controlado` (subconjuntos de treino) |
+| `src/mindeye_ridge/` | biblioteca: `utils`, `models` e `modeling_git` (do MindEye2) e o que foi acrescentado — `paths`, `nsd_data`, `clip_targets`, `frr`, `embedding_metrics`, `semantica` (fração da tela e rótulos), `dataset_controlado` (subconjuntos de treino), `agregacao` (como usar as repetições), `resultados` (o retrieval de um modelo pelo nome) |
 | `src/report/` | código da página do benchmark e do `BENCHMARK.md` |
 | `src/generative_models/`, `src/autoencoder/` | código de terceiros usado como está (Stability AI; ConvNeXt) |
 | `mindeye1/` | MindEye1: `src/` (código original + ajustes marcados `# benchmark-modelos`), `download.py`, `README-original.md` |

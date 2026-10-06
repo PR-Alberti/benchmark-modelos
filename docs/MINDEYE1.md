@@ -69,7 +69,7 @@ no `train`, o nome da saída, padrão `subj01_me1`) e `AE_NAME` o de baixo níve
 vão direto para o script Python (por exemplo `scripts/me1_run.sh train --num_epochs=3`).
 
 Com `NUM_SESSIONS`, `DATASET=<manifesto.json>` treina num dataset controlado (ver o
-[README](../README.md#treino-com-dataset-controlado); o `src/treina.py` faz isso a partir de um
+[README](../README.md#treino-por-dicionário-e-dataset-controlado); o `src/treina.py` faz isso a partir de um
 dicionário). Nesse caso `MODEL_NAME` é obrigatório, e o baixo nível passa a ser
 `${MODEL_NAME}_lowlevel`, treinado no mesmo manifesto. Passe as mesmas variáveis no `train`, no
 `lowlevel` e no `recon`. Um modelo não retoma com outro manifesto.

@@ -273,7 +273,7 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   ├── make_comparison.py       figura imagem vista × reconstruções
 │   ├── mindeye_ridge/           biblioteca (utils, models, modeling_git, paths, nsd_data,
 │   │                            clip_targets, frr, embedding_metrics, semantica,
-│   │                            dataset_controlado)
+│   │                            dataset_controlado, agregacao, resultados)
 │   ├── report/                  o código da página e do BENCHMARK.md (dados, tabelas, textos,
 │   │                            markdown e, em assets/, o CSS e o JavaScript)
 │   ├── generative_models/       código da Stability AI, como está
