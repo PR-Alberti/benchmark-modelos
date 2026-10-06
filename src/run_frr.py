@@ -15,6 +15,10 @@ como o plano de estagio propoe (o alvo continuo dispensa avaliar a imagem gerada
 
     python run_frr.py --model_name subj01_frr_1sess --num_sessions 1
     python run_frr.py --model_name subj01_frr_40sess --num_sessions 40
+    python run_frr.py --model_name subj01_frr_animais --num_sessions 40 --dataset ds.json
+
+Com --dataset (manifesto do mindeye_ridge.dataset_controlado), o treino sao as exibicoes do
+manifesto em vez das N primeiras sessoes; o teste nao muda.
 
 Grava, em results/evals/<model_name>/:
     <model_name>_all_clipvoxels.pt   embeddings previstos (1000, 256, 1664), fp16
@@ -31,7 +35,7 @@ import h5py
 import numpy as np
 import torch
 
-from mindeye_ridge import embedding_metrics, frr, nsd_data, paths, utils
+from mindeye_ridge import dataset_controlado, embedding_metrics, frr, nsd_data, paths, utils
 from mindeye_ridge.clip_targets import ClipTargets, embeddings_avaliacao, SEQ, DIM
 
 
@@ -41,6 +45,8 @@ def parse_args():
     parser.add_argument("--data_path", type=str, default=str(paths.DATA))
     parser.add_argument("--subj", type=int, default=1)
     parser.add_argument("--num_sessions", type=int, default=1, help="treina nas N primeiras sessoes")
+    parser.add_argument("--dataset", type=str, default=None,
+                        help="manifesto de um dataset controlado (dataset_controlado.py): treina nessas exibicoes")
     parser.add_argument("--folds", type=int, default=5)
     parser.add_argument("--grid", choices=["doerig", "extended"], default="doerig",
                         help="fracoes testadas: doerig = as 20 de 0,05 a 1 (padrao, o que o plano especifica); "
@@ -98,7 +104,7 @@ def main():
     os.makedirs(paths.TABLES, exist_ok=True)
 
     # ------------------------------------------------------------ dados
-    treino = nsd_data.exibicoes_treino(args.data_path, args.subj, args.num_sessions)
+    treino = dataset_controlado.exibicoes(args.data_path, args.subj, args.num_sessions, args.dataset)
     ids_teste, linhas_teste = nsd_data.exibicoes_teste(args.data_path, args.subj)
     assert not set(treino["imagem"]) & set(ids_teste), "imagem de teste no treino"
     n_exib, n_imagens = len(treino["imagem"]), len(np.unique(treino["imagem"]))
@@ -165,6 +171,7 @@ def main():
     relatorio = {
         "modelo": args.model_name,
         "config": {"sujeito": args.subj, "sessoes": args.num_sessions, "exibicoes_treino": n_exib,
+                   "dataset": dataset_controlado.carrega(args.dataset)["config"] if args.dataset else None,
                    "imagens_treino": n_imagens, "imagens_teste": len(ids_teste), "voxels": n_voxels,
                    "dim_alvo": int(Y_teste.shape[1]), "dobras": args.folds, "semente": args.seed,
                    "grade": "personalizada" if args.fracs else ("estendida" if args.grid == "extended" else "doerig"),

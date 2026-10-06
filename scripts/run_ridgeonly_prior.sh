@@ -52,6 +52,9 @@ if [ "$FROZEN" = "0" ]; then FROZEN_FLAGS="--no-frozen_fp16"; fi
 if [ "${PRIOR:-1}" = "0" ]; then PRIOR_FLAGS="--no-use_prior"
 else PRIOR_FLAGS="--use_prior --prior_scale=30"; fi
 
+# DATASET=<manifesto.json> treina so nas exibicoes de um dataset controlado
+# (src/mindeye_ridge/dataset_controlado.py), dentro das NUM_SESSIONS sessoes; o teste nao muda.
+#
 # SEED muda a semente (padrao 42). Com a mesma semente e o mesmo codigo o treino
 # e deterministico: repetir a corrida reproduz as metricas epoca por epoca.
 #
@@ -85,5 +88,5 @@ $ENVP/bin/python train_ridgeonly.py \
     --max_lr=${MAX_LR:-3e-4} --mixup_pct=.33 --num_epochs=${NUM_EPOCHS:-150} \
     --no-use_image_aug --new_test --embedder_fp16 --seed=${SEED:-42} \
     --ckpt_interval=${CKPT_INTERVAL:-999} --ckpt_saving --no-wandb_log $RESUME_FLAG \
-    --metrics_csv=$TRAIN_LOGS/$MODEL_NAME/metrics.csv \
+    --metrics_csv=$TRAIN_LOGS/$MODEL_NAME/metrics.csv ${DATASET:+--dataset="$DATASET"} \
     2>&1 | tee $TEE_FLAGS $TRAIN_LOGS/$MODEL_NAME/train.log
