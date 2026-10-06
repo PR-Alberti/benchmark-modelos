@@ -18,7 +18,9 @@ como o plano de estagio propoe (o alvo continuo dispensa avaliar a imagem gerada
     python run_frr.py --model_name subj01_frr_animais --num_sessions 40 --dataset ds.json
 
 Com --dataset (manifesto do mindeye_ridge.dataset_controlado), o treino sao as exibicoes do
-manifesto em vez das N primeiras sessoes; o teste nao muda.
+manifesto em vez das N primeiras sessoes; o teste nao muda. A agregacao do manifesto escolhe entre
+cada exibicao como uma linha (o padrao) e a media das repeticoes de cada imagem; os modos sorteados a
+cada epoca nao se aplicam, porque a FRR ajusta numa passada.
 
 Grava, em results/evals/<model_name>/:
     <model_name>_all_clipvoxels.pt   embeddings previstos (1000, 256, 1664), fp16
@@ -35,7 +37,7 @@ import h5py
 import numpy as np
 import torch
 
-from mindeye_ridge import dataset_controlado, embedding_metrics, frr, nsd_data, paths, utils
+from mindeye_ridge import agregacao, dataset_controlado, embedding_metrics, frr, nsd_data, paths, utils
 from mindeye_ridge.clip_targets import ClipTargets, embeddings_avaliacao, SEQ, DIM
 
 
@@ -108,6 +110,9 @@ def main():
     ids_teste, linhas_teste = nsd_data.exibicoes_teste(args.data_path, args.subj)
     assert not set(treino["imagem"]) & set(ids_teste), "imagem de teste no treino"
     n_exib, n_imagens = len(treino["imagem"]), len(np.unique(treino["imagem"]))
+    modo = treino["agregacao"] or "exibicoes"
+    if modo not in ("exibicoes", "media"):
+        raise ValueError(f"agregacao {modo!r}: a FRR ajusta numa passada (sem epocas); use exibicoes ou media")
     print(f"treino: {args.num_sessions} sessao(oes), {n_exib} exibicoes, {n_imagens} imagens; "
           f"teste: {len(ids_teste)} imagens x {len(linhas_teste[0])} repeticoes", flush=True)
     all_images = imagens_do_teste(args.data_path, ids_teste)
@@ -120,11 +125,15 @@ def main():
     seg_embedding = time.time() - t0
 
     betas = torch.from_numpy(nsd_data.carrega_betas(args.data_path, args.subj))
-    X = betas[treino["beta"]]
+    if modo == "media":                                                   # uma linha por imagem
+        ids_img, linhas_img = agregacao.grupos(treino["imagem"], treino["beta"])
+        X = torch.stack([betas[l].mean(0) for l in linhas_img])
+    else:
+        ids_img, X = treino["imagem"], betas[treino["beta"]]
     X_teste = torch.stack([betas[r].mean(0) for r in linhas_teste])       # media das repeticoes
     n_voxels = X.shape[1]
     del betas
-    groups = alvos.linhas(treino["imagem"])
+    groups = alvos.linhas(ids_img)
 
     # ------------------------------------------------------------ ajuste
     fracs = args.fracs or (frr.FRACS_ESTENDIDA if args.grid == "extended" else frr.FRACS_DOERIG)
@@ -172,6 +181,7 @@ def main():
         "modelo": args.model_name,
         "config": {"sujeito": args.subj, "sessoes": args.num_sessions, "exibicoes_treino": n_exib,
                    "dataset": dataset_controlado.carrega(args.dataset)["config"] if args.dataset else None,
+                   "agregacao": modo, "amostras_treino": int(len(X)),
                    "imagens_treino": n_imagens, "imagens_teste": len(ids_teste), "voxels": n_voxels,
                    "dim_alvo": int(Y_teste.shape[1]), "dobras": args.folds, "semente": args.seed,
                    "grade": "personalizada" if args.fracs else ("estendida" if args.grid == "extended" else "doerig"),

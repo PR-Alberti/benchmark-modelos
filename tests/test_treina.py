@@ -101,6 +101,11 @@ class Ambiente(unittest.TestCase):
         self.assertIn("ignorando do ambiente", out.getvalue())
         self.assertIn("BATCH_SIZE=8", out.getvalue())
 
+    def test_frr_nao_sorteia_por_epoca(self):
+        for modo in ("sorteio", "combinacao"):
+            with self.assertRaisesRegex(ValueError, "nao se aplica"):
+                treina.roda("x", {"modelo": "frr", "dataset": {"agregacao": modo}}, dry_run=True)
+
     def test_so_subj01(self):
         with self.assertRaisesRegex(ValueError, "subj01"):
             treina.roda("x", {"modelo": "frr", "dataset": {"subj": 2}}, dry_run=True)

@@ -249,7 +249,7 @@ if num_sessions > 0:
     num_train, num_val = len(_treino["coco"]), len(_teste["coco"])
     train_dl = nsd_benchmark.Lotes(_treino, batch_size, embaralha=True, device=device, seed=seed)
     val_dl = nsd_benchmark.Lotes(_teste, 300, embaralha=False, device=device)
-    print(f'treino: {num_train} imagens ({len(train_dl)} lotes por epoca); validacao: {num_val} imagens')
+    print(f'treino: {num_train} amostras ({len(train_dl)} lotes por epoca); validacao: {num_val} imagens')
 else:
   print('Pulling NSD webdataset data...')
 

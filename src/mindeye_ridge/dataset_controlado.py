@@ -16,6 +16,10 @@ A ordem das escolhas:
 4. n_imagens (opcional): sorteio de imagens com a semente, no total ou por classe (`balanceado`);
 5. de cada imagem, `repeticoes` exibicoes sorteadas (ou todas, se `repeticoes` e None).
 
+`agregacao` nao muda as exibicoes escolhidas, e sim como o treino as usa: cada exibicao como uma
+amostra, a media das repeticoes de cada imagem, ou uma repeticao/combinacao sorteada a cada epoca
+(mindeye_ridge.agregacao). None e o que cada modelo faz no benchmark.
+
 Com tudo no padrao, o subconjunto e exatamente o das N primeiras sessoes, o que os modelos ja
 usavam. O teste nao muda: sao sempre as 1.000 imagens compartilhadas.
 """
@@ -26,6 +30,7 @@ from dataclasses import asdict, dataclass, field
 import numpy as np
 import pandas as pd
 
+from . import agregacao as _agregacao
 from . import nsd_data, semantica
 
 REGRAS = ("exclusiva", "prioridade")
@@ -44,6 +49,7 @@ class ConfigDataset:
     maximo_outros: float = 2            # exclusiva: % maxima de cada outra classe
     balanceado: bool = False            # n_imagens por classe, em vez de no total
     semente: int = 0
+    agregacao: str | None = None        # exibicoes, media, sorteio, combinacao; None = o do modelo
     subj: int = 1
     extra: dict = field(default_factory=dict, repr=False)
 
@@ -54,6 +60,8 @@ class ConfigDataset:
             raise ValueError(f"repeticoes = {self.repeticoes}: tem de ser 1, 2, 3 ou None")
         if self.n_imagens is not None and self.n_imagens < 1:
             raise ValueError(f"n_imagens = {self.n_imagens}: tem de ser positivo ou None")
+        if self.agregacao is not None and self.agregacao not in _agregacao.MODOS:
+            raise ValueError(f"agregacao = {self.agregacao!r}: use uma de {_agregacao.MODOS} ou None")
         if self.regra not in REGRAS:
             raise ValueError(f"regra = {self.regra!r}: use uma de {REGRAS}")
         if self.balanceado and not self.classes and self.regra == "exclusiva":
@@ -189,6 +197,7 @@ def carrega(caminho):
 def exibicoes(data_path, subj, num_sessions, dataset=None):
     """O que os treinos chamam: as exibicoes do manifesto `dataset`, se houver; senao as N
     primeiras sessoes inteiras, que e tambem o que o manifesto padrao (o dataset completo) contem.
+    A chave "agregacao" diz como usar as repeticoes (None: o que o modelo faz no benchmark).
 
     Confere que o manifesto e do mesmo sujeito, que cada exibicao dele existe, com a mesma imagem,
     nas sessoes de treino que o treino abre (o que tambem garante que nenhuma imagem do teste
@@ -196,7 +205,7 @@ def exibicoes(data_path, subj, num_sessions, dataset=None):
     """
     pool = nsd_data.exibicoes_treino(data_path, subj, num_sessions)
     if not dataset:
-        return pool
+        return {**pool, "agregacao": None}
     sub = carrega(dataset)
     if sub["config"]["subj"] != subj:
         raise ValueError(f"o dataset {dataset} e do subj0{sub['config']['subj']}, nao do subj0{subj}")
@@ -212,8 +221,9 @@ def exibicoes(data_path, subj, num_sessions, dataset=None):
                          f"nas {num_sessions} primeiras sessoes de treino do subj0{subj}, por exemplo {fora[:3]}")
     if len(np.unique(sub["beta"])) != len(sub["beta"]):
         raise ValueError(f"o dataset {dataset} repete exibicoes")
-    print(f"dataset controlado {dataset}: {sub['resumo']}", flush=True)
-    return {k: sub[k] for k in ("imagem", "beta", "sessao")}
+    agregacao = sub["config"].get("agregacao")
+    print(f"dataset controlado {dataset}: {sub['resumo']}, agregacao {agregacao or 'a do modelo'}", flush=True)
+    return {**{k: sub[k] for k in ("imagem", "beta", "sessao")}, "agregacao": agregacao}
 
 
 def amostras_por_epoca_mindeye2(n_exibicoes, n_pool, num_sessions):

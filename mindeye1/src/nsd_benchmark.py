@@ -12,7 +12,11 @@ tem menos de 3 exibicoes nas sessoes usadas (com 1 sessao, 413 das 536 tem so um
 se repetem ate completar 3, como o recon_inference.py do MindEye2 faz no teste.
 
 Com `dataset` (manifesto do mindeye_ridge.dataset_controlado), o treino sao as exibicoes do
-manifesto em vez das N primeiras sessoes; o teste nao muda.
+manifesto em vez das N primeiras sessoes; o teste nao muda. A agregacao do manifesto
+(mindeye_ridge.agregacao) e aplicada pelo Lotes do treino: com "exibicoes" cada exibicao e uma
+amostra; com "media", "sorteio" e "combinacao" a amostra e a imagem, e as 3 posicoes de repeticao
+chegam ao treino iguais ao vetor escolhido, entao o rodizio do alto nivel (train_i % 3) e o
+voxel_select do baixo nivel usam exatamente esse vetor. Sem agregacao, o original.
 """
 import os
 import sys
@@ -23,7 +27,7 @@ import torch
 
 _REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.join(_REPO, "src"))
-from mindeye_ridge import dataset_controlado, nsd_data  # noqa: E402
+from mindeye_ridge import agregacao, dataset_controlado, nsd_data  # noqa: E402
 
 SUBJ = 1
 
@@ -54,10 +58,20 @@ def carrega(data_path, num_sessions, dataset=None):
 
     ex = dataset_controlado.exibicoes(data_path, SUBJ, num_sessions, dataset)
     ids_treino = np.unique(ex["imagem"])
-    linhas = [_completa3(ex["beta"][ex["imagem"] == i]) for i in ids_treino]
-    treino = {"voxel": torch.from_numpy(betas[np.stack(linhas)]),
-              "imagem": _imagens(data_path, ids_treino),
-              "coco": torch.from_numpy(ids_treino)}
+    if ex["agregacao"] == "exibicoes":
+        # uma amostra por exibicao; cada imagem e guardada uma vez so e indexada por amostra
+        treino = {"voxel": torch.from_numpy(betas[ex["beta"]])[:, None].expand(-1, 3, -1),
+                  "imagem": _imagens(data_path, ids_treino),
+                  "indice_imagem": torch.from_numpy(np.searchsorted(ids_treino, ex["imagem"])),
+                  "coco": torch.from_numpy(ex["imagem"]),
+                  "n_rep": torch.ones(len(ex["beta"]), dtype=torch.long)}
+    else:
+        grupos = [ex["beta"][ex["imagem"] == i] for i in ids_treino]
+        treino = {"voxel": torch.from_numpy(betas[np.stack([_completa3(g) for g in grupos])]),
+                  "imagem": _imagens(data_path, ids_treino),
+                  "coco": torch.from_numpy(ids_treino),
+                  "n_rep": torch.tensor([len(g) for g in grupos])}
+    treino["agregacao"] = ex["agregacao"]
 
     return treino, carrega_teste(data_path, betas)
 
@@ -83,6 +97,7 @@ class Lotes:
     def __init__(self, dados, batch, embaralha, device, seed=0):
         self.dados, self.batch, self.embaralha, self.device = dados, batch, embaralha, device
         self.rng = np.random.default_rng(seed)
+        self.gerador = torch.Generator().manual_seed(seed)      # sorteios da agregacao
         self.n = len(dados["coco"])
 
     def __len__(self):
@@ -93,6 +108,11 @@ class Lotes:
         for k in range(len(self)):
             idx = torch.from_numpy(np.sort(ordem[k * self.batch:(k + 1) * self.batch]) if not self.embaralha
                                    else ordem[k * self.batch:(k + 1) * self.batch])
-            yield (self.dados["voxel"][idx].to(self.device),
-                   self.dados["imagem"][idx].to(self.device).float(),
+            voxel = self.dados["voxel"][idx]
+            modo = self.dados.get("agregacao")
+            if self.embaralha and modo is not None:
+                voxel = agregacao.seleciona(voxel, self.dados["n_rep"][idx], modo, self.gerador)[:, None].expand(-1, 3, -1)
+            img = self.dados["indice_imagem"][idx] if "indice_imagem" in self.dados else idx
+            yield (voxel.to(self.device),
+                   self.dados["imagem"][img].to(self.device).float(),
                    self.dados["coco"][idx].to(self.device))
