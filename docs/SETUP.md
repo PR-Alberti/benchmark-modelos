@@ -39,11 +39,13 @@ O `setup_env.sh` cria um ambiente 3.11 isolado, então a versão do sistema não
 
 ```bash
 git clone https://github.com/PR-Alberti/benchmark-modelos.git
-cd benchmark-modelos && setup/bootstrap.sh --all --ckpts
+cd benchmark-modelos && setup/bootstrap.sh --ckpts
 ```
 
-É isso. O `bootstrap.sh` cria o ambiente, baixa os 62 GB de dados e traz os
-checkpoints já treinados. Leva algumas horas, quase tudo em download.
+É isso. O `bootstrap.sh` cria o ambiente, baixa os dados (40 sessões), pré-baixa os pesos de
+terceiros que os modelos buscariam na primeira execução, prepara o MindEye1, traz os checkpoints
+ridge-only já treinados e confere que o código dos três modelos (MindEye2, FRR, MindEye1)
+carrega. São ~130 GB; leva algumas horas, quase tudo em download.
 
 **Antes de começar**, se quiser só ver o que falta na máquina sem baixar nada:
 
@@ -59,9 +61,9 @@ barramento PCI" (os dois se parecem, e a diferença muda completamente o que faz
 
 | Comando | O que faz |
 |---|---|
-| `setup/bootstrap.sh` | ambiente + dados de treino (~30 GB) |
-| `setup/bootstrap.sh --all` | ambiente + todos os dados (~62 GB) |
-| `setup/bootstrap.sh --all --ckpts` | + os modelos já treinados, para rodar sem treinar |
+| `setup/bootstrap.sh` | tudo para os três modelos: ambiente, dados, pesos, MindEye1 (~130 GB) |
+| `setup/bootstrap.sh --ckpts` | + os ridge-only já treinados, para rodar sem treinar |
+| `setup/bootstrap.sh --minimo` | só o ridge-only de 1 sessão: ambiente + dados (~30 GB) |
 | `setup/bootstrap.sh --check` | só diagnostica, não baixa nada |
 | `--env-path X` / `--data-path Y` | muda onde o ambiente e os dados ficam |
 
@@ -70,11 +72,13 @@ continua de onde parou.
 
 ### Se preferir passo a passo
 
-O `bootstrap.sh` só encadeia estes dois, que continuam funcionando sozinhos:
+O `bootstrap.sh` só encadeia estes, que continuam funcionando sozinhos:
 
 ```bash
-setup/setup_env.sh --with-extras       # ambiente Python (~15 min)
-setup/download_data.py --stage finetune recon enhanced evals paper --subj 1 --num-sessions 1
+setup/setup_env.sh --with-extras       # ambiente Python, com os pacotes do MindEye1 (~15 min)
+setup/download_data.py --stage finetune blurry recon enhanced evals paper paper40 --subj 1
+setup/prefetch_weights.py              # pesos de terceiros (CLIP, Versatile Diffusion, métricas)
+scripts/me1_setup.sh                   # links do MindEye1 para os pesos do MindEye2
 ```
 
 O `setup_env.sh` termina imprimindo o que encontrou — confira que a GPU aparece:
@@ -240,9 +244,10 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   ├── ESTAGIO.md               plano de estágio: o que já está feito
 │   └── README-mindeye2-original.md   README do MindEye2, como referência
 ├── setup/
-│   ├── bootstrap.sh             prepara a máquina inteira (chama os dois abaixo)
+│   ├── bootstrap.sh             prepara a máquina inteira (chama os de baixo)
 │   ├── setup_env.sh             cria o ambiente Python
 │   ├── download_data.py         baixa os arquivos da seção 4.1
+│   ├── prefetch_weights.py      baixa os pesos de terceiros (CLIP, Versatile Diffusion, métricas)
 │   └── restore_ckpt.py          conserta .pth que o Drive descompactou (seção 7)
 ├── scripts/
 │   ├── common.sh                caminhos e ambiente, lidos por todos os run_*.sh
@@ -439,7 +444,7 @@ sobrevive o que está no GitHub.**
 Tudo que é código está no repositório: `src/`, `scripts/`, `tests/`, `mindeye1/`, `setup/`,
 os guias de `docs/` e as tabelas de métricas em `results/tables/`. Uma máquina nova recupera tudo isso com `git clone`.
 
-Os 62 GB de dados externos também não precisam de backup — o `bootstrap.sh` os
+Os dados e pesos externos também não precisam de backup — o `bootstrap.sh` os
 rebaixa do HuggingFace.
 
 ### O que se perde se você não guardar

@@ -26,23 +26,21 @@ estágio está em [ESTAGIO.md](docs/ESTAGIO.md).
 
 ## Instalação
 
-Os três modelos usam o mesmo ambiente Python (`~/envs/fmri`). Primeiro o ambiente e os dados do
-MindEye2, que o FRR também usa:
+Um comando prepara a máquina para treinar e avaliar os três modelos:
 
 ```bash
 git clone https://github.com/PR-Alberti/benchmark-modelos.git
 cd benchmark-modelos
-setup/bootstrap.sh --check     # diagnóstico: GPU, ambiente, dados; não baixa nada
-setup/bootstrap.sh --all       # ambiente + os 62 GB de dados do MindEye2 (horas, quase tudo download)
+setup/bootstrap.sh --check     # diagnóstico: GPU, ambiente, dados, pesos; não baixa nada
+setup/bootstrap.sh             # tudo (~130 GB, horas, quase tudo download)
 ```
 
-Depois, o que o MindEye1 precisa a mais:
-
-```bash
-scripts/me1_setup.sh                            # 3 pacotes no mesmo ambiente + links
-mindeye1/download.py --stage test ckpts vd      # modelos publicados + teste + Versatile Diffusion (~31 GB)
-mindeye1/download.py --stage train              # só para treinar: + 39 GB
-```
+O `bootstrap.sh` cria o ambiente Python (`~/envs/fmri`, o mesmo para os três), baixa os dados do
+MindEye2 com as 40 sessões (que o FRR e o MindEye1 também usam), pré-baixa os pesos que os modelos
+buscariam na primeira execução (CLIP, Versatile Diffusion, redes das métricas), liga o MindEye1 a
+esses pesos e, no fim, importa o código de cada modelo para confirmar que ele carrega. Termina
+com o comando de treino de cada um. `--ckpts` traz também os ridge-only já treinados;
+`--minimo` prepara só o ridge-only de 1 sessão (~30 GB).
 
 Tudo é idempotente: interrompa e rode de novo que continua. Bibliotecas, cada arquivo baixado,
 onde fica e os erros conhecidos estão no [SETUP.md](docs/SETUP.md) (MindEye2 e FRR) e no
@@ -62,7 +60,7 @@ Todos os scripts rodam de qualquer diretório.
 
 ### MindEye2 (ridge-only)
 
-Precisa de: `setup/bootstrap.sh --all` (ou `setup/download_data.py --stage finetune recon enhanced evals --subj 1`).
+Precisa de: `setup/bootstrap.sh` (ou só `setup/bootstrap.sh --minimo` para o treino de 1 sessão).
 
 ```bash
 scripts/run_ridgeonly_prior.sh                                   # treino, 1 sessão (~1h50)
@@ -98,7 +96,7 @@ outros modelos. Detalhes no [SETUP.md](docs/SETUP.md#frr-baseline-linear-plano-d
 
 ### MindEye1
 
-Precisa de: `scripts/me1_setup.sh` e `mindeye1/download.py --stage vd` (acima). No benchmark, o
+Precisa de: `setup/bootstrap.sh`, que já roda o `scripts/me1_setup.sh` e baixa o Versatile Diffusion. No benchmark, o
 MindEye1 usa os dados do MindEye2 — as mesmas sessões de treino e o mesmo teste dos outros modelos —
 e não precisa dos 39 GB de treino do `webdataset_avg_split`.
 
