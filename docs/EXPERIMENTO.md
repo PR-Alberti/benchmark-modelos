@@ -317,7 +317,7 @@ Em 30/09/2026 os quatro braços ridge-only e os dois modelos publicados no artig
 (1 e 40 sessões) passaram pelo mesmo pipeline, com a mesma semente:
 reconstrução, refinamento e as métricas do `final_evaluations.py`. Tabelas em
 [BENCHMARK.md](../BENCHMARK.md); galeria de reconstruções lado a lado, curvas de
-treino e ruído em `benchmark/index.html`. Para refazer tudo:
+treino e ruído em `results/benchmark/index.html`. Para refazer tudo:
 `./scripts/run_benchmark.sh` (~50 h numa A4500).
 
 Reconstruções refinadas, com 25% de blurry misturado nos modelos que têm o ramo,

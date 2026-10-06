@@ -7,7 +7,7 @@
 #   setup/setup_env.sh --venv               # usa python3.11 -m venv em vez de conda
 #   setup/setup_env.sh --with-extras        # inclui os pacotes do final_evaluations
 #
-# Baseado no setup.sh do repo original (legacy/setup.sh), com quatro ajustes necessarios em
+# Baseado no setup.sh do repo original (MedARC-AI/MindEyeV2), com quatro ajustes necessarios em
 # maquinas atuais (cada um esta comentado abaixo, na secao "correcoes").
 # =============================================================================
 set -euo pipefail

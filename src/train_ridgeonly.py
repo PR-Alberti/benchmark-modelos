@@ -204,6 +204,11 @@ parser.add_argument(
     help="com --ridge_only, guarda backbone e prior (congelados) em fp16",
 )
 parser.add_argument(
+    "--dataset",type=str,default=None,
+    help="manifesto de um dataset controlado (mindeye_ridge.dataset_controlado): treina so nessas "
+         "exibicoes, dentro das --num_sessions sessoes",
+)
+parser.add_argument(
     "--resume",action=argparse.BooleanOptionalAction,default=False,
     help="retoma do last.pth deste modelo, se existir (ridge, otimizador, scheduler e epoca)",
 )
@@ -251,10 +256,52 @@ if multi_subject:
 else:
     num_samples_per_epoch = (750*num_sessions) // num_devices 
 
+# benchmark-modelos: com --dataset, o treino sao as exibicoes do manifesto. Os tars das
+# --num_sessions sessoes continuam sendo lidos, e o filtro abaixo deixa passar so as amostras
+# cuja linha em betas (behav coluna 5, unica por exibicao) esta no manifesto. A epoca encolhe na
+# proporcao das exibicoes mantidas (dataset_controlado.amostras_por_epoca_mindeye2). O manifesto
+# do pool inteiro, o padrao do dataset controlado, roda exatamente como sem --dataset: sem filtro
+# e com as mesmas 750*num_sessions amostras por epoca.
+#
+# A agregacao do manifesto (mindeye_ridge.agregacao) diz como usar as repeticoes. Com "exibicoes"
+# (ou None, o original) cada exibicao e uma amostra. Nos outros modos a amostra e a imagem: o filtro
+# deixa passar uma exibicao de cada imagem (a primeira do manifesto), e no carregamento dos voxels a
+# linha dela vira a media, uma repeticao sorteada ou uma combinacao das repeticoes da imagem.
+linhas_dataset = None
+agrega_treino = None
+if dataset:
+    if multi_subject:
+        raise ValueError("--dataset vale so com --no-multi_subject")
+    from mindeye_ridge import agregacao, dataset_controlado, nsd_data
+    _ex = dataset_controlado.exibicoes(data_path, subj, num_sessions, dataset)
+    _n_pool = len(nsd_data.exibicoes_treino(data_path, subj, num_sessions)["beta"])
+    _modo = _ex["agregacao"]
+    if _modo in (None, "exibicoes"):
+        _linhas = _ex["beta"]
+    else:
+        _ids, _grupos = agregacao.grupos(_ex["imagem"], _ex["beta"])
+        _linhas = np.array([g[0] for g in _grupos])
+        _posicao = {int(r): i for i, r in enumerate(_linhas)}
+        _tres = torch.from_numpy(np.stack([agregacao.tres(g) for g in _grupos])).long()
+        _n_rep = torch.tensor([len(g) for g in _grupos])
+        _gerador = torch.Generator().manual_seed(seed)
+
+        def agrega_treino(vox, linhas):
+            i = [_posicao[int(l)] for l in linhas]
+            return agregacao.seleciona(vox[_tres[i]], _n_rep[i], _modo, _gerador)
+    if len(_linhas) < _n_pool or agrega_treino is not None:
+        linhas_dataset = set(_linhas.tolist())
+    num_samples_per_epoch = dataset_controlado.amostras_por_epoca_mindeye2(len(_linhas), _n_pool, num_sessions) // num_devices
+    print(f"dataset controlado: {len(_ex['beta'])} de {_n_pool} exibicoes de treino, {len(_linhas)} amostras "
+          f"(agregacao {_modo or 'original'}); "
+          f"{'pool inteiro, sem filtro' if linhas_dataset is None else 'filtrando os tars'}")
+
 print("dividing batch size by subj_list, which will then be concatenated across subj during training...") 
 batch_size = batch_size // len(subj_list)
 
 num_iterations_per_epoch = num_samples_per_epoch // (batch_size*len(subj_list))
+if num_iterations_per_epoch < 1:
+    raise ValueError(f"{num_samples_per_epoch} exibicoes de treino nao enchem um lote de {batch_size}")
 
 print("batch_size =", batch_size, "num_iterations_per_epoch =",num_iterations_per_epoch, "num_samples_per_epoch =",num_samples_per_epoch)
 
@@ -275,6 +322,8 @@ for s in subj_list:
                         .decode("torch")\
                         .rename(behav="behav.npy", past_behav="past_behav.npy", future_behav="future_behav.npy", olds_behav="olds_behav.npy")\
                         .to_tuple(*["behav", "past_behav", "future_behav", "olds_behav"])
+    if linhas_dataset is not None:
+        train_data[f'subj0{s}'] = train_data[f'subj0{s}'].select(lambda a: int(a[0][0, 5]) in linhas_dataset)
     train_dl[f'subj0{s}'] = torch.utils.data.DataLoader(train_data[f'subj0{s}'], batch_size=batch_size, shuffle=False, drop_last=False, pin_memory=True)
 
     f = h5py.File(f'{data_path}/betas_all_subj0{s}_fp32_renorm.hdf5', 'r')
@@ -534,6 +583,7 @@ if local_rank==0 and wandb_log: # only use main process for wandb logging
       "batch_size": batch_size,
       "num_epochs": num_epochs,
       "num_sessions": num_sessions,
+      "dataset": dataset,
       "num_params": num_params,
       "clip_scale": clip_scale,
       "prior_scale": prior_scale,
@@ -686,7 +736,10 @@ for epoch in progress_bar:
                 # Load voxels for current batch, matching above indexing
                 voxel_idx = behav0[:,0,5].cpu().long().numpy()
                 voxel_sorted_idx = voxel_idx[image_sorted_idx]
-                voxel0 = voxels[f'subj0{subj_list[s]}'][voxel_sorted_idx]
+                if agrega_treino is None:
+                    voxel0 = voxels[f'subj0{subj_list[s]}'][voxel_sorted_idx]
+                else:   # benchmark-modelos: media/sorteio/combinacao das repeticoes (--dataset)
+                    voxel0 = agrega_treino(voxels[f'subj0{subj_list[s]}'], voxel_sorted_idx)
                 voxel0 = torch.Tensor(voxel0).unsqueeze(1)
 
                 if epoch < int(mixup_pct * num_epochs):

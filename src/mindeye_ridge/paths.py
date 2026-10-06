@@ -18,7 +18,8 @@ EVALS = RESULTS / "evals"              # tensores que cada modelo produz (fora d
 TABLES = RESULTS / "tables"            # metricas finais (no git)
 FIGS = RESULTS / "figs"
 METRICS = RESULTS / "metrics"          # curvas de treino guardadas de corridas antigas
-BENCHMARK = REPO / "benchmark"         # pagina gerada pelo make_benchmark.py
+BENCHMARK = RESULTS / "benchmark"      # pagina gerada pelo make_benchmark.py
+LOGS = RESULTS / "logs"                # logs dos scripts do benchmark (fora do git)
 
 
 def add_vendored_to_path():

@@ -1,9 +1,9 @@
 #!/bin/bash
-# Gera tudo o que o benchmark (benchmark/) precisa: treina o que falta,
+# Gera tudo o que o benchmark (results/benchmark/) precisa: treina o que falta,
 # reconstroi, avalia e monta a pagina. Uma GPU, tudo em sequencia.
 #
 #   scripts/run_benchmark.sh            # ~50 h numa A4500
-#   tail -f logs/benchmark.log # uma linha por etapa
+#   tail -f results/logs/benchmark.log # uma linha por etapa
 #
 # Pode ser interrompido e rodado de novo: treinos retomam do last.pth,
 # reconstrucoes do parcial, e o que ja terminou e pulado.
@@ -18,6 +18,8 @@
 set -e
 set -o pipefail
 source "$(dirname "$0")/common.sh"
+# o benchmark e o dataset completo: um DATASET exportado no shell nao pode vazar para estes treinos
+unset DATASET
 
 mkdir -p $LOGS
 LOG=$LOGS/benchmark.log
@@ -129,7 +131,7 @@ avalia final_subj01_pretrained_40sess_24bs published-base
 
 etapa "montando a pagina"
 $ENVP/bin/python make_benchmark.py >> "$LOG" 2>&1
-etapa "pagina montada: benchmark/index.html"
+etapa "pagina montada: results/benchmark/index.html"
 
 # ---------------------------------------------------------------------------
 # Ruido de referencia. O treino e deterministico com a mesma semente (o 4096 +
@@ -155,4 +157,4 @@ avalia "$m" enhanced
 
 etapa "montando a pagina (com o ruido de referencia)"
 $ENVP/bin/python make_benchmark.py >> "$LOG" 2>&1
-etapa "=== fim: benchmark/index.html ==="
+etapa "=== fim: results/benchmark/index.html ==="

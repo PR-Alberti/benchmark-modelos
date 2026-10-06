@@ -2,7 +2,7 @@
 
 MindEye2, sujeito 1 do NSD. Quatro variações do fine-tune só da camada ridge, comparadas com os modelos publicados no artigo (fine-tune completo), com um baseline linear (FRR) que não usa rede nenhuma e com o MindEye1 treinado do zero. Mesmo teste (1.000 imagens), mesmo pipeline de reconstrução e mesmas métricas para todos.
 
-A versão completa, com a galeria de reconstruções, curvas de treino e seletor refinada/unCLIP, está em [benchmark/index.html](benchmark/index.html) — um arquivo só, abre offline.
+A versão completa, com a galeria de reconstruções, curvas de treino e seletor refinada/unCLIP, está em [results/benchmark/index.html](results/benchmark/index.html) — um arquivo só, abre offline.
 
 Gerado por `src/make_benchmark.py` em 06/10/2026 07:41 (commit `16307d6`).
 
@@ -146,6 +146,6 @@ O treino é determinístico com a mesma semente, então a régua troca só a sem
 
 Refinadas, os mesmos estímulos para todos os modelos (a página tem mais, e as unCLIP e blurry):
 
-![Galeria de reconstruções refinadas](benchmark/galeria_refinadas.jpg)
+![Galeria de reconstruções refinadas](results/benchmark/galeria_refinadas.jpg)
 
-![Galeria de reconstruções unCLIP](benchmark/galeria_unclip.jpg)
+![Galeria de reconstruções unCLIP](results/benchmark/galeria_unclip.jpg)

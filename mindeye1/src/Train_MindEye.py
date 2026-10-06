@@ -184,6 +184,11 @@ parser.add_argument(
          "teste de 1.000 imagens) em vez do webdataset_avg_split; ver nsd_benchmark.py",
 )
 parser.add_argument(
+    "--dataset",type=str,default=None,
+    help="com --num_sessions, treina nas exibicoes deste manifesto (mindeye_ridge.dataset_controlado) "
+         "em vez das N primeiras sessoes",
+)
+parser.add_argument(
     "--save_last_every",type=int,default=1,
     help="grava o last.pth a cada N epocas (e na ultima); cada um tem ~6 GB",
 )
@@ -234,15 +239,17 @@ if use_image_aug:
 # In[6]:
 
 
+if dataset and num_sessions <= 0:
+    raise ValueError("--dataset vale so com os dados do benchmark (--num_sessions > 0)")
 if num_sessions > 0:
     # benchmark-modelos: os mesmos dados de treino e teste dos outros modelos do benchmark
     import nsd_benchmark
     print(f'Dados do benchmark: {num_sessions} sessoes de {data_path}')
-    _treino, _teste = nsd_benchmark.carrega(data_path, num_sessions)
+    _treino, _teste = nsd_benchmark.carrega(data_path, num_sessions, dataset)
     num_train, num_val = len(_treino["coco"]), len(_teste["coco"])
     train_dl = nsd_benchmark.Lotes(_treino, batch_size, embaralha=True, device=device, seed=seed)
     val_dl = nsd_benchmark.Lotes(_teste, 300, embaralha=False, device=device)
-    print(f'treino: {num_train} imagens ({len(train_dl)} lotes por epoca); validacao: {num_val} imagens')
+    print(f'treino: {num_train} amostras ({len(train_dl)} lotes por epoca); validacao: {num_val} imagens')
 else:
   print('Pulling NSD webdataset data...')
 
