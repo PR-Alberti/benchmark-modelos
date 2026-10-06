@@ -68,6 +68,7 @@ class Modelo:
     padrao: dict
     traduz: callable                    # hiper completo -> (env, args extras)
     valida: callable = field(default=lambda h: None)
+    valida_dataset: callable = field(default=lambda h, resumo: None)   # antes de gravar o manifesto
 
     def completa(self, hiper):
         hiper = dict(hiper or {})
@@ -102,6 +103,18 @@ def _valida_mindeye2(h):
         raise ValueError("mindeye2: blurry exige hidden_dim 4096 (o checkpoint final_multisubject_subj01)")
 
 
+def _valida_mindeye1(h):
+    if h["num_epochs"] < 2:
+        raise ValueError("mindeye1: num_epochs >= 2 (o OneCycleLR usa pct_start = 2/num_epochs)")
+
+
+def _valida_dataset_mindeye1(h, resumo):
+    lote = h["batch_size"] or (32 if h["paper"] else 16)
+    if resumo["imagens_unicas"] < lote:
+        raise ValueError(f"mindeye1: {resumo['imagens_unicas']} imagens nao enchem um lote de {lote} "
+                         "(no MindEye1 cada amostra e uma imagem, com as repeticoes empilhadas)")
+
+
 def _mindeye1(h):
     env = {"PAPER": _sim_nao(h["paper"]), "SAVE_EVERY": str(h["save_every"])}
     return env, _flags({"num_epochs": h["num_epochs"], "max_lr": h["max_lr"], "seed": h["seed"],
@@ -130,7 +143,7 @@ MODELOS = {
                        ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "AE_NAME", "PAPER", "SAVE_EVERY"),
                        {"num_epochs": 240, "max_lr": 3e-4, "seed": 42, "mixup_pct": 0.33,
                         "batch_size": None, "paper": False, "save_every": 1},
-                       _mindeye1),
+                       _mindeye1, _valida_mindeye1, _valida_dataset_mindeye1),
 }
 
 
@@ -169,16 +182,18 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
 
     pasta = paths.TRAIN_LOGS / nome
     manifesto, registro = pasta / "dataset.json", pasta / "experimento.json"
-    if manifesto.exists():
+    novo = not manifesto.exists()
+    if novo:
+        sub = dc.monta(cfg, paths.DATA)
+        resumo = sub["resumo"]
+    else:
         _confere_igual(manifesto, "config", cfg.como_dict(), nome)
         resumo = dc.carrega(manifesto)["resumo"]
         print(f"[{nome}] dataset ja montado: {manifesto}")
-    else:
-        sub = dc.monta(cfg, paths.DATA)
-        resumo = sub["resumo"]
-        if not dry_run:
-            pasta.mkdir(parents=True, exist_ok=True)
-            dc.salva(sub, manifesto)
+    modelo.valida_dataset(hiper, resumo)
+    if novo and not dry_run:
+        pasta.mkdir(parents=True, exist_ok=True)
+        dc.salva(sub, manifesto)
     print(f"[{nome}] dataset {cfg.assinatura()}: {json.dumps(resumo, ensure_ascii=False)}")
     if so_dataset:
         return resumo
