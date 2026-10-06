@@ -15,7 +15,10 @@ O que acontece:
    frr -> scripts/run_frr.sh, mindeye2 -> scripts/run_ridgeonly_prior.sh,
    mindeye1 -> scripts/me1_run.sh train.
 
-Um nome de experimento nao muda de configuracao: se train_logs/<nome> ja tem outro dataset ou
+Um experimento concluido nao roda de novo (marcador train_logs/<nome>/.treino_completo), e um
+nome que ja tem modelo treinado fora do treina.py (os do benchmark) e recusado, para nunca
+sobrescrever um modelo: para reproduzir um deles, use outro nome. Um nome de experimento nao muda
+de configuracao: se train_logs/<nome> ja tem outro dataset ou
 outros hiperparametros, o treino para (os tres modelos retomam do que encontram em disco, e
 misturar configuracoes estragaria a corrida). Mude o nome ou apague o diretorio.
 
@@ -71,6 +74,7 @@ class Modelo:
     valida: callable = field(default=lambda h: None)
     valida_dataset: callable = field(default=lambda h, resumo: None)   # antes de gravar o manifesto
     agregacoes: tuple = agregacao.MODOS     # modos de usar as repeticoes que o treino aceita
+    saida: callable = field(default=lambda nome: paths.TRAIN_LOGS / nome / "last.pth")   # o modelo treinado
 
     def completa(self, hiper):
         hiper = dict(hiper or {})
@@ -128,7 +132,8 @@ MODELOS = {
     "frr": Modelo(["run_frr.sh"], ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "EXTRA"),
                   {"folds": 5, "grid": "doerig", "fracs": None, "global_fraction": False,
                    "seed": 42, "chunk": 8192},
-                  _frr, agregacoes=("exibicoes", "media")),     # sem epocas: nada a sortear por epoca
+                  _frr, agregacoes=("exibicoes", "media"),      # sem epocas: nada a sortear por epoca
+                  saida=lambda nome: paths.TABLES / f"{nome}_frr.json"),
     # src/train_ridgeonly.py: so a ridge do subj01, a partir do pre-treino nos outros 7 sujeitos.
     # batch_size None = o padrao do script (16 no 1024, 8 no 4096 + blurry); frozen_fp16 None = idem
     "mindeye2": Modelo(["run_ridgeonly_prior.sh"],
@@ -145,7 +150,8 @@ MODELOS = {
                        ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "AE_NAME", "PAPER", "SAVE_EVERY"),
                        {"num_epochs": 240, "max_lr": 3e-4, "seed": 42, "mixup_pct": 0.33,
                         "batch_size": None, "paper": False, "save_every": 1},
-                       _mindeye1, _valida_mindeye1, _valida_dataset_mindeye1),
+                       _mindeye1, _valida_mindeye1, _valida_dataset_mindeye1,
+                       saida=lambda nome: paths.REPO / "mindeye1" / "train_logs" / nome / "last.pth"),
 }
 
 
@@ -185,7 +191,10 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
     hiper = modelo.completa(exp.get("hiper"))
 
     pasta = paths.TRAIN_LOGS / nome
-    manifesto, registro = pasta / "dataset.json", pasta / "experimento.json"
+    manifesto, registro, completo = pasta / "dataset.json", pasta / "experimento.json", pasta / ".treino_completo"
+    if not dry_run and modelo.saida(nome).exists() and not registro.exists():
+        raise SystemExit(f"{nome} ja tem um modelo treinado fora do treina.py ({modelo.saida(nome)}).\n"
+                         f"Para reproduzir esta configuracao, rode o dicionario com outro nome.")
     novo = not manifesto.exists()
     if novo:
         sub = dc.monta(cfg, paths.DATA)
@@ -205,6 +214,9 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
     if registro.exists():
         _confere_igual(registro, "hiper", hiper, nome)
         _confere_igual(registro, "modelo", exp["modelo"], nome)
+    if completo.exists() and not dry_run:
+        print(f"[{nome}] ja treinado: {modelo.saida(nome)} (para treinar de novo, apague {pasta})", flush=True)
+        return resumo
     env, args = modelo.traduz(hiper)
     env.update({"MODEL_NAME": nome, "NUM_SESSIONS": str(cfg.sessoes), "DATASET": str(manifesto)})
     if retoma:
@@ -224,11 +236,12 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
                    "assinatura_dataset": cfg.assinatura(), "resumo_dataset": resumo, "commit": _commit(),
                    "comando": {"env": env, "cmd": cmd}}, f, indent=1, ensure_ascii=False)
     subprocess.run(cmd, env=ambiente, check=True)
+    completo.touch()
     return resumo
 
 
 def main():
-    from experimentos import EXPERIMENTOS
+    from experimentos import BENCHMARK, EXPERIMENTOS, TODOS
 
     p = argparse.ArgumentParser(description="treina um experimento de src/experimentos.py")
     p.add_argument("nomes", nargs="*", help="experimentos a rodar, em sequencia")
@@ -239,14 +252,16 @@ def main():
     a = p.parse_args()
 
     if a.lista or not a.nomes:
-        for nome, exp in EXPERIMENTOS.items():
-            print(f"{nome:40s} {exp['modelo']:9s} dataset={exp.get('dataset', {})}")
+        for titulo, grupo in (("benchmark (ja treinados)", BENCHMARK), ("experimentos", EXPERIMENTOS)):
+            print(f"-- {titulo}")
+            for nome, exp in grupo.items():
+                print(f"{nome:40s} {exp['modelo']:9s} hiper={exp.get('hiper', {})} dataset={exp.get('dataset', {})}")
         return
-    faltam = [n for n in a.nomes if n not in EXPERIMENTOS]
+    faltam = [n for n in a.nomes if n not in TODOS]
     if faltam:
         sys.exit(f"experimentos inexistentes: {faltam}; veja --lista")
     for nome in a.nomes:
-        roda(nome, EXPERIMENTOS[nome], so_dataset=a.so_dataset, dry_run=a.dry_run, retoma=a.retoma)
+        roda(nome, TODOS[nome], so_dataset=a.so_dataset, dry_run=a.dry_run, retoma=a.retoma)
 
 
 if __name__ == "__main__":
