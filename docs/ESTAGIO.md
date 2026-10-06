@@ -7,7 +7,7 @@ de banco de provas, e decodificar o embedding CLIP da imagem vista serve de subs
 decodificação de imagética visual. A meta é uma lei de escala: como a quantidade de dados exigida
 depende do nível de informação desejado e do modelo.
 
-Esta branch (`estagio`) é onde essa análise acontece. A tabela diz o que já existe; os números
+A tabela diz o que já existe para essa análise; os números
 estão no [BENCHMARK.md](../BENCHMARK.md), e o que foi feito e por quê, no [EXPERIMENTO.md](EXPERIMENTO.md).
 
 ## Dados
@@ -16,7 +16,8 @@ estão no [BENCHMARK.md](../BENCHMARK.md), e o que foi feito e por quê, no [EXP
 |---|---|---|
 | Splits de treino e teste que não mudam entre os experimentos | feito | Teste fixo: as 1.000 imagens compartilhadas do NSD (`new_test`), 3 repetições cada; treino: as primeiras N sessões do sujeito, sem nenhuma imagem do teste (conferido em `run_frr.py`). Leitura em `src/mindeye_ridge/nsd_data.py` |
 | Embeddings CLIP de todas as imagens-alvo | feito | `src/mindeye_ridge/clip_targets.py`: ViT-bigG/14, 256 × 1.664 tokens, em cache em disco |
-| Pipeline reprodutível de subconjuntos controlados | **pendente** | Hoje o único eixo é o número de sessões (`--num_sessions`). As reduções do plano (imagens únicas, repetições, variedade) pedem sorteios com semente sobre as exibições; o `frr.py` já aceita qualquer subconjunto de exibições (`X` e `groups`) e de alvos (`Y`) |
+| Pipeline reprodutível de subconjuntos controlados | feito | `src/mindeye_ridge/dataset_controlado.py`: sorteio com semente sobre as exibições, por sessões, imagens únicas, repetições (1 a 3) e classes semânticas, com um manifesto que os três modelos leem (`--dataset` / `DATASET`). Cada treino é um dicionário em `src/experimentos.py`, rodado pelo `src/treina.py` (ver o [README](../README.md#treino-por-dicionário-e-dataset-controlado)) |
+| Rótulo semântico das imagens | feito | `src/mindeye_ridge/semantica.py`: fração da tela de cada categoria COCO, no recorte que o NSD mostrou; regras exclusiva e de prioridade. Exploração em `notebooks/classificacao_semantica.ipynb` |
 
 ## Modelos
 
@@ -33,8 +34,8 @@ estão no [BENCHMARK.md](../BENCHMARK.md), e o que foi feito e por quê, no [EXP
 | Tarefa do plano | Estado | Observação |
 |---|---|---|
 | Redução de dados por sessões | parcial | 1 e 40 sessões para o FRR, o ridge 1024 e o MindEye1; as condições de 25, 35 e 50 h do plano não foram rodadas |
-| Redução de dados por imagens únicas e por repetições | **pendente** | Depende do pipeline de subconjuntos |
-| Redução de variedade (por categoria, aleatória, maximizando distância) | **pendente** | Idem |
+| Redução de dados por imagens únicas e por repetições | **pendente** | O pipeline existe; falta rodar. A varredura de 3.000 exibições (3.000 × 1, 1.500 × 2, 1.000 × 3) já está em `src/experimentos.py` para o FRR |
+| Redução de variedade (por categoria, aleatória, maximizando distância) | **pendente** | Por categoria: o pipeline existe (classes semânticas), falta rodar. Maximizando distância: falta implementar |
 | Mesmo teste e mesmo sujeito em todas as condições | feito | O benchmark inteiro usa o subj01 e as mesmas 1.000 imagens |
 
 ## Extensões

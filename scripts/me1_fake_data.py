@@ -5,7 +5,7 @@ Servem para medir memoria e tempo do treino sem baixar os 39 GB de dados reais: 
 imagens sao ruido, entao as metricas nao significam nada. Mesmos nomes de arquivo, chaves e
 formas dos shards reais (3 repeticoes x 15.724 voxels em fp16, JPEG 425 x 425):
 
-    python tools/me1_fake_data.py /tmp/me1_fake
+    python scripts/me1_fake_data.py /tmp/me1_fake
     ME1_DATA=/tmp/me1_fake scripts/me1_run.sh train --num_epochs=3 --no-ckpt_saving
 
 O treino le um numero fixo de batches por epoca (8.859 exemplos), reamostrando os shards,

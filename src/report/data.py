@@ -66,10 +66,10 @@ def conta_params(mid, pasta=paths.TRAIN_LOGS):
 
 
 def tempo_me1(*etapas):
-    """Duracao somada das etapas (ids) no logs/me1_benchmark.log, em segundos; None se faltar alguma."""
+    """Duracao somada das etapas (ids) no results/logs/me1_benchmark.log, em segundos; None se faltar alguma."""
     import datetime
     import re
-    p = paths.REPO / "logs" / "me1_benchmark.log"
+    p = paths.LOGS / "me1_benchmark.log"
     if not p.exists():
         return None
     marcas = {}

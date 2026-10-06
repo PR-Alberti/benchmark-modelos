@@ -151,7 +151,7 @@ pip install sentence-transformers==2.5.1 evaluate==0.4.1 nltk==3.8.1 \
 Instalados por `setup/setup_env.sh --with-extras`. Dois detalhes:
 
 - `datasets` fica em 2.x porque a série 5.x exige `huggingface_hub>=0.25`, que quebra o `diffusers` 0.23.0.
-- o `setup.sh` original (agora em `legacy/`) pede `umap==0.1.1`, que não existe mais no PyPI; `umap-learn` fornece o mesmo módulo `umap`.
+- o `setup.sh` original pede `umap==0.1.1`, que não existe mais no PyPI; `umap-learn` fornece o mesmo módulo `umap`.
 
 ### 3.4 Pins de compatibilidade (aplicados por último)
 
@@ -241,8 +241,7 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   ├── SETUP.md                 este arquivo
 │   ├── MINDEYE1.md              instalação, ajustes e protocolo do MindEye1
 │   ├── EXPERIMENTO.md           o que foi feito e por quê
-│   ├── ESTAGIO.md               plano de estágio: o que já está feito
-│   └── README-mindeye2-original.md   README do MindEye2, como referência
+│   └── ESTAGIO.md               plano de estágio: o que já está feito
 ├── setup/
 │   ├── bootstrap.sh             prepara a máquina inteira (chama os de baixo)
 │   ├── setup_env.sh             cria o ambiente Python
@@ -257,7 +256,8 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   ├── run_frr.sh               baseline linear FRR
 │   ├── me1_setup.sh  me1_run.sh   MindEye1: preparação e uma etapa por vez (MINDEYE1.md)
 │   ├── run_me1_benchmark.sh     MindEye1 no benchmark: 1 e 40 sessões, do treino às métricas
-│   └── run_benchmark.sh         roda tudo o que o benchmark precisa (seção 6)
+│   ├── run_benchmark.sh         roda tudo o que o benchmark precisa (seção 6)
+│   └── me1_fake_data.py  inspect_ckpt.py   utilitários: dados sintéticos do MindEye1, flags de um checkpoint
 ├── mindeye1/                    MindEye1: src/ (código original + ajustes), download.py,
 │                                train_logs/ (links e saídas, fora do git)
 ├── src/                         pontos de entrada (rodam de qualquer diretório)
@@ -267,25 +267,27 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   ├── final_evaluations.py     calcula as métricas
 │   ├── verify_retrieval.py      só o retrieval, sem difusão
 │   ├── run_frr.py               FRR: voxels → embedding CLIP
-│   ├── make_benchmark.py        monta benchmark/index.html e BENCHMARK.md
+│   ├── experimentos.py          treinos com dataset controlado: um dicionário por experimento
+│   ├── treina.py                roda um experimento (dataset + script de treino do modelo)
+│   ├── make_benchmark.py        monta results/benchmark/ e BENCHMARK.md
 │   ├── make_comparison.py       figura imagem vista × reconstruções
 │   ├── mindeye_ridge/           biblioteca (utils, models, modeling_git, paths, nsd_data,
-│   │                            clip_targets, frr, embedding_metrics)
+│   │                            clip_targets, frr, embedding_metrics, semantica,
+│   │                            dataset_controlado, agregacao, resultados)
 │   ├── report/                  o código da página e do BENCHMARK.md (dados, tabelas, textos,
 │   │                            markdown e, em assets/, o CSS e o JavaScript)
 │   ├── generative_models/       código da Stability AI, como está
 │   └── autoencoder/             ConvNeXt do MindEye2
 ├── results/
 │   ├── tables/                  CSVs e JSONs com as métricas finais        (no git)
+│   ├── benchmark/index.html     benchmark completo com galeria (gerado, abre offline; no git)
 │   ├── metrics/  figs/          curvas e figuras de corridas antigas       (no git)
-│   └── evals/<modelo>/          tensores de reconstrução e de embedding    (fora do git)
-├── benchmark/index.html         benchmark completo com galeria (gerado, abre offline)
+│   ├── evals/<modelo>/          tensores de reconstrução e de embedding    (fora do git)
+│   └── logs/                    logs do run_benchmark.sh e do run_me1_benchmark.sh (fora do git)
 ├── tests/                       testes (python -m unittest discover -s tests)
-├── notebooks/                   notebooks do MindEye2 original, de referência
-├── legacy/                      o que já não é usado, com um README dizendo o que era
-├── tools/                       utilitários avulsos (me1_fake_data.py, inspect_ckpt.py)
-├── train_logs/<modelo>/         saída: last.pth + metrics.csv + train.log  (fora do git)
-└── logs/                        logs de execução                            (fora do git)
+├── notebooks/                   treino.ipynb (como treinar), classificacao_semantica.ipynb;
+│                                mindeye2_original/ (os notebooks e o README do MindEye2, de referência)
+└── train_logs/<modelo>/         saída: last.pth + metrics.csv + train.log  (fora do git)
 
 ~/mindeyev2/                 ← dados externos (seção 4.1), 62 GB
 ├── coco_images_224_float16.hdf5
@@ -293,6 +295,7 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 ├── wds/subj01/{train,test,new_test}/0.tar
 ├── train_logs/                  checkpoints prontos (multi-sujeito e do artigo)
 ├── evals/                       imagens e legendas de referência
+├── semantica/                   anotações COCO 2017 e a fração da tela por imagem (dataset controlado)
 └── .cache/                      modelos da seção 4.2
 
 ~/mindeye1/                  ← dados e modelos publicados do MindEye1 (MINDEYE1.md), até 58 GB
@@ -362,13 +365,13 @@ oposto do que o comentário do `final_evaluations.py` (`fwd: brain, clip`) e o a
 ### Benchmark de todos os modelos
 
 ```bash
-scripts/run_benchmark.sh              # ~40 h numa A4500; uma linha por etapa em logs/benchmark.log
+scripts/run_benchmark.sh              # ~40 h numa A4500; uma linha por etapa em results/logs/benchmark.log
 python src/make_benchmark.py             # só remonta a página com o que já existe
 ```
 
 Treina o que falta (4096 + blurry e 40 sessões), reconstrói e avalia os quatro ridge-only
 e os dois modelos do artigo (1 e 40 sessões; `download_data.py --stage paper paper40 blurry`),
-roda o baseline linear FRR (próxima seção), e monta `benchmark/index.html` e `BENCHMARK.md`.
+roda o baseline linear FRR (próxima seção), e monta `results/benchmark/index.html` e `BENCHMARK.md`.
 Pode ser interrompido e rodado de novo:
 
 | Onde | Como retoma |
@@ -415,10 +418,10 @@ mas o retrieval não o acompanha (veja o `BENCHMARK.md`).
 
 ### Treino original do artigo (não o ridge-only)
 
-Os notebooks de `notebooks/` são os do MindEye2 original e importam `utils` e `models` do layout antigo (tudo em `src/`). Para rodar esta receita, converta o notebook para dentro de `src/` e troque os imports por `from mindeye_ridge import utils` e `from mindeye_ridge.models import ...`; ou use o `src/train_ridgeonly.py`, que já faz isso e treina tudo quando chamado com `--no-ridge_only` (veja `legacy/run_fulltune_probe.sh`).
+Os notebooks de `notebooks/mindeye2_original/` são os do MindEye2 original e importam `utils` e `models` do layout antigo (tudo em `src/`). Para rodar esta receita, converta o notebook para dentro de `src/` e troque os imports por `from mindeye_ridge import utils` e `from mindeye_ridge.models import ...`; ou use o `src/train_ridgeonly.py`, que já faz isso e treina tudo quando chamado com `--no-ridge_only` (`python src/train_ridgeonly.py --no-ridge_only --multisubject_ckpt=<dados>/train_logs/multisubject_subj01_1024hid_nolow_300ep ...`, com os mesmos argumentos que o `scripts/run_ridgeonly_prior.sh` passa).
 
 ```bash
-jupyter nbconvert notebooks/Train.ipynb --to python --output-dir src
+jupyter nbconvert notebooks/mindeye2_original/Train.ipynb --to python --output-dir src
 GLOBAL_BATCH_SIZE=24 ~/envs/fmri/bin/python Train.py \
     --data_path=$HOME/mindeyev2 --cache_dir=$HOME/mindeyev2/.cache \
     --model_name=meu_teste --subj=1 --num_sessions=1 --batch_size=24 \
@@ -456,6 +459,8 @@ rebaixa do HuggingFace.
 | `results/evals/<modelo>/*.pt` (reconstruções) | ~2,3 GB | sim, ~3 h de inferência |
 | `<dados>/clip_targets/` (cache dos alvos CLIP do FRR) | 8 GB | sim, ~3 min |
 | `train_logs/<modelo>/frr_cv/` (dobras da validação cruzada do FRR) | 70 MB cada | sim, ~20 min nas 40 sessões |
+| `<dados>/semantica/` (anotações COCO e fração da tela, dataset controlado) | 500 MB | sim, ~1 min de download e ~20 s de cálculo |
+| `train_logs/<nome>/dataset.json` (manifesto de um dataset controlado) | até 1 MB | sim, o mesmo dicionário sorteia o mesmo subconjunto |
 
 Os `.pth` **e as reconstruções** estão publicados no release
 [`checkpoints-v1`](https://github.com/PR-Alberti/mindeye2-ridge/releases), e o
