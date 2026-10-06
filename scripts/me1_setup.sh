@@ -43,13 +43,17 @@ liga() {  # liga <destino> <origem>
 echo "== links em mindeye1/train_logs"
 liga "$ME1/train_logs/models/sd_image_var_autoenc.pth" "$DATA/sd_image_var_autoenc.pth"
 liga "$ME1/train_logs/models/convnext_xlarge_alpha0.75_fullckpt.pth" "$DATA/convnext_xlarge_alpha0.75_fullckpt.pth"
+# o que vem abaixo so serve para o MindEye1 original (modelos publicados e webdataset_avg_split);
+# o benchmark treina do zero nos dados do MindEye2 e nao precisa de nada disso
+echo "== opcional: MindEye1 original (mindeye1/download.py --stage test ckpts)"
 for m in prior_257_final_subj01_bimixco_softclip_byol autoencoder_subj01_4x_locont_no_reconst; do
-    liga "$ME1/train_logs/$m" "$ME1_DATA/mindeye_models/$m"
+    if [ -e "$ME1_DATA/mindeye_models/$m" ]; then liga "$ME1/train_logs/$m" "$ME1_DATA/mindeye_models/$m"
+    else echo "  -      $m (nao baixado)"; fi
+done
+for f in webdataset_avg_split/test/test_subj01_0.tar webdataset_avg_split/train/train_subj01_0.tar; do
+    [ -e "$ME1_DATA/$f" ] && echo "  ok     $f" || echo "  -      $f (nao baixado)"
 done
 
-echo "== dados em $ME1_DATA"
-for f in webdataset_avg_split/test/test_subj01_0.tar webdataset_avg_split/train/train_subj01_0.tar; do
-    [ -e "$ME1_DATA/$f" ] && echo "  ok     $f" || echo "  FALTA  $f  (mindeye1/download.py)"
-done
+echo "== obrigatorio para o benchmark"
 VD=$(ls -d "$HF_HOME"/hub/models--shi-labs--versatile-diffusion/snapshots/*/ 2>/dev/null | head -1)
-[ -n "$VD" ] && echo "  ok     Versatile Diffusion ($VD)" || echo "  FALTA  Versatile Diffusion  (mindeye1/download.py --stage vd)"
+[ -n "$VD" ] && echo "  ok     Versatile Diffusion ($VD)" || { echo "  FALTA  Versatile Diffusion  (mindeye1/download.py --stage vd)"; falta=1; }

@@ -21,8 +21,10 @@ gerador diferente. O retrieval do MindEye1 é medido do mesmo jeito (top-1 entre
 
 ## Instalação
 
-Pré-requisito: o ambiente e os dados do MindEye2 (`setup/bootstrap.sh`, veja o [SETUP.md](SETUP.md)).
-O MindEye1 usa o mesmo ambiente `~/envs/fmri`; nada do MindEye2 muda.
+Para o benchmark, basta o `setup/bootstrap.sh` (veja o [SETUP.md](SETUP.md)): ele instala os 3
+pacotes do MindEye1 no ambiente `~/envs/fmri`, baixa o Versatile Diffusion e roda o
+`me1_setup.sh`. Os comandos abaixo são o passo a passo, e o `download.py` só é preciso para
+o MindEye1 **original** (modelos publicados e `webdataset_avg_split`):
 
 ```bash
 scripts/me1_setup.sh --check          # o que falta, sem instalar nada

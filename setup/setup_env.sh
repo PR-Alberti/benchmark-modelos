@@ -80,6 +80,11 @@ echo "==> aplicando correcoes de compatibilidade"
 #    sem ele o torch.load falha com ModuleNotFoundError
 "$PIP" install deepspeed==0.13.1
 
+echo "==> instalando os pacotes do MindEye1"
+# importados pelo utils.py do MindEye1 (info-nce, msssim) e o Adam de 8 bits que faz o treino
+# caber em 20 GB (bitsandbytes). --no-deps: sem isso o pip tenta trocar a versao do torch
+"$PIP" install --no-deps info-nce-pytorch==0.1.0 pytorch-msssim==1.0.0 bitsandbytes==0.43.3
+
 echo
 echo "==> verificando a instalacao"
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)" "$ENV_PATH/bin/python" - <<'PY'
@@ -110,5 +115,5 @@ echo "=========================================================="
 echo " Ambiente pronto: $ENV_PATH"
 echo " Para usar:  $ENV_PATH/bin/python ..."
 echo "        ou:  source $ENV_PATH/bin/activate"
-echo " Proximo passo:  setup/download_data.py --help"
+echo " Proximo passo (dados e pesos):  setup/bootstrap.sh"
 echo "=========================================================="
