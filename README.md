@@ -103,6 +103,7 @@ e não precisa dos 39 GB de treino do `webdataset_avg_split`.
 ```bash
 scripts/run_me1_benchmark.sh               # 1 e 40 sessões: treino, reconstrução e métricas (~37 h)
 SESSOES=1 scripts/run_me1_benchmark.sh     # só 1 sessão (~5 h)
+LOWLEVEL=0 scripts/run_me1_benchmark.sh    # sem low-level: subj01_me1_<N>sess_semlowlevel (~23 h)
 NUM_SESSIONS=1 scripts/me1_run.sh train    # uma etapa: train | lowlevel | recon | metrics
 ```
 
