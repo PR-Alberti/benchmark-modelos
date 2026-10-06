@@ -239,6 +239,8 @@ if use_image_aug:
 # In[6]:
 
 
+if dataset and num_sessions <= 0:
+    raise ValueError("--dataset vale so com os dados do benchmark (--num_sessions > 0)")
 if num_sessions > 0:
     # benchmark-modelos: os mesmos dados de treino e teste dos outros modelos do benchmark
     import nsd_benchmark

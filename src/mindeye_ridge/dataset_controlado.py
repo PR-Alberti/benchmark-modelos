@@ -135,6 +135,8 @@ def monta(cfg, data_path, exibicoes=None, fracoes=None):
             escolhidas = rng.choice(candidatas, cfg.n_imagens, replace=False)
     else:
         escolhidas = candidatas
+    if not len(escolhidas):
+        raise ValueError(f"nenhuma imagem elegivel: {cfg.como_dict()}")
     escolhidas = np.sort(escolhidas)
 
     # as exibicoes de cada imagem escolhida: todas, ou `repeticoes` sorteadas
@@ -185,17 +187,42 @@ def carrega(caminho):
 
 
 def exibicoes(data_path, subj, num_sessions, dataset=None):
-    """O que os treinos chamam: o manifesto `dataset`, se houver, senao as N primeiras sessoes.
+    """O que os treinos chamam: as exibicoes do manifesto `dataset`, se houver; senao as N
+    primeiras sessoes inteiras, que e tambem o que o manifesto padrao (o dataset completo) contem.
 
-    Confere que o manifesto e do mesmo sujeito e cabe nas sessoes que o treino vai abrir.
+    Confere que o manifesto e do mesmo sujeito, que cada exibicao dele existe, com a mesma imagem,
+    nas sessoes de treino que o treino abre (o que tambem garante que nenhuma imagem do teste
+    entrou) e que nenhuma exibicao se repete.
     """
+    pool = nsd_data.exibicoes_treino(data_path, subj, num_sessions)
     if not dataset:
-        return nsd_data.exibicoes_treino(data_path, subj, num_sessions)
+        return pool
     sub = carrega(dataset)
     if sub["config"]["subj"] != subj:
         raise ValueError(f"o dataset {dataset} e do subj0{sub['config']['subj']}, nao do subj0{subj}")
+    if not len(sub["beta"]):
+        raise ValueError(f"o dataset {dataset} esta vazio")
     if sub["sessao"].max() >= num_sessions:
         raise ValueError(f"o dataset {dataset} usa a sessao {sub['sessao'].max() + 1}, "
                          f"mas o treino abre so {num_sessions}; use num_sessions >= {sub['config']['sessoes']}")
+    imagem_da_linha = dict(zip(pool["beta"].tolist(), pool["imagem"].tolist()))
+    fora = [(i, b) for i, b in zip(sub["imagem"].tolist(), sub["beta"].tolist()) if imagem_da_linha.get(b) != i]
+    if fora:
+        raise ValueError(f"o dataset {dataset} tem {len(fora)} exibicoes (imagem, linha de betas) que nao estao "
+                         f"nas {num_sessions} primeiras sessoes de treino do subj0{subj}, por exemplo {fora[:3]}")
+    if len(np.unique(sub["beta"])) != len(sub["beta"]):
+        raise ValueError(f"o dataset {dataset} repete exibicoes")
     print(f"dataset controlado {dataset}: {sub['resumo']}", flush=True)
     return {k: sub[k] for k in ("imagem", "beta", "sessao")}
+
+
+def amostras_por_epoca_mindeye2(n_exibicoes, n_pool, num_sessions):
+    """Amostras por epoca do MindEye2 (train_ridgeonly.py) treinando em `n_exibicoes` das `n_pool`
+    exibicoes de treino das `num_sessions` sessoes.
+
+    O original define a epoca como 750 * num_sessions, os trials nominais das sessoes, que incluem
+    os das imagens de teste (fora dos tars de treino): com 40 sessoes, 30.000 sorteios para 27.000
+    exibicoes. Com um subconjunto a epoca encolhe na mesma proporcao das exibicoes, e o pool inteiro
+    da exatamente o numero do original.
+    """
+    return 750 * num_sessions * n_exibicoes // n_pool
