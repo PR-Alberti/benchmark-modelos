@@ -6,7 +6,7 @@
 #   SESSOES="1" scripts/run_me1_benchmark.sh  so 1 sessao (~5 h)
 #
 # Pode ser interrompido e rodado de novo: etapa concluida e pulada (marcador .completo) e treino
-# pela metade retoma do last.pth. Uma linha por etapa em logs/me1_benchmark.log.
+# pela metade retoma do last.pth. Uma linha por etapa em results/logs/me1_benchmark.log.
 set -e
 set -o pipefail
 source "$(dirname "$0")/common.sh"
