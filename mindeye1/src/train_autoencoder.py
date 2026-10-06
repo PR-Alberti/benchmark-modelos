@@ -110,6 +110,7 @@ ups_mode = '4x'
 # MindEye2 em --data_path); 0 le o webdataset_avg_split do original em ME1_DATA
 num_sessions = 0
 cache_alvos = True  # so com num_sessions > 0; ver abaixo
+dataset = ""       # com num_sessions > 0: manifesto do dataset controlado (mindeye_ridge.dataset_controlado)
 data_path = os.environ.get("ME1_DATA", "/fsx/proj-fmri/shared/natural-scenes-dataset")
 
 # need non-deterministic CuDNN for conv3D to work
@@ -191,7 +192,7 @@ if local_rank == 0: print('Pulling NSD webdataset data...')
 if num_sessions > 0:
     # benchmark-modelos: os mesmos dados de treino e teste dos outros modelos do benchmark
     import nsd_benchmark
-    _treino, _teste = nsd_benchmark.carrega(data_path, num_sessions)
+    _treino, _teste = nsd_benchmark.carrega(data_path, num_sessions, dataset or None)
     num_train, num_val = len(_treino["coco"]), len(_teste["coco"])
     train_dl = nsd_benchmark.Lotes(_treino, batch_size, embaralha=True, device=device, seed=seed)
     val_dl = nsd_benchmark.Lotes(_teste, max(16, batch_size), embaralha=False, device=device)

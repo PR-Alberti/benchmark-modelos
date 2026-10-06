@@ -15,6 +15,9 @@
 #   sem NUM_SESSIONS        o MindEye1 original: webdataset_avg_split em $ME1_DATA, modelos
 #                           publicados como padrao.
 #
+# DATASET=<manifesto.json> (com NUM_SESSIONS) treina nas exibicoes de um dataset controlado
+# (src/mindeye_ridge/dataset_controlado.py) em vez das N primeiras sessoes; o teste nao muda.
+#
 # Variaveis: MODEL_NAME, AE_NAME (trocam os nomes), PAPER=1 (treino com batch 32 e AdamW normal,
 # como no artigo: nao cabe numa GPU de 20 GB), SAVE_EVERY (grava o last.pth a cada N epocas).
 # Treinos interrompidos retomam do last.pth. Antes: scripts/me1_setup.sh. Detalhes no docs/MINDEYE1.md.
@@ -52,12 +55,12 @@ train)
     # ultimo, como nos outros modelos
     $PY Train_MindEye.py --data_path="$DADOS" $BENCH --model_name="$MODEL_NAME" --subj=1 \
         --hidden --clip_variant=ViT-L/14 --n_samples_save=0 --no-wandb_log --save_at_end \
-        --save_last_every="${SAVE_EVERY:-1}" $CFG $RESUME "$@" \
+        --save_last_every="${SAVE_EVERY:-1}" ${DATASET:+--dataset="$DATASET"} $CFG $RESUME "$@" \
         2>&1 | filtra | tee -a "$SAIDA/train.log" ;;
 lowlevel)
     # subj01, batch 8, 120 epocas, como no artigo; retoma sozinho se houver last.pth
     SAIDA="$REPO/mindeye1/train_logs/models/$AE_NAME"; mkdir -p "$SAIDA"
-    if [ "$N" -gt 0 ]; then ARGS="--num_sessions=$N --data_path=$DADOS"; else ARGS=""; fi
+    if [ "$N" -gt 0 ]; then ARGS="--num_sessions=$N --data_path=$DADOS ${DATASET:+--dataset=$DATASET}"; else ARGS=""; fi
     $PY train_autoencoder.py --model_name="$AE_NAME" $ARGS "$@" 2>&1 | filtra | tee -a "$SAIDA/train.log" ;;
 retrieval)
     $PY Retrievals_testset.py --data_path="$ME1_DATA" --model_name="$MODEL_NAME" --subj=1 "$@" 2>&1 | filtra ;;

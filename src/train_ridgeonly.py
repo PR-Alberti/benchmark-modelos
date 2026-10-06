@@ -204,6 +204,11 @@ parser.add_argument(
     help="com --ridge_only, guarda backbone e prior (congelados) em fp16",
 )
 parser.add_argument(
+    "--dataset",type=str,default=None,
+    help="manifesto de um dataset controlado (mindeye_ridge.dataset_controlado): treina so nessas "
+         "exibicoes, dentro das --num_sessions sessoes",
+)
+parser.add_argument(
     "--resume",action=argparse.BooleanOptionalAction,default=False,
     help="retoma do last.pth deste modelo, se existir (ridge, otimizador, scheduler e epoca)",
 )
@@ -251,10 +256,24 @@ if multi_subject:
 else:
     num_samples_per_epoch = (750*num_sessions) // num_devices 
 
+# benchmark-modelos: com --dataset, o treino sao as exibicoes do manifesto. Os tars das
+# --num_sessions sessoes continuam sendo lidos, e o filtro abaixo deixa passar so as amostras
+# cuja linha em betas (behav coluna 5, unica por exibicao) esta no manifesto. A epoca passa a ter
+# o tamanho do subconjunto, como as 750*num_sessions acima tem o do conjunto inteiro.
+linhas_dataset = None
+if dataset:
+    if multi_subject:
+        raise ValueError("--dataset vale so com --no-multi_subject")
+    from mindeye_ridge import dataset_controlado
+    linhas_dataset = set(dataset_controlado.exibicoes(data_path, subj, num_sessions, dataset)["beta"].tolist())
+    num_samples_per_epoch = len(linhas_dataset) // num_devices
+
 print("dividing batch size by subj_list, which will then be concatenated across subj during training...") 
 batch_size = batch_size // len(subj_list)
 
 num_iterations_per_epoch = num_samples_per_epoch // (batch_size*len(subj_list))
+if num_iterations_per_epoch < 1:
+    raise ValueError(f"{num_samples_per_epoch} exibicoes de treino nao enchem um lote de {batch_size}")
 
 print("batch_size =", batch_size, "num_iterations_per_epoch =",num_iterations_per_epoch, "num_samples_per_epoch =",num_samples_per_epoch)
 
@@ -275,6 +294,8 @@ for s in subj_list:
                         .decode("torch")\
                         .rename(behav="behav.npy", past_behav="past_behav.npy", future_behav="future_behav.npy", olds_behav="olds_behav.npy")\
                         .to_tuple(*["behav", "past_behav", "future_behav", "olds_behav"])
+    if linhas_dataset is not None:
+        train_data[f'subj0{s}'] = train_data[f'subj0{s}'].select(lambda a: int(a[0][0, 5]) in linhas_dataset)
     train_dl[f'subj0{s}'] = torch.utils.data.DataLoader(train_data[f'subj0{s}'], batch_size=batch_size, shuffle=False, drop_last=False, pin_memory=True)
 
     f = h5py.File(f'{data_path}/betas_all_subj0{s}_fp32_renorm.hdf5', 'r')
@@ -534,6 +555,7 @@ if local_rank==0 and wandb_log: # only use main process for wandb logging
       "batch_size": batch_size,
       "num_epochs": num_epochs,
       "num_sessions": num_sessions,
+      "dataset": dataset,
       "num_params": num_params,
       "clip_scale": clip_scale,
       "prior_scale": prior_scale,
