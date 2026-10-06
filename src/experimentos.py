@@ -12,7 +12,13 @@ Cada experimento:
     "hiper":   hiperparametros do modelo; o que faltar fica no padrao (treina.py, MODELOS)
     "dataset": campos do ConfigDataset (src/mindeye_ridge/dataset_controlado.py):
                sessoes, n_imagens, repeticoes, classes, regra, minimo, maximo_outros,
-               balanceado, semente
+               balanceado, semente, agregacao
+
+"agregacao" diz como o treino usa as repeticoes de cada imagem (src/mindeye_ridge/agregacao.py):
+"exibicoes" (cada trial uma amostra), "media" (media dos betas das repeticoes), "sorteio" (uma
+repeticao sorteada a cada epoca) ou "combinacao" (combinacao aleatoria das repeticoes, como o baixo
+nivel do MindEye1). None, o padrao, e o que o modelo faz no benchmark: exibicoes no FRR e no
+MindEye2, rodizio das repeticoes no MindEye1. O FRR aceita so exibicoes e media.
 
 As classes sao listas de colunas da tabela de fracoes da tela (sup_<supercategoria> ou
 cat_<categoria> do COCO); notebooks/classificacao_semantica.ipynb mostra quantas imagens cada
@@ -55,6 +61,22 @@ EXPERIMENTOS = {
         "dataset": {"sessoes": 40, "n_imagens": 1000, "repeticoes": 3, "semente": 0},
     },
 }
+
+# trials separados x media das repeticoes, com as mesmas 1.000 imagens de 3 exibicoes
+for _modo in ("exibicoes", "media"):
+    EXPERIMENTOS[f"subj01_frr_1000img_3rep_{_modo}"] = {
+        "modelo": "frr",
+        "hiper": {"seed": 42},
+        "dataset": {"sessoes": 40, "n_imagens": 1000, "repeticoes": 3, "semente": 0, "agregacao": _modo},
+    }
+# no MindEye2 a epoca acompanha o numero de amostras: 3.000 exibicoes, ou 1.000 imagens nos modos por
+# imagem; o triplo de epocas nesses modos deixa os quatro com o mesmo numero de passos
+for _modo in ("exibicoes", "media", "sorteio", "combinacao"):
+    EXPERIMENTOS[f"subj01_me2_1000img_3rep_{_modo}"] = {
+        "modelo": "mindeye2",
+        "hiper": {"num_epochs": 20 if _modo == "exibicoes" else 60, "frozen_fp16": True, "seed": 42},
+        "dataset": {"sessoes": 40, "n_imagens": 1000, "repeticoes": 3, "semente": 0, "agregacao": _modo},
+    }
 
 # imagens unicas x repeticoes com o mesmo numero de exibicoes (3.000): a pergunta do plano de
 # estagio sobre o que vale mais para um tempo de aquisicao fixo

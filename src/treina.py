@@ -37,6 +37,7 @@ import subprocess
 import sys
 from dataclasses import dataclass, field
 
+from mindeye_ridge import agregacao
 from mindeye_ridge import dataset_controlado as dc
 from mindeye_ridge import paths
 
@@ -69,6 +70,7 @@ class Modelo:
     traduz: callable                    # hiper completo -> (env, args extras)
     valida: callable = field(default=lambda h: None)
     valida_dataset: callable = field(default=lambda h, resumo: None)   # antes de gravar o manifesto
+    agregacoes: tuple = agregacao.MODOS     # modos de usar as repeticoes que o treino aceita
 
     def completa(self, hiper):
         hiper = dict(hiper or {})
@@ -126,7 +128,7 @@ MODELOS = {
     "frr": Modelo(["run_frr.sh"], ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "EXTRA"),
                   {"folds": 5, "grid": "doerig", "fracs": None, "global_fraction": False,
                    "seed": 42, "chunk": 8192},
-                  _frr),
+                  _frr, agregacoes=("exibicoes", "media")),     # sem epocas: nada a sortear por epoca
     # src/train_ridgeonly.py: so a ridge do subj01, a partir do pre-treino nos outros 7 sujeitos.
     # batch_size None = o padrao do script (16 no 1024, 8 no 4096 + blurry); frozen_fp16 None = idem
     "mindeye2": Modelo(["run_ridgeonly_prior.sh"],
@@ -178,6 +180,8 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
     cfg = dc.ConfigDataset.de_dict(exp.get("dataset"))
     if cfg.subj != 1:
         raise ValueError(f"dataset.subj = {cfg.subj}: os scripts de treino sao do subj01")
+    if cfg.agregacao is not None and cfg.agregacao not in modelo.agregacoes:
+        raise ValueError(f"{exp['modelo']}: agregacao {cfg.agregacao!r} nao se aplica; use uma de {modelo.agregacoes}")
     hiper = modelo.completa(exp.get("hiper"))
 
     pasta = paths.TRAIN_LOGS / nome
