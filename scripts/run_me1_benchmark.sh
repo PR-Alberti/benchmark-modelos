@@ -10,6 +10,8 @@
 set -e
 set -o pipefail
 source "$(dirname "$0")/common.sh"
+# o benchmark e o dataset completo: um DATASET exportado no shell nao pode vazar para estes treinos
+unset DATASET
 LOG="$LOGS/me1_benchmark.log"; mkdir -p "$LOGS"
 ME1_LOGS="$REPO/mindeye1/train_logs"
 etapa() { echo "[$(date '+%F %T')] $*" | tee -a "$LOG"; }

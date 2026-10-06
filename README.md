@@ -146,10 +146,13 @@ vez, a tabela baixa as anotações COCO 2017 (~250 MB) para `$MINDEYE_DATA/seman
 
 O `treina.py` grava o manifesto do dataset e a configuração completa (com o commit do código) em
 `train_logs/<nome>/` e chama o script de treino do modelo com `DATASET` apontando para o
-manifesto. Os scripts aceitam a variável também quando chamados direto, como
-`DATASET=train_logs/<nome>/dataset.json NUM_SESSIONS=40 scripts/run_frr.sh`. O teste não muda:
-são sempre as 1.000 imagens compartilhadas. Um nome de experimento não muda de configuração: se
-`train_logs/<nome>` já tem outra, o treino para.
+manifesto. Os scripts aceitam a variável também quando chamados direto, com `MODEL_NAME`
+obrigatório (os nomes padrão são os dos modelos do benchmark), como
+`MODEL_NAME=<nome> DATASET=train_logs/<nome>/dataset.json NUM_SESSIONS=40 scripts/run_frr.sh`.
+O teste não muda: são sempre as 1.000 imagens compartilhadas. Um nome de experimento não muda de
+configuração: se `train_logs/<nome>` já tem outra, o treino para; e um modelo não retoma com
+outro manifesto (`dataset.sha1` no diretório do modelo). O `run_benchmark.sh` e o
+`run_me1_benchmark.sh` ignoram `DATASET`: o benchmark é sempre o dataset completo.
 
 ## Resultados
 
