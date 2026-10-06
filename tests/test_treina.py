@@ -49,6 +49,16 @@ class Hiper(unittest.TestCase):
             treina.MODELOS["mindeye2"].completa({"num_epochs": 1})
         with self.assertRaisesRegex(ValueError, "4096"):
             treina.MODELOS["mindeye2"].completa({"blurry": True})
+        with self.assertRaisesRegex(ValueError, "num_epochs"):
+            treina.MODELOS["mindeye1"].completa({"num_epochs": 1})
+
+    def test_mindeye1_precisa_de_um_lote_de_imagens(self):
+        m = treina.MODELOS["mindeye1"]
+        m.valida_dataset(m.completa({}), {"imagens_unicas": 16})
+        with self.assertRaisesRegex(ValueError, "lote de 16"):
+            m.valida_dataset(m.completa({}), {"imagens_unicas": 15})
+        with self.assertRaisesRegex(ValueError, "lote de 32"):
+            m.valida_dataset(m.completa({"paper": True}), {"imagens_unicas": 20})
 
 
 MAQUINA = {"HOME", "PWD", "BASH_SOURCE", "MINDEYE_ENV", "MINDEYE_DATA", "CUDA_VISIBLE_DEVICES",
