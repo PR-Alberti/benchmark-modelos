@@ -17,7 +17,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 import treina
-from experimentos import EXPERIMENTOS
+from experimentos import BENCHMARK, TODOS
 from mindeye_ridge import dataset_controlado as dc
 from mindeye_ridge import paths
 
@@ -115,9 +115,53 @@ MANIFESTO_FALSO = {"imagem": np.arange(3), "beta": np.arange(3), "sessao": np.ze
                    "rotulo": np.array([None] * 3, dtype=object), "config": {}, "resumo": {"exibicoes": 3}}
 
 
+class Benchmark(unittest.TestCase):
+    """Os dicionarios do BENCHMARK pedem aos scripts o que o run_benchmark.sh e o
+    run_me1_benchmark.sh pediram quando treinaram esses modelos."""
+
+    # as variaveis que os scripts do benchmark passaram (alem de MODEL_NAME), e as sessoes
+    ESPERADO = {
+        "subj01_ridgeonly_1sess_prior": ({}, 1),
+        "subj01_ridgeonly_1sess": ({"PRIOR": "0"}, 1),
+        "subj01_ridgeonly_1sess_4096blurry": ({"BLURRY": "1", "HIDDEN_DIM": "4096", "CKPT_INTERVAL": "10"}, 1),
+        "subj01_ridgeonly_40sess_prior": ({"NUM_EPOCHS": "20", "CKPT_INTERVAL": "1", "FROZEN": "1"}, 40),
+        "subj01_ridgeonly_1sess_prior_seed1": ({"SEED": "1"}, 1),
+        "subj01_ridgeonly_1sess_noprior_seed42": ({"PRIOR": "0", "SEED": "42"}, 1),
+        "subj01_me1_1sess": ({"SAVE_EVERY": "10"}, 1),
+        "subj01_me1_40sess": ({"SAVE_EVERY": "1"}, 40),
+    }
+    # os padroes dos scripts: o que o treina.py escreve explicitamente tem de coincidir com eles
+    PADRAO_SCRIPT = {"mindeye2": {"HIDDEN_DIM": "1024", "NUM_EPOCHS": "150", "MAX_LR": "0.0003", "PRIOR": "1",
+                                  "BLURRY": "0", "SEED": "42"},
+                     "mindeye1": {"PAPER": "0", "SAVE_EVERY": "1"}}
+
+    def test_variaveis_iguais_as_do_benchmark(self):
+        for nome, (env_esperado, sessoes) in self.ESPERADO.items():
+            with self.subTest(nome):
+                exp = BENCHMARK[nome]
+                m = treina.MODELOS[exp["modelo"]]
+                env, _ = m.traduz(m.completa(exp["hiper"]))
+                self.assertEqual(env, {**self.PADRAO_SCRIPT[exp["modelo"]], **env_esperado})
+                self.assertEqual(dc.ConfigDataset.de_dict(exp["dataset"]).sessoes, sessoes)
+
+    def test_frr_com_as_opcoes_das_variantes(self):
+        def extra(nome):
+            m = treina.MODELOS["frr"]
+            return m.traduz(m.completa(BENCHMARK[nome]["hiper"]))[0]["EXTRA"]
+        self.assertNotIn("--global_fraction", extra("subj01_frr_1sess"))
+        self.assertIn("--grid=doerig", extra("subj01_frr_40sess"))
+        self.assertIn("--global_fraction", extra("subj01_frr_40sess_global"))
+        self.assertIn("--grid=extended", extra("subj01_frr_1sess_ext"))
+
+    def test_dataset_e_sempre_o_completo(self):
+        for nome, exp in BENCHMARK.items():
+            cfg = dc.ConfigDataset.de_dict(exp["dataset"])
+            self.assertEqual((cfg.n_imagens, cfg.repeticoes, cfg.classes, cfg.agregacao), (None,) * 4, nome)
+
+
 class Experimentos(unittest.TestCase):
     def test_todos_os_experimentos_sao_validos(self):
-        for nome, exp in EXPERIMENTOS.items():
+        for nome, exp in TODOS.items():
             with self.subTest(nome):
                 self.assertIn(exp["modelo"], treina.MODELOS)
                 treina.MODELOS[exp["modelo"]].completa(exp.get("hiper"))
@@ -172,6 +216,22 @@ class Roda(unittest.TestCase):
             self.roda({**self.EXP, "dataset": {**self.EXP["dataset"], "semente": 2}})
         with self.assertRaises(SystemExit):
             self.roda({**self.EXP, "hiper": {"num_epochs": 6}})
+
+    def test_concluido_nao_roda_de_novo(self):
+        _, run = self.roda(self.EXP)
+        self.assertTrue((Path(self.tmp.name) / "exp" / ".treino_completo").exists())
+        out, run = self.roda(self.EXP)
+        self.assertIn("ja treinado", out)
+        self.assertFalse(any(c.args and c.args[0][0] == "bash" for c in run.call_args_list))
+
+    def test_modelo_treinado_fora_do_treina_e_recusado(self):
+        pasta = Path(self.tmp.name) / "exp"
+        pasta.mkdir()
+        (pasta / "last.pth").write_bytes(b"")
+        with self.assertRaisesRegex(SystemExit, "outro nome"):
+            self.roda(self.EXP)
+        self.assertFalse((pasta / "dataset.json").exists())        # nem o manifesto e gravado
+        self.roda(self.EXP, dry_run=True)                             # so mostrar o comando pode
 
     def test_dry_run_nao_grava_nem_treina(self):
         out, run = self.roda(self.EXP, dry_run=True)
