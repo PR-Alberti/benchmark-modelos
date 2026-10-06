@@ -130,6 +130,23 @@ else
     fi
 fi
 
+# rotulos semanticos do dataset controlado (src/mindeye_ridge/semantica.py): as anotacoes COCO 2017
+# (~250 MB) e a tabela de fracao da tela das 10.000 imagens do subj01 (~20 s). Sem isto, o
+# treina.py baixa e calcula na primeira vez que um experimento usar classes.
+TABELA="$DATA_PATH/semantica/subj01_fracao_tela.csv"
+if [[ $MINIMO -eq 1 ]]; then
+    echo "  rotulos semanticos: pulados com --minimo (o treina.py calcula se precisar)"
+elif [[ -f "$TABELA" ]]; then
+    ok "rotulos semanticos: $TABELA"
+elif [[ $CHECK_ONLY -eq 1 ]]; then
+    falta "rotulos semanticos: tabela ausente (o bootstrap baixa as anotacoes COCO, ~250 MB)"
+elif (cd src && "$ENV_PATH/bin/python" -W ignore -c \
+        "from mindeye_ridge import semantica, paths; semantica.tabela_fracoes(paths.DATA, 1)") 2>&1 | sed 's/^/  /'; then
+    ok "rotulos semanticos: $TABELA"
+else
+    problema "rotulos semanticos: falharam - rode de novo"
+fi
+
 # --- 4. pesos de terceiros ----------------------------------------------------
 titulo "4. Pesos que os modelos baixariam na primeira execucao"
 
@@ -243,6 +260,9 @@ if [[ $MINIMO -eq 0 ]]; then
         src "import sentence_transformers, evaluate, nltk"
     verifica "FRR (1 e 40 sessoes)" "$D/wds/subj01/train/39.tar" "$D/wds/subj01/new_test/0.tar" -- \
         src "import mindeye_ridge.frr, mindeye_ridge.nsd_data, mindeye_ridge.clip_targets"
+    verifica "Dataset controlado (src/treina.py)" "$D/semantica/subj01_fracao_tela.csv" \
+        "$D/wds/subj01/train/39.tar" -- \
+        src "import treina, experimentos, mindeye_ridge.dataset_controlado, mindeye_ridge.semantica"
     verifica "MindEye1 (1 e 40 sessoes)" "$D/sd_image_var_autoenc.pth" \
         "mindeye1/train_logs/models/convnext_xlarge_alpha0.75_fullckpt.pth" -- \
         mindeye1/src "import utils, models, nsd_benchmark, vd_compat, bitsandbytes"

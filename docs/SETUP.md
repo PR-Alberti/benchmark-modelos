@@ -267,10 +267,13 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   ├── final_evaluations.py     calcula as métricas
 │   ├── verify_retrieval.py      só o retrieval, sem difusão
 │   ├── run_frr.py               FRR: voxels → embedding CLIP
+│   ├── experimentos.py          treinos com dataset controlado: um dicionário por experimento
+│   ├── treina.py                roda um experimento (dataset + script de treino do modelo)
 │   ├── make_benchmark.py        monta benchmark/index.html e BENCHMARK.md
 │   ├── make_comparison.py       figura imagem vista × reconstruções
 │   ├── mindeye_ridge/           biblioteca (utils, models, modeling_git, paths, nsd_data,
-│   │                            clip_targets, frr, embedding_metrics)
+│   │                            clip_targets, frr, embedding_metrics, semantica,
+│   │                            dataset_controlado)
 │   ├── report/                  o código da página e do BENCHMARK.md (dados, tabelas, textos,
 │   │                            markdown e, em assets/, o CSS e o JavaScript)
 │   ├── generative_models/       código da Stability AI, como está
@@ -281,7 +284,7 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   └── evals/<modelo>/          tensores de reconstrução e de embedding    (fora do git)
 ├── benchmark/index.html         benchmark completo com galeria (gerado, abre offline)
 ├── tests/                       testes (python -m unittest discover -s tests)
-├── notebooks/                   notebooks do MindEye2 original, de referência
+├── notebooks/                   classificacao_semantica.ipynb e os notebooks do MindEye2 original
 ├── legacy/                      o que já não é usado, com um README dizendo o que era
 ├── tools/                       utilitários avulsos (me1_fake_data.py, inspect_ckpt.py)
 ├── train_logs/<modelo>/         saída: last.pth + metrics.csv + train.log  (fora do git)
@@ -293,6 +296,7 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 ├── wds/subj01/{train,test,new_test}/0.tar
 ├── train_logs/                  checkpoints prontos (multi-sujeito e do artigo)
 ├── evals/                       imagens e legendas de referência
+├── semantica/                   anotações COCO 2017 e a fração da tela por imagem (dataset controlado)
 └── .cache/                      modelos da seção 4.2
 
 ~/mindeye1/                  ← dados e modelos publicados do MindEye1 (MINDEYE1.md), até 58 GB
@@ -456,6 +460,8 @@ rebaixa do HuggingFace.
 | `results/evals/<modelo>/*.pt` (reconstruções) | ~2,3 GB | sim, ~3 h de inferência |
 | `<dados>/clip_targets/` (cache dos alvos CLIP do FRR) | 8 GB | sim, ~3 min |
 | `train_logs/<modelo>/frr_cv/` (dobras da validação cruzada do FRR) | 70 MB cada | sim, ~20 min nas 40 sessões |
+| `<dados>/semantica/` (anotações COCO e fração da tela, dataset controlado) | 500 MB | sim, ~1 min de download e ~20 s de cálculo |
+| `train_logs/<nome>/dataset.json` (manifesto de um dataset controlado) | até 1 MB | sim, o mesmo dicionário sorteia o mesmo subconjunto |
 
 Os `.pth` **e as reconstruções** estão publicados no release
 [`checkpoints-v1`](https://github.com/PR-Alberti/mindeye2-ridge/releases), e o

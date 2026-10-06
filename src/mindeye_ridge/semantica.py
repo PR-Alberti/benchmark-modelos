@@ -52,6 +52,7 @@ def baixa_se_faltar(data_path):
         with zipfile.ZipFile(zip_path) as z:
             for a in anotacoes:
                 z.extract(f"annotations/{a.name}", sem)
+        zip_path.unlink()                       # so os dois instances_*.json interessam (~490 MB)
     return stim, anotacoes
 
 
