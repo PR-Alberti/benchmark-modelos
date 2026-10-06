@@ -5,12 +5,15 @@
 import io
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 from unittest import mock
+
+import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 import treina
@@ -46,6 +49,55 @@ class Hiper(unittest.TestCase):
             treina.MODELOS["mindeye2"].completa({"num_epochs": 1})
         with self.assertRaisesRegex(ValueError, "4096"):
             treina.MODELOS["mindeye2"].completa({"blurry": True})
+
+
+MAQUINA = {"HOME", "PWD", "BASH_SOURCE", "MINDEYE_ENV", "MINDEYE_DATA", "CUDA_VISIBLE_DEVICES",
+           "PYTORCH_CUDA_ALLOC_CONF", "ME1_DATA"}      # configuracao da maquina, nao do experimento
+
+
+def variaveis_lidas(*arquivos):
+    """Variaveis que um script le do ambiente: as com valor padrao (${X:-...}, ${X:+...}) e as
+    usadas sem nunca serem atribuidas no script nem no common.sh."""
+    texto = "\n".join(Path(a).read_text() for a in arquivos)
+    texto = "\n".join(l for l in texto.splitlines() if not l.lstrip().startswith("#"))
+    usadas = set(re.findall(r"\$\{?([A-Z_][A-Z0-9_]*)", texto))
+    com_padrao = set(re.findall(r"\$\{([A-Z_][A-Z0-9_]*):?[-+=]", texto))
+    atribuidas = set(re.findall(r"(?:^|[\s;(])(?:export |local )?([A-Z_][A-Z0-9_]*)=", texto, re.M))
+    return (com_padrao | (usadas - atribuidas)) - MAQUINA
+
+
+class Ambiente(unittest.TestCase):
+    def test_treina_controla_toda_variavel_que_os_scripts_leem(self):
+        comum = paths.REPO / "scripts" / "common.sh"
+        for nome, modelo in treina.MODELOS.items():
+            with self.subTest(nome):
+                lidas = variaveis_lidas(paths.REPO / "scripts" / modelo.script[0], comum)
+                self.assertEqual(lidas, set(modelo.variaveis))
+
+    def test_variavel_do_shell_nao_vaza_para_o_treino(self):
+        exp = {"modelo": "mindeye2", "hiper": {"num_epochs": 5},
+               "dataset": {"sessoes": 3, "n_imagens": 40, "repeticoes": 1}}
+        with tempfile.TemporaryDirectory() as d, \
+                mock.patch.object(treina.paths, "TRAIN_LOGS", Path(d)), \
+                mock.patch.object(treina.dc, "monta", return_value=MANIFESTO_FALSO), \
+                mock.patch.object(treina, "_commit", return_value="abc"), \
+                mock.patch.dict(os.environ, {"BATCH_SIZE": "8", "RESUME": "1", "EXTRA": "--x", "OUTRA": "fica"}), \
+                mock.patch("subprocess.run") as run, redirect_stdout(io.StringIO()) as out:
+            treina.roda("exp", exp)
+        env = run.call_args.kwargs["env"]
+        self.assertNotIn("BATCH_SIZE", env)
+        self.assertNotIn("RESUME", env)
+        self.assertEqual(env["OUTRA"], "fica")                          # o resto do ambiente segue
+        self.assertIn("ignorando do ambiente", out.getvalue())
+        self.assertIn("BATCH_SIZE=8", out.getvalue())
+
+    def test_so_subj01(self):
+        with self.assertRaisesRegex(ValueError, "subj01"):
+            treina.roda("x", {"modelo": "frr", "dataset": {"subj": 2}}, dry_run=True)
+
+
+MANIFESTO_FALSO = {"imagem": np.arange(3), "beta": np.arange(3), "sessao": np.zeros(3, int),
+                   "rotulo": np.array([None] * 3, dtype=object), "config": {}, "resumo": {"exibicoes": 3}}
 
 
 class Experimentos(unittest.TestCase):
