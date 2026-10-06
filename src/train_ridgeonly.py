@@ -258,15 +258,22 @@ else:
 
 # benchmark-modelos: com --dataset, o treino sao as exibicoes do manifesto. Os tars das
 # --num_sessions sessoes continuam sendo lidos, e o filtro abaixo deixa passar so as amostras
-# cuja linha em betas (behav coluna 5, unica por exibicao) esta no manifesto. A epoca passa a ter
-# o tamanho do subconjunto, como as 750*num_sessions acima tem o do conjunto inteiro.
+# cuja linha em betas (behav coluna 5, unica por exibicao) esta no manifesto. A epoca encolhe na
+# proporcao das exibicoes mantidas (dataset_controlado.amostras_por_epoca_mindeye2). O manifesto
+# do pool inteiro, o padrao do dataset controlado, roda exatamente como sem --dataset: sem filtro
+# e com as mesmas 750*num_sessions amostras por epoca.
 linhas_dataset = None
 if dataset:
     if multi_subject:
         raise ValueError("--dataset vale so com --no-multi_subject")
-    from mindeye_ridge import dataset_controlado
-    linhas_dataset = set(dataset_controlado.exibicoes(data_path, subj, num_sessions, dataset)["beta"].tolist())
-    num_samples_per_epoch = len(linhas_dataset) // num_devices
+    from mindeye_ridge import dataset_controlado, nsd_data
+    _linhas = dataset_controlado.exibicoes(data_path, subj, num_sessions, dataset)["beta"]
+    _n_pool = len(nsd_data.exibicoes_treino(data_path, subj, num_sessions)["beta"])
+    if len(_linhas) < _n_pool:
+        linhas_dataset = set(_linhas.tolist())
+    num_samples_per_epoch = dataset_controlado.amostras_por_epoca_mindeye2(len(_linhas), _n_pool, num_sessions) // num_devices
+    print(f"dataset controlado: {len(_linhas)} de {_n_pool} exibicoes de treino; "
+          f"{'pool inteiro, sem filtro' if linhas_dataset is None else 'filtrando os tars'}")
 
 print("dividing batch size by subj_list, which will then be concatenated across subj during training...") 
 batch_size = batch_size // len(subj_list)

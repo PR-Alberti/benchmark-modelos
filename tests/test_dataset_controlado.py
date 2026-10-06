@@ -7,6 +7,8 @@ import sys
 import tempfile
 import unittest
 
+from unittest import mock
+
 import numpy as np
 import pandas as pd
 
@@ -89,6 +91,10 @@ class Selecao(unittest.TestCase):
 
 
 class Erros(unittest.TestCase):
+    def test_subconjunto_vazio(self):
+        with self.assertRaisesRegex(ValueError, "nenhuma imagem"):
+            monta(sessoes=6, classes=CLASSES, minimo=50)
+
     def test_pedir_mais_do_que_ha(self):
         with self.assertRaises(ValueError):
             monta(sessoes=6, n_imagens=61)
@@ -122,6 +128,65 @@ class Manifesto(unittest.TestCase):
         self.assertNotEqual(dc.ConfigDataset(n_imagens=5).assinatura(), dc.ConfigDataset(n_imagens=6).assinatura())
 
 
+class Leitura(unittest.TestCase):
+    """dataset_controlado.exibicoes, o que os treinos chamam, com o pool sintetico no lugar do disco."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        pool = lambda data_path, subj, n: {k: v[EX["sessao"] < n] for k, v in EX.items()}
+        self.patch = mock.patch.object(dc.nsd_data, "exibicoes_treino", side_effect=pool)
+        self.patch.start()
+
+    def tearDown(self):
+        self.patch.stop()
+        self.tmp.cleanup()
+
+    def manifesto(self, **mudancas):
+        sub = monta(sessoes=6, n_imagens=10, repeticoes=1)
+        sub.update(mudancas)
+        caminho = f"{self.tmp.name}/ds.json"
+        dc.salva(sub, caminho)
+        return caminho
+
+    def test_sem_manifesto_e_o_pool(self):
+        ex = dc.exibicoes(None, 1, 4)
+        np.testing.assert_array_equal(ex["beta"], EX["beta"][EX["sessao"] < 4])
+
+    def test_manifesto_valido(self):
+        ex = dc.exibicoes(None, 1, 6, self.manifesto())
+        self.assertEqual(len(ex["beta"]), 10)
+
+    def test_exibicao_fora_do_pool_ou_com_outra_imagem(self):
+        sub = monta(sessoes=6, n_imagens=10, repeticoes=1)
+        trocada = sub["imagem"].copy(); trocada[0] = 999
+        with self.assertRaisesRegex(ValueError, "nao estao"):
+            dc.exibicoes(None, 1, 6, self.manifesto(imagem=trocada))
+        inexistente = sub["beta"].copy(); inexistente[0] = 10**6
+        with self.assertRaisesRegex(ValueError, "nao estao"):
+            dc.exibicoes(None, 1, 6, self.manifesto(beta=inexistente))
+
+    def test_exibicao_repetida(self):
+        sub = monta(sessoes=6, n_imagens=10, repeticoes=1)
+        dup = {k: np.r_[sub[k], sub[k][:1]] for k in ("imagem", "beta", "sessao", "rotulo")}
+        with self.assertRaisesRegex(ValueError, "repete"):
+            dc.exibicoes(None, 1, 6, self.manifesto(**dup))
+
+    def test_sessoes_insuficientes(self):
+        with self.assertRaisesRegex(ValueError, "num_sessions"):
+            dc.exibicoes(None, 1, 2, self.manifesto())
+
+
+class EpocaMindEye2(unittest.TestCase):
+    def test_pool_inteiro_reproduz_o_original(self):
+        # subj01: 27.000 exibicoes de treino nas 40 sessoes, 688 na primeira
+        self.assertEqual(dc.amostras_por_epoca_mindeye2(27000, 27000, 40), 750 * 40)
+        self.assertEqual(dc.amostras_por_epoca_mindeye2(688, 688, 1), 750)
+
+    def test_subconjunto_encolhe_na_mesma_proporcao(self):
+        self.assertEqual(dc.amostras_por_epoca_mindeye2(9000, 27000, 40), 10000)
+        self.assertEqual(dc.amostras_por_epoca_mindeye2(3000, 27000, 40), 3333)
+
+
 DADOS = os.path.exists(f"{paths.DATA}/wds/subj01/train/39.tar")
 
 
@@ -133,6 +198,22 @@ class Subj01(unittest.TestCase):
             ref = nsd_data.exibicoes_treino(paths.DATA, 1, n)
             for k in ("imagem", "beta", "sessao"):
                 np.testing.assert_array_equal(sub[k], ref[k])
+
+    def test_padrao_e_o_dataset_completo(self):
+        """O dicionario vazio e o pool inteiro das 40 sessoes: o que os treinos recebem e o mesmo
+        que sem --dataset, e o MindEye2 fica com as 750 * 40 amostras por epoca do original."""
+        cfg = dc.ConfigDataset.de_dict({})
+        self.assertEqual(cfg.sessoes, 40)
+        sub = dc.monta(cfg, paths.DATA)
+        with tempfile.TemporaryDirectory() as d:
+            dc.salva(sub, f"{d}/ds.json")
+            ex = dc.exibicoes(paths.DATA, 1, 40, f"{d}/ds.json")
+        ref = nsd_data.exibicoes_treino(paths.DATA, 1, 40)
+        for k in ("imagem", "beta", "sessao"):
+            np.testing.assert_array_equal(ex[k], ref[k])
+        self.assertEqual(sub["resumo"], {"exibicoes": 27000, "imagens_unicas": 9000, "repeticoes": {3: 9000},
+                                         "sessoes_usadas": 40})
+        self.assertEqual(dc.amostras_por_epoca_mindeye2(len(ex["beta"]), len(ref["beta"]), 40), 30000)
 
     def test_exibicoes_confere_sessoes_do_manifesto(self):
         sub = dc.monta(dc.ConfigDataset(sessoes=5, n_imagens=50, repeticoes=1), paths.DATA)
