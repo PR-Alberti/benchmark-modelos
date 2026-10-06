@@ -284,7 +284,8 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   └── evals/<modelo>/          tensores de reconstrução e de embedding    (fora do git)
 ├── benchmark/index.html         benchmark completo com galeria (gerado, abre offline)
 ├── tests/                       testes (python -m unittest discover -s tests)
-├── notebooks/                   classificacao_semantica.ipynb e os notebooks do MindEye2 original
+├── notebooks/                   treino.ipynb (como treinar), classificacao_semantica.ipynb;
+│                                mindeye2_original/ (os notebooks do MindEye2, de referência)
 ├── legacy/                      o que já não é usado, com um README dizendo o que era
 ├── tools/                       utilitários avulsos (me1_fake_data.py, inspect_ckpt.py)
 ├── train_logs/<modelo>/         saída: last.pth + metrics.csv + train.log  (fora do git)
@@ -419,10 +420,10 @@ mas o retrieval não o acompanha (veja o `BENCHMARK.md`).
 
 ### Treino original do artigo (não o ridge-only)
 
-Os notebooks de `notebooks/` são os do MindEye2 original e importam `utils` e `models` do layout antigo (tudo em `src/`). Para rodar esta receita, converta o notebook para dentro de `src/` e troque os imports por `from mindeye_ridge import utils` e `from mindeye_ridge.models import ...`; ou use o `src/train_ridgeonly.py`, que já faz isso e treina tudo quando chamado com `--no-ridge_only` (veja `legacy/run_fulltune_probe.sh`).
+Os notebooks de `notebooks/mindeye2_original/` são os do MindEye2 original e importam `utils` e `models` do layout antigo (tudo em `src/`). Para rodar esta receita, converta o notebook para dentro de `src/` e troque os imports por `from mindeye_ridge import utils` e `from mindeye_ridge.models import ...`; ou use o `src/train_ridgeonly.py`, que já faz isso e treina tudo quando chamado com `--no-ridge_only` (veja `legacy/run_fulltune_probe.sh`).
 
 ```bash
-jupyter nbconvert notebooks/Train.ipynb --to python --output-dir src
+jupyter nbconvert notebooks/mindeye2_original/Train.ipynb --to python --output-dir src
 GLOBAL_BATCH_SIZE=24 ~/envs/fmri/bin/python Train.py \
     --data_path=$HOME/mindeyev2 --cache_dir=$HOME/mindeyev2/.cache \
     --model_name=meu_teste --subj=1 --num_sessions=1 --batch_size=24 \

@@ -218,7 +218,7 @@ ficam fora do git: num clone novo, sem eles, a página sai sem a galeria e sem a
 | `setup/` | preparam a máquina: `bootstrap.sh` (tudo de uma vez), `setup_env.sh` (ambiente), `download_data.py` (dados do MindEye2), `restore_ckpt.py` |
 | `docs/` | [SETUP.md](docs/SETUP.md) e [MINDEYE1.md](docs/MINDEYE1.md) (instalação e operação), [EXPERIMENTO.md](docs/EXPERIMENTO.md) (o que foi feito e por quê), [ESTAGIO.md](docs/ESTAGIO.md) (plano de estágio), `README-mindeye2-original.md` |
 | [BENCHMARK.md](BENCHMARK.md) | resultados (gerado pelo `make_benchmark.py`) |
-| `notebooks/` | `classificacao_semantica.ipynb` (exploração dos rótulos semânticos); os outros são do MindEye2 original, só de referência |
+| `notebooks/` | `treino.ipynb` (como treinar: os modelos do benchmark e experimentos novos como dicionários), `classificacao_semantica.ipynb` (exploração dos rótulos semânticos); em `mindeye2_original/`, os notebooks do MindEye2, só de referência |
 | `legacy/` | scripts antigos, só de referência |
 
 ## Licença
