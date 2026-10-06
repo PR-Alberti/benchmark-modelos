@@ -111,6 +111,46 @@ O treino como no artigo (batch 32, AdamW) não cabe em 20 GB; aqui ele usa batch
 estão no [MINDEYE1.md](docs/MINDEYE1.md). Sem `NUM_SESSIONS`, o `me1_run.sh` roda o MindEye1 original
 (dados do `webdataset_avg_split`, modelos publicados).
 
+### Treino com dataset controlado
+
+Os três modelos também treinam num subconjunto controlado do treino, em vez das N primeiras
+sessões. Cada experimento é um dicionário em `src/experimentos.py`:
+
+```python
+"subj01_frr_5classes_300img_1rep": {
+    "modelo": "frr",                       # frr | mindeye2 | mindeye1
+    "hiper": {"folds": 5, "seed": 42},     # o que faltar fica no padrão do modelo
+    "dataset": {"sessoes": 40,             # pool: as primeiras N sessões
+                "n_imagens": 300,          # imagens únicas (por classe, com balanceado)
+                "repeticoes": 1,           # exibições por imagem: 1, 2 ou 3
+                "classes": {"pessoa": ["sup_person"], "animal": ["sup_animal"]},
+                "minimo": 10, "maximo_outros": 2, "balanceado": True,
+                "semente": 0},
+},
+```
+
+```bash
+python src/treina.py --lista                       # os experimentos definidos
+python src/treina.py <nome> --so_dataset           # sorteia e resume o dataset, sem treinar
+python src/treina.py <nome> --dry_run              # mostra o comando que rodaria
+python src/treina.py <nome> [<nome> ...]           # treina, em sequência
+```
+
+O sorteio é feito sobre as exibições (`src/mindeye_ridge/dataset_controlado.py`), com semente:
+mesmo dicionário, mesmo subconjunto. As classes são listas de colunas da tabela de frações da tela
+(`src/mindeye_ridge/semantica.py`): cada categoria COCO (`cat_*`) ou supercategoria (`sup_*`), em %
+da tela que o NSD mostrou. A imagem é da classe se ela ocupa pelo menos `minimo`% e as outras
+classes ficam abaixo de `maximo_outros`%. A exploração que calibrou esses limiares está em
+[`notebooks/classificacao_semantica.ipynb`](notebooks/classificacao_semantica.ipynb). Na primeira
+vez, a tabela baixa as anotações COCO 2017 (~250 MB) para `$MINDEYE_DATA/semantica/`.
+
+O `treina.py` grava o manifesto do dataset e a configuração completa (com o commit do código) em
+`train_logs/<nome>/` e chama o script de treino do modelo com `DATASET` apontando para o
+manifesto. Os scripts aceitam a variável também quando chamados direto, como
+`DATASET=train_logs/<nome>/dataset.json NUM_SESSIONS=40 scripts/run_frr.sh`. O teste não muda:
+são sempre as 1.000 imagens compartilhadas. Um nome de experimento não muda de configuração: se
+`train_logs/<nome>` já tem outra, o treino para.
+
 ## Resultados
 
 [BENCHMARK.md](BENCHMARK.md) traz as tabelas do MindEye2 (quatro ridge-only e os dois modelos do
@@ -122,7 +162,7 @@ abas e nas duas tabelas, e ele não entra nas métricas de legenda.
 ```bash
 scripts/run_benchmark.sh                 # regenera tudo do MindEye2 e do FRR (~50 h numa A4500)
 python src/make_benchmark.py             # só remonta a página com o que já existe
-python -m unittest discover -s tests     # testes do FRR, da página e dos caminhos
+python -m unittest discover -s tests     # testes do FRR, da página, dos caminhos e do dataset controlado
 ```
 
 A página e o `BENCHMARK.md` versionados já estão prontos. Para remontá-los, o
@@ -133,8 +173,8 @@ ficam fora do git: num clone novo, sem eles, a página sai sem a galeria e sem a
 
 | | |
 |---|---|
-| `src/` | MindEye2 e FRR: `train_ridgeonly.py`, `recon_inference.py`, `enhanced_recon_inference.py`, `final_evaluations.py`, `verify_retrieval.py`, `run_frr.py`, `make_benchmark.py`, `make_comparison.py` |
-| `src/mindeye_ridge/` | biblioteca: `utils`, `models` e `modeling_git` (do MindEye2) e o que foi acrescentado — `paths`, `nsd_data`, `clip_targets`, `frr`, `embedding_metrics` |
+| `src/` | MindEye2 e FRR: `train_ridgeonly.py`, `recon_inference.py`, `enhanced_recon_inference.py`, `final_evaluations.py`, `verify_retrieval.py`, `run_frr.py`, `make_benchmark.py`, `make_comparison.py`; treino com dataset controlado: `experimentos.py` (os dicionários) e `treina.py` |
+| `src/mindeye_ridge/` | biblioteca: `utils`, `models` e `modeling_git` (do MindEye2) e o que foi acrescentado — `paths`, `nsd_data`, `clip_targets`, `frr`, `embedding_metrics`, `semantica` (fração da tela e rótulos), `dataset_controlado` (subconjuntos de treino) |
 | `src/report/` | código da página do benchmark e do `BENCHMARK.md` |
 | `src/generative_models/`, `src/autoencoder/` | código de terceiros usado como está (Stability AI; ConvNeXt) |
 | `mindeye1/` | MindEye1: `src/` (código original + ajustes marcados `# benchmark-modelos`), `download.py`, `README-original.md` |
@@ -147,7 +187,8 @@ ficam fora do git: num clone novo, sem eles, a página sai sem a galeria e sem a
 | `setup/` | preparam a máquina: `bootstrap.sh` (tudo de uma vez), `setup_env.sh` (ambiente), `download_data.py` (dados do MindEye2), `restore_ckpt.py` |
 | `docs/` | [SETUP.md](docs/SETUP.md) e [MINDEYE1.md](docs/MINDEYE1.md) (instalação e operação), [EXPERIMENTO.md](docs/EXPERIMENTO.md) (o que foi feito e por quê), [ESTAGIO.md](docs/ESTAGIO.md) (plano de estágio), `README-mindeye2-original.md` |
 | [BENCHMARK.md](BENCHMARK.md) | resultados (gerado pelo `make_benchmark.py`) |
-| `notebooks/`, `legacy/` | notebooks do MindEye2 original e scripts antigos, só de referência |
+| `notebooks/` | `classificacao_semantica.ipynb` (exploração dos rótulos semânticos); os outros são do MindEye2 original, só de referência |
+| `legacy/` | scripts antigos, só de referência |
 
 ## Licença
 
