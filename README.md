@@ -117,7 +117,9 @@ O jeito mais simples de treinar é o [`notebooks/treino.ipynb`](notebooks/treino
 treino é um dicionário com o modelo, os hiperparâmetros e o dataset, e os modelos já treinados do
 benchmark estão lá como exemplo (o dicionário `BENCHMARK` de `src/experimentos.py`, que reproduz o
 treino de cada um). Os scripts acima continuam valendo; o dicionário só chama o script certo com as
-variáveis certas.
+variáveis certas. Os notebooks rodam no ambiente do `setup_env.sh`: no VS Code, escolha
+`~/envs/fmri/bin/python` como kernel; no Jupyter, registre-o uma vez com
+`~/envs/fmri/bin/python -m ipykernel install --user --name fmri`.
 
 Os três modelos também treinam num subconjunto controlado do treino, em vez das N primeiras
 sessões. Cada experimento é um dicionário em `src/experimentos.py` (`EXPERIMENTOS`):
@@ -191,7 +193,7 @@ outro manifesto (`dataset.sha1` no diretório do modelo). O `run_benchmark.sh` e
 ## Resultados
 
 [BENCHMARK.md](BENCHMARK.md) traz as tabelas do MindEye2 (quatro ridge-only e os dois modelos do
-artigo), do FRR e do MindEye1 (1 e 40 sessões), todas com o mesmo pipeline e as mesmas métricas. `benchmark/index.html` é a
+artigo), do FRR e do MindEye1 (1 e 40 sessões), todas com o mesmo pipeline e as mesmas métricas. `results/benchmark/index.html` é a
 página completa (galeria de reconstruções, curvas de treino, ruído entre sementes; um arquivo
 só, abre offline). O MindEye1 não tem refinamento: a mesma reconstrução aparece nas duas
 abas e nas duas tabelas, e ele não entra nas métricas de legenda.
@@ -215,17 +217,14 @@ ficam fora do git: num clone novo, sem eles, a página sai sem a galeria e sem a
 | `src/report/` | código da página do benchmark e do `BENCHMARK.md` |
 | `src/generative_models/`, `src/autoencoder/` | código de terceiros usado como está (Stability AI; ConvNeXt) |
 | `mindeye1/` | MindEye1: `src/` (código original + ajustes marcados `# benchmark-modelos`), `download.py`, `README-original.md` |
-| `scripts/` | `run_*.sh` (MindEye2 e FRR), `me1_setup.sh`, `me1_run.sh` e `run_me1_benchmark.sh` (MindEye1); `common.sh` guarda caminhos e ambiente |
-| `results/` | `tables/` (métricas finais, no git), `metrics/`, `figs/`, `evals/` (tensores, fora do git) |
-| `benchmark/` | a página do benchmark |
+| `scripts/` | `run_*.sh` (MindEye2 e FRR), `me1_setup.sh`, `me1_run.sh` e `run_me1_benchmark.sh` (MindEye1); `common.sh` guarda caminhos e ambiente; utilitários: `me1_fake_data.py` (dados sintéticos do MindEye1), `inspect_ckpt.py` |
+| `results/` | tudo o que é gerado: `tables/` (métricas finais, no git), `benchmark/` (a página do benchmark, no git), `metrics/` e `figs/` (corridas antigas, no git), `evals/` (tensores) e `logs/` (logs dos scripts do benchmark), fora do git |
 | `tests/` | testes |
-| `tools/` | `me1_fake_data.py` (dados sintéticos do MindEye1), `inspect_ckpt.py` |
-| `train_logs/`, `mindeye1/train_logs/`, `logs/` | checkpoints e logs (fora do git) |
+| `train_logs/`, `mindeye1/train_logs/` | checkpoints e logs de treino, um diretório por modelo (fora do git) |
 | `setup/` | preparam a máquina: `bootstrap.sh` (tudo de uma vez), `setup_env.sh` (ambiente), `download_data.py` (dados do MindEye2), `restore_ckpt.py` |
-| `docs/` | [SETUP.md](docs/SETUP.md) e [MINDEYE1.md](docs/MINDEYE1.md) (instalação e operação), [EXPERIMENTO.md](docs/EXPERIMENTO.md) (o que foi feito e por quê), [ESTAGIO.md](docs/ESTAGIO.md) (plano de estágio), `README-mindeye2-original.md` |
+| `docs/` | [SETUP.md](docs/SETUP.md) e [MINDEYE1.md](docs/MINDEYE1.md) (instalação e operação), [EXPERIMENTO.md](docs/EXPERIMENTO.md) (o que foi feito e por quê), [ESTAGIO.md](docs/ESTAGIO.md) (plano de estágio) |
 | [BENCHMARK.md](BENCHMARK.md) | resultados (gerado pelo `make_benchmark.py`) |
-| `notebooks/` | `treino.ipynb` (como treinar: os modelos do benchmark e experimentos novos como dicionários), `classificacao_semantica.ipynb` (exploração dos rótulos semânticos); em `mindeye2_original/`, os notebooks do MindEye2, só de referência |
-| `legacy/` | scripts antigos, só de referência |
+| `notebooks/` | `treino.ipynb` (como treinar: os modelos do benchmark e experimentos novos como dicionários), `classificacao_semantica.ipynb` (exploração dos rótulos semânticos); em `mindeye2_original/`, os notebooks e o README do MindEye2, só de referência |
 
 ## Licença
 

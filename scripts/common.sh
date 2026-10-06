@@ -13,7 +13,7 @@ DATA="${MINDEYE_DATA:-$HOME/mindeyev2}"
 TRAIN_LOGS="$REPO/train_logs"
 EVALS="$REPO/results/evals"
 TABLES="$REPO/results/tables"
-LOGS="$REPO/logs"
+LOGS="$REPO/results/logs"
 
 export MINDEYE_DATA="$DATA"
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"

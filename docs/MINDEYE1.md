@@ -87,7 +87,7 @@ dicionário). Nesse caso `MODEL_NAME` é obrigatório, e o baixo nível passa a 
 | `Retrievals_testset.py` e `Reconstruction_Metrics.py` (pipeline original) | não testados; no benchmark, o retrieval e as métricas vêm do `final_evaluations.py`, como nos outros modelos |
 | Busca no LAION-5B (`Retrievals.py`, parte de cima) | **não roda em lugar nenhum**: o serviço `knn.laion.ai` saiu do ar com o LAION-5B |
 
-O tempo de treino foi medido com dados sintéticos (`tools/me1_fake_data.py`); com os shards reais
+O tempo de treino foi medido com dados sintéticos (`scripts/me1_fake_data.py`); com os shards reais
 a leitura pode ser mais lenta. A referência dos autores para o retrieval do modelo publicado está
 no próprio `Retrievals.py`: subj01, fwd 97,18 % e bwd 94,68 %. O código do MindEye1 calcula as duas
 direções como o do MindEye2 (o `batchwise_cosine_similarity` dos dois transpõe o resultado): fwd é
@@ -119,7 +119,7 @@ imagem → cérebro (cada imagem procura o seu cérebro entre 300) e bwd, céreb
 | `train_autoencoder.py` | opção com tipo errado na linha de comando era ignorada em silêncio; agora para o script |
 | `me1_run.sh` | `MPLBACKEND=Agg`: o `Reconstructions.py` chama `plt.show()` na 1ª imagem, e numa máquina com tela o backend TkAgg trava esperando a janela fechar |
 
-Para testar o treino sem baixar os 39 GB: `tools/me1_fake_data.py <pasta>` cria shards sintéticos
+Para testar o treino sem baixar os 39 GB: `scripts/me1_fake_data.py <pasta>` cria shards sintéticos
 no formato real (ruído; só servem para medir memória e tempo), e
 `ME1_DATA=<pasta> scripts/me1_run.sh train --num_epochs=3 --no-ckpt_saving` roda 3 épocas
 (o `OneCycleLR` exige pelo menos 3).

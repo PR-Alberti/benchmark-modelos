@@ -11,7 +11,7 @@ from mindeye_ridge import paths
 
 class Paths(unittest.TestCase):
     def test_raiz_tem_o_layout_esperado(self):
-        for d in ("src", "scripts", "tests", "results", "legacy", "notebooks"):
+        for d in ("src", "scripts", "setup", "tests", "results", "notebooks", "docs"):
             self.assertTrue((paths.REPO / d).is_dir(), d)
         self.assertEqual(paths.SRC, paths.REPO / "src")
         self.assertTrue((paths.SRC / "mindeye_ridge" / "paths.py").exists())

@@ -16,7 +16,7 @@ def markdown(dados, args):
          "que não usa rede nenhuma e com o MindEye1 treinado do zero. Mesmo teste (1.000 imagens), mesmo pipeline de reconstrução e "
          "mesmas métricas para todos.", "",
          "A versão completa, com a galeria de reconstruções, curvas de treino e seletor "
-         "refinada/unCLIP, está em [benchmark/index.html](benchmark/index.html) — um arquivo "
+         "refinada/unCLIP, está em [results/benchmark/index.html](results/benchmark/index.html) — um arquivo "
          "só, abre offline.", "",
          f"Gerado por `src/make_benchmark.py` em {datetime.datetime.now():%d/%m/%Y %H:%M} "
          f"(commit `{commit()}`).", "", "## Modelos", "",
@@ -126,8 +126,8 @@ def markdown(dados, args):
     L += ["",
           "## Galeria", "",
           "Refinadas, os mesmos estímulos para todos os modelos (a página tem mais, e as unCLIP e blurry):",
-          "", "![Galeria de reconstruções refinadas](benchmark/galeria_refinadas.jpg)", "",
-          "![Galeria de reconstruções unCLIP](benchmark/galeria_unclip.jpg)", ""]
+          "", "![Galeria de reconstruções refinadas](results/benchmark/galeria_refinadas.jpg)", "",
+          "![Galeria de reconstruções unCLIP](results/benchmark/galeria_unclip.jpg)", ""]
     return "\n".join(L)
 
 
