@@ -8,7 +8,7 @@ decodificação de imagética visual. A meta é uma lei de escala: como a quanti
 depende do nível de informação desejado e do modelo.
 
 Esta branch (`estagio`) é onde essa análise acontece. A tabela diz o que já existe; os números
-estão no [BENCHMARK.md](BENCHMARK.md), e o que foi feito e por quê, no [EXPERIMENTO.md](EXPERIMENTO.md).
+estão no [BENCHMARK.md](../BENCHMARK.md), e o que foi feito e por quê, no [EXPERIMENTO.md](EXPERIMENTO.md).
 
 ## Dados
 
@@ -26,7 +26,7 @@ estão no [BENCHMARK.md](BENCHMARK.md), e o que foi feito e por quê, no [EXPERI
 | Modelo não linear por sujeito, da literatura | **pendente** | Falta escolher por relevância e reprodutibilidade, e implementar |
 | MindEye2 simplificado (sem reconstrução de baixo nível e sem unCLIP), pré-treinado e adaptado ao sujeito | feito | Os ridge-only de 1024 (`scripts/run_ridgeonly_prior.sh`): só a ridge do sujeito é treinada, a partir do pré-treino nos outros 7 sujeitos |
 | Quais componentes do MindEye2 ficam mantidos, congelados ou retreinados | feito | [EXPERIMENTO.md](EXPERIMENTO.md): backbone e prior congelados, ridge treinada (2,21% dos parâmetros); o 4096 + blurry mantém o ramo de baixo nível |
-| Custo computacional e tempo de treino como dimensão de complexidade | parcial | Tempo de treino dos ridge-only e custo do FRR (tempo, GPU, RAM) no [BENCHMARK.md](BENCHMARK.md). Falta padronizar a medida entre famílias |
+| Custo computacional e tempo de treino como dimensão de complexidade | parcial | Tempo de treino dos ridge-only e custo do FRR (tempo, GPU, RAM) no [BENCHMARK.md](../BENCHMARK.md). Falta padronizar a medida entre famílias |
 
 ## Comparação
 

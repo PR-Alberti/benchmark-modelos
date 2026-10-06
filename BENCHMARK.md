@@ -4,7 +4,7 @@ MindEye2, sujeito 1 do NSD. Quatro variações do fine-tune só da camada ridge,
 
 A versão completa, com a galeria de reconstruções, curvas de treino e seletor refinada/unCLIP, está em [benchmark/index.html](benchmark/index.html) — um arquivo só, abre offline.
 
-Gerado por `src/make_benchmark.py` em 05/10/2026 09:18 (commit `ff7744a`).
+Gerado por `src/make_benchmark.py` em 06/10/2026 07:41 (commit `16307d6`).
 
 ## Modelos
 

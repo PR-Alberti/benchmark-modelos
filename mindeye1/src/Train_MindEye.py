@@ -169,7 +169,7 @@ parser.add_argument(
     "--vd_cache_dir", type=str, default='/fsx/proj-medarc/fmri/cache/models--shi-labs--versatile-diffusion/snapshots/2926f8e11ea526b562cd592b099fcf9c2985d0b7',
     help="Where is cached Versatile Diffusion model; if not cached will download to this path",
 )
-# benchmark-modelos: as duas opcoes abaixo fazem o treino caber numa GPU de 20 GB (ver MINDEYE1.md)
+# benchmark-modelos: as duas opcoes abaixo fazem o treino caber numa GPU de 20 GB (ver docs/MINDEYE1.md)
 parser.add_argument(
     "--adam8bit",action=argparse.BooleanOptionalAction,default=False,
     help="AdamW de 8 bits (bitsandbytes): estados do otimizador em 2 GB em vez de 8. Muda o treino em relacao ao artigo",

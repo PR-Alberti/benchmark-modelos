@@ -2,10 +2,10 @@
 # =============================================================================
 # setup_env.sh - cria o ambiente Python para rodar o MindEye2.
 #
-#   ./setup_env.sh                      # cria em ~/envs/fmri com conda
-#   ./setup_env.sh --path /outro/lugar  # escolhe onde criar
-#   ./setup_env.sh --venv               # usa python3.11 -m venv em vez de conda
-#   ./setup_env.sh --with-extras        # inclui os pacotes do final_evaluations
+#   setup/setup_env.sh                      # cria em ~/envs/fmri com conda
+#   setup/setup_env.sh --path /outro/lugar  # escolhe onde criar
+#   setup/setup_env.sh --venv               # usa python3.11 -m venv em vez de conda
+#   setup/setup_env.sh --with-extras        # inclui os pacotes do final_evaluations
 #
 # Baseado no setup.sh do repo original (legacy/setup.sh), com quatro ajustes necessarios em
 # maquinas atuais (cada um esta comentado abaixo, na secao "correcoes").
@@ -82,15 +82,13 @@ echo "==> aplicando correcoes de compatibilidade"
 
 echo
 echo "==> verificando a instalacao"
-"$ENV_PATH/bin/python" - <<'PY'
+REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)" "$ENV_PATH/bin/python" - <<'PY'
 import warnings; warnings.filterwarnings("ignore")
 import os, sys
 import torch, numpy, h5py, webdataset, open_clip, transformers, diffusers, accelerate, kornia
 import clip, dalle2_pytorch, deepspeed
 
-src = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0] or ".")), "src")
-if not os.path.isdir(src):
-    src = os.path.join(os.getcwd(), "src")
+src = os.path.join(os.environ["REPO_DIR"], "src")
 if os.path.isdir(src):
     sys.path.insert(0, src)
     sys.path.insert(0, os.path.join(src, "generative_models"))
@@ -112,5 +110,5 @@ echo "=========================================================="
 echo " Ambiente pronto: $ENV_PATH"
 echo " Para usar:  $ENV_PATH/bin/python ..."
 echo "        ou:  source $ENV_PATH/bin/activate"
-echo " Proximo passo:  ./download_data.py --help"
+echo " Proximo passo:  setup/download_data.py --help"
 echo "=========================================================="

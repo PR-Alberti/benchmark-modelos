@@ -2,16 +2,16 @@
 # =============================================================================
 # bootstrap.sh - deixa uma maquina nova pronta para rodar o MindEye2.
 #
-#   ./bootstrap.sh --check        so diagnostica: o que ja existe, o que falta
-#   ./bootstrap.sh                ambiente + dados de treino  (~30 GB)
-#   ./bootstrap.sh --all          ambiente + todos os dados   (~62 GB)
-#   ./bootstrap.sh --all --ckpts  + os checkpoints ja treinados (nao precisa treinar)
+#   setup/bootstrap.sh --check        so diagnostica: o que ja existe, o que falta
+#   setup/bootstrap.sh                ambiente + dados de treino  (~30 GB)
+#   setup/bootstrap.sh --all          ambiente + todos os dados   (~62 GB)
+#   setup/bootstrap.sh --all --ckpts  + os checkpoints ja treinados (nao precisa treinar)
 #
 # Cada etapa e idempotente: pode interromper e rodar de novo que ele continua
-# de onde parou. Detalhes de tudo que e instalado estao no SETUP.md.
+# de onde parou. Detalhes de tudo que e instalado estao no docs/SETUP.md.
 # =============================================================================
 set -uo pipefail
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."   # raiz do repositorio
 
 ENV_PATH="${ENV_PATH:-$HOME/envs/fmri}"
 DATA_PATH="${DATA_PATH:-$HOME/mindeyev2}"
@@ -61,7 +61,7 @@ fi
 
 livre_gb=$(df -BG --output=avail "$HOME" | tail -1 | tr -dc '0-9')
 if [[ ${livre_gb:-0} -ge 85 ]]; then ok "disco livre: ${livre_gb} GB"
-else falta "disco livre: ${livre_gb} GB (recomendado 85 GB; veja a conta no SETUP.md)"; fi
+else falta "disco livre: ${livre_gb} GB (recomendado 85 GB; veja a conta no docs/SETUP.md)"; fi
 
 if command -v conda >/dev/null 2>&1; then ok "conda: $(conda --version)"
 elif command -v python3.11 >/dev/null 2>&1; then ok "python3.11 (sera usado com --venv)"
@@ -81,7 +81,7 @@ else
     echo "  criando (~15 min)..."
     args=(--with-extras --path "$ENV_PATH")
     command -v conda >/dev/null 2>&1 || args+=(--venv)
-    if ./setup_env.sh "${args[@]}"; then ok "ambiente criado"; else erro "setup_env.sh falhou"; exit 1; fi
+    if setup/setup_env.sh "${args[@]}"; then ok "ambiente criado"; else erro "setup_env.sh falhou"; exit 1; fi
 fi
 
 # --- 3. dados -----------------------------------------------------------------
@@ -98,10 +98,10 @@ if ! "$PY" -c "import huggingface_hub" >/dev/null 2>&1; then
 fi
 
 if [[ $CHECK_ONLY -eq 1 ]]; then
-    "$PY" download_data.py --stage "${STAGES[@]}" --subj 1 --num-sessions 1 \
+    "$PY" setup/download_data.py --stage "${STAGES[@]}" --subj 1 --num-sessions 1 \
         --data-path "$DATA_PATH" --dry-run 2>&1 | sed 's/^/  /'
 else
-    if "$PY" download_data.py --stage "${STAGES[@]}" --subj 1 --num-sessions 1 \
+    if "$PY" setup/download_data.py --stage "${STAGES[@]}" --subj 1 --num-sessions 1 \
            --data-path "$DATA_PATH" 2>&1 | sed 's/^/  /'; then
         ok "dados no lugar"
     else
@@ -169,7 +169,7 @@ fi
 titulo "Pronto"
 
 if [[ $CHECK_ONLY -eq 1 ]]; then
-    echo "  Diagnostico apenas. Para preparar de verdade:  ./bootstrap.sh --all --ckpts"
+    echo "  Diagnostico apenas. Para preparar de verdade:  setup/bootstrap.sh --all --ckpts"
     exit 0
 fi
 
@@ -184,5 +184,5 @@ cat <<FIM
       scripts/run_recon.sh subj01_ridgeonly_1sess_prior 1024 noblurry
       scripts/run_evals.sh subj01_ridgeonly_1sess_prior enhanced
 
-  Tudo explicado em SETUP.md.
+  Tudo explicado em docs/SETUP.md.
 FIM

@@ -1,6 +1,6 @@
 #!/bin/bash
 # MindEye1 no benchmark: treina, reconstroi e avalia com 1 e com 40 sessoes, nas mesmas exibicoes
-# de treino e no mesmo teste dos outros modelos (MINDEYE1.md, "No benchmark").
+# de treino e no mesmo teste dos outros modelos (docs/MINDEYE1.md, "No benchmark").
 #
 #   scripts/run_me1_benchmark.sh              tudo, 1 sessao primeiro (~37 h numa A4500)
 #   SESSOES="1" scripts/run_me1_benchmark.sh  so 1 sessao (~5 h)

@@ -6,7 +6,7 @@
 #
 # O MindEye1 foi escrito para torch 2.0.1 / diffusers 0.13 / accelerate 0.19; roda no
 # ambiente do MindEye2 (torch 2.1, diffusers 0.23, accelerate 0.24) com os ajustes descritos
-# no MINDEYE1.md. Faltam so:
+# no docs/MINDEYE1.md. Faltam so:
 #   info-nce-pytorch, pytorch-msssim   importados pelo utils.py do MindEye1
 #   bitsandbytes 0.43.3                Adam de 8 bits, para o treino caber em 20 GB
 #

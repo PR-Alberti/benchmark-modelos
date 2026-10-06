@@ -8,11 +8,11 @@ avaliação para todos. Três modelos:
 |---|---|---|---|
 | **MindEye2** | MLP + diffusion prior → CLIP ViT-bigG, imagem por SDXL unCLIP ([Scotti et al., 2024](https://arxiv.org/abs/2403.11207)). Aqui: fine-tune só da camada ridge (1 e 40 sessões) e os modelos publicados | `src/` | treinado, reconstruído e avaliado — [BENCHMARK.md](BENCHMARK.md) |
 | **FRR** | regressão ridge fracionária, linear, dos voxels direto para o embedding CLIP ([Rokem & Kay, 2020](https://doi.org/10.1093/gigascience/giaa133); como em Doerig et al., 2025) | `src/run_frr.py`, `src/mindeye_ridge/frr.py` | rodado com 1 e 40 sessões — [BENCHMARK.md](BENCHMARK.md) |
-| **MindEye1** | MLP + diffusion prior → CLIP ViT-L/14, imagem por Versatile Diffusion ([Scotti et al., 2023](https://arxiv.org/abs/2305.18274)). Aqui: treinado do zero com 1 e 40 sessões, nos mesmos dados dos outros | `mindeye1/` | adaptado para 20 GB; treinado, reconstruído e avaliado com 1 e 40 sessões — [BENCHMARK.md](BENCHMARK.md), [MINDEYE1.md](MINDEYE1.md) |
+| **MindEye1** | MLP + diffusion prior → CLIP ViT-L/14, imagem por Versatile Diffusion ([Scotti et al., 2023](https://arxiv.org/abs/2305.18274)). Aqui: treinado do zero com 1 e 40 sessões, nos mesmos dados dos outros | `mindeye1/` | adaptado para 20 GB; treinado, reconstruído e avaliado com 1 e 40 sessões — [BENCHMARK.md](BENCHMARK.md), [MINDEYE1.md](docs/MINDEYE1.md) |
 
 Este repositório junta o trabalho de [`mindeye2-ridge`](https://github.com/PR-Alberti/mindeye2-ridge)
 (que guarda o histórico completo do MindEye2 e do FRR) com o MindEye1. O que falta do plano de
-estágio está em [ESTAGIO.md](ESTAGIO.md).
+estágio está em [ESTAGIO.md](docs/ESTAGIO.md).
 
 ## Requisitos
 
@@ -32,8 +32,8 @@ MindEye2, que o FRR também usa:
 ```bash
 git clone https://github.com/PR-Alberti/benchmark-modelos.git
 cd benchmark-modelos
-./bootstrap.sh --check     # diagnóstico: GPU, ambiente, dados; não baixa nada
-./bootstrap.sh --all       # ambiente + os 62 GB de dados do MindEye2 (horas, quase tudo download)
+setup/bootstrap.sh --check     # diagnóstico: GPU, ambiente, dados; não baixa nada
+setup/bootstrap.sh --all       # ambiente + os 62 GB de dados do MindEye2 (horas, quase tudo download)
 ```
 
 Depois, o que o MindEye1 precisa a mais:
@@ -45,8 +45,8 @@ mindeye1/download.py --stage train              # só para treinar: + 39 GB
 ```
 
 Tudo é idempotente: interrompa e rode de novo que continua. Bibliotecas, cada arquivo baixado,
-onde fica e os erros conhecidos estão no [SETUP.md](SETUP.md) (MindEye2 e FRR) e no
-[MINDEYE1.md](MINDEYE1.md).
+onde fica e os erros conhecidos estão no [SETUP.md](docs/SETUP.md) (MindEye2 e FRR) e no
+[MINDEYE1.md](docs/MINDEYE1.md).
 
 Os caminhos padrão podem ser trocados por variáveis de ambiente:
 
@@ -62,7 +62,7 @@ Todos os scripts rodam de qualquer diretório.
 
 ### MindEye2 (ridge-only)
 
-Precisa de: `./bootstrap.sh --all` (ou `download_data.py --stage finetune recon enhanced evals --subj 1`).
+Precisa de: `setup/bootstrap.sh --all` (ou `setup/download_data.py --stage finetune recon enhanced evals --subj 1`).
 
 ```bash
 scripts/run_ridgeonly_prior.sh                                   # treino, 1 sessão (~1h50)
@@ -70,21 +70,21 @@ scripts/run_recon.sh subj01_ridgeonly_1sess_prior 1024 noblurry  # reconstruçõ
 scripts/run_evals.sh subj01_ridgeonly_1sess_prior enhanced       # métricas
 ```
 
-40 sessões (~8 h de treino; precisa de `download_data.py --stage finetune --subj 1`, sem limitar
+40 sessões (~8 h de treino; precisa de `setup/download_data.py --stage finetune --subj 1`, sem limitar
 as sessões):
 
 ```bash
 MODEL_NAME=subj01_ridgeonly_40sess_prior NUM_SESSIONS=40 NUM_EPOCHS=20 FROZEN=1 scripts/run_ridgeonly_prior.sh
 ```
 
-Sem treinar: `./bootstrap.sh --ckpts` baixa os checkpoints treinados do release `checkpoints-v1` de
+Sem treinar: `setup/bootstrap.sh --ckpts` baixa os checkpoints treinados do release `checkpoints-v1` de
 `mindeye2-ridge` (repositório privado: precisa estar logado no GitHub). Os modelos publicados no
-artigo vêm de `download_data.py --stage paper paper40`.
+artigo vêm de `setup/download_data.py --stage paper paper40`.
 
 ### FRR
 
 Precisa de: os dados de treino do MindEye2 e as imagens de teste
-(`download_data.py --stage train evals --subj 1`, que já traz as 40 sessões).
+(`setup/download_data.py --stage train evals --subj 1`, que já traz as 40 sessões).
 Não tem treino por gradiente: a validação cruzada e o ajuste final rodam de uma vez.
 
 ```bash
@@ -94,7 +94,7 @@ NUM_SESSIONS=40 scripts/run_frr.sh       # 40 sessões (~30 min; ~25 GB de RAM)
 
 Na primeira execução calcula os embeddings CLIP das imagens de treino (8 GB, ~3 min) e os guarda
 em `$MINDEYE_DATA/clip_targets/`. Só produz o embedding, então só o retrieval é comparável com os
-outros modelos. Detalhes no [SETUP.md](SETUP.md#frr-baseline-linear-plano-de-estágio).
+outros modelos. Detalhes no [SETUP.md](docs/SETUP.md#frr-baseline-linear-plano-de-estágio).
 
 ### MindEye1
 
@@ -110,7 +110,7 @@ NUM_SESSIONS=1 scripts/me1_run.sh train    # uma etapa: train | lowlevel | recon
 
 O treino como no artigo (batch 32, AdamW) não cabe em 20 GB; aqui ele usa batch 16 e Adam de
 8 bits, o que muda o treino. O protocolo do benchmark, os ajustes e as medições de memória e tempo
-estão no [MINDEYE1.md](MINDEYE1.md). Sem `NUM_SESSIONS`, o `me1_run.sh` roda o MindEye1 original
+estão no [MINDEYE1.md](docs/MINDEYE1.md). Sem `NUM_SESSIONS`, o `me1_run.sh` roda o MindEye1 original
 (dados do `webdataset_avg_split`, modelos publicados).
 
 ## Resultados
@@ -145,12 +145,11 @@ ficam fora do git: num clone novo, sem eles, a página sai sem a galeria e sem a
 | `benchmark/` | a página do benchmark |
 | `tests/` | testes |
 | `tools/` | `me1_fake_data.py` (dados sintéticos do MindEye1), `inspect_ckpt.py` |
-| `train_logs/`, `mindeye1/train_logs/` | checkpoints e logs (fora do git) |
+| `train_logs/`, `mindeye1/train_logs/`, `logs/` | checkpoints e logs (fora do git) |
+| `setup/` | preparam a máquina: `bootstrap.sh` (tudo de uma vez), `setup_env.sh` (ambiente), `download_data.py` (dados do MindEye2), `restore_ckpt.py` |
+| `docs/` | [SETUP.md](docs/SETUP.md) e [MINDEYE1.md](docs/MINDEYE1.md) (instalação e operação), [EXPERIMENTO.md](docs/EXPERIMENTO.md) (o que foi feito e por quê), [ESTAGIO.md](docs/ESTAGIO.md) (plano de estágio), `README-mindeye2-original.md` |
+| [BENCHMARK.md](BENCHMARK.md) | resultados (gerado pelo `make_benchmark.py`) |
 | `notebooks/`, `legacy/` | notebooks do MindEye2 original e scripts antigos, só de referência |
-| `bootstrap.sh`, `setup_env.sh`, `download_data.py` | preparam a máquina para o MindEye2 e o FRR |
-| [SETUP.md](SETUP.md) · [MINDEYE1.md](MINDEYE1.md) | instalação e operação em detalhe |
-| [BENCHMARK.md](BENCHMARK.md) · [EXPERIMENTO.md](EXPERIMENTO.md) · [ESTAGIO.md](ESTAGIO.md) | resultados, o que foi feito e por quê, e o plano de estágio |
-| `README-original.md`, `mindeye1/README-original.md` | READMEs dos repositórios originais |
 
 ## Licença
 

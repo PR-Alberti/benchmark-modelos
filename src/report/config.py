@@ -16,7 +16,7 @@ MODELOS = [
     dict(id="subj01_frr_40sess", rotulo="FRR · 40 sessões", frr=True, grupo=40, sessoes=40, hidden=None,
          blurry=False, prior="sem prior, sem rede",
          treino="20 frações · CV 5 dobras · uma fração por dimensão", partida=None),
-    # MindEye1 treinado do zero nas mesmas sessoes e testado no mesmo teste (MINDEYE1.md). Nao tem
+    # MindEye1 treinado do zero nas mesmas sessoes e testado no mesmo teste (docs/MINDEYE1.md). Nao tem
     # refinamento: a reconstrucao final (Versatile Diffusion + img2img da borrada) entra nas duas abas
     dict(id="subj01_me1_1sess", rotulo="MindEye1 · 1 sessão", me1=True, grupo=1, sessoes=1, hidden=4096,
          blurry=True, prior="do zero, com o prior", baixo="subj01_me1_lowlevel_1sess",
