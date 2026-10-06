@@ -575,7 +575,7 @@ def pagina(dados, args):
             autocast já faz, para caber em 20 GB.</li>
           <li>Uma corrida por modelo, semente 42. A régua de ruído está na seção
             <a href="#ruido">Quanto é ruído</a>. A diferença de cerca de 1 ponto entre as duas
-            corridas do 4096 + blurry descrita no EXPERIMENTO.md não era ruído: com o mesmo código,
+            corridas do 4096 + blurry descrita no docs/EXPERIMENTO.md não era ruído: com o mesmo código,
             a corrida se repete exatamente, e entre aquelas duas o código mudou (o conserto do
             ColorJitter em fp16 entrou pouco antes da segunda).</li>
           <li>As métricas do 1024 + prior foram recalculadas sobre os tensores do release. As das

@@ -10,7 +10,7 @@ comecem alinhados em 64 bytes, coisa que o zipfile do Python nao faz. O jeito
 certo e ler as storages e deixar o proprio torch gravar de novo, que e o que
 este script faz.
 
-    ./restore_ckpt.py pasta_do_checkpoint/ -o train_logs/meu_modelo/last.pth
+    setup/restore_ckpt.py pasta_do_checkpoint/ -o train_logs/meu_modelo/last.pth
 
 Se a pasta ja for um .pth valido, ele avisa e nao faz nada.
 """

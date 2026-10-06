@@ -21,7 +21,7 @@ gerador diferente. O retrieval do MindEye1 é medido do mesmo jeito (top-1 entre
 
 ## Instalação
 
-Pré-requisito: o ambiente e os dados do MindEye2 (`./bootstrap.sh`, veja o [SETUP.md](SETUP.md)).
+Pré-requisito: o ambiente e os dados do MindEye2 (`setup/bootstrap.sh`, veja o [SETUP.md](SETUP.md)).
 O MindEye1 usa o mesmo ambiente `~/envs/fmri`; nada do MindEye2 muda.
 
 ```bash

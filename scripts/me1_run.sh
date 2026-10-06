@@ -17,7 +17,7 @@
 #
 # Variaveis: MODEL_NAME, AE_NAME (trocam os nomes), PAPER=1 (treino com batch 32 e AdamW normal,
 # como no artigo: nao cabe numa GPU de 20 GB), SAVE_EVERY (grava o last.pth a cada N epocas).
-# Treinos interrompidos retomam do last.pth. Antes: scripts/me1_setup.sh. Detalhes no MINDEYE1.md.
+# Treinos interrompidos retomam do last.pth. Antes: scripts/me1_setup.sh. Detalhes no docs/MINDEYE1.md.
 set -e
 set -o pipefail
 source "$(dirname "$0")/common.sh"

@@ -316,7 +316,7 @@ de baixo nível.
 Em 30/09/2026 os quatro braços ridge-only e os dois modelos publicados no artigo
 (1 e 40 sessões) passaram pelo mesmo pipeline, com a mesma semente:
 reconstrução, refinamento e as métricas do `final_evaluations.py`. Tabelas em
-[BENCHMARK.md](BENCHMARK.md); galeria de reconstruções lado a lado, curvas de
+[BENCHMARK.md](../BENCHMARK.md); galeria de reconstruções lado a lado, curvas de
 treino e ruído em `benchmark/index.html`. Para refazer tudo:
 `./scripts/run_benchmark.sh` (~50 h numa A4500).
 
@@ -393,7 +393,7 @@ As tabelas da primeira rodada estão em `results/tables/pre_benchmark/`.
 O plano de estágio pede, entre as famílias de modelos, "um modelo linear por sujeito, provavelmente
 Fractional Ridge Regression (FRR), seguindo Doerig et al.". É o ponto mais simples da escala de
 complexidade: sem rede, sem prior, sem reconstrução, e com a mesma entrada, o mesmo treino e o mesmo
-teste do ridge-only. Os números completos estão no [BENCHMARK.md](BENCHMARK.md) e o que falta do
+teste do ridge-only. Os números completos estão no [BENCHMARK.md](../BENCHMARK.md) e o que falta do
 plano, no [ESTAGIO.md](ESTAGIO.md).
 
 ### O modelo

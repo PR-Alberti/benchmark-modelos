@@ -5,16 +5,16 @@ Os arquivos sao agrupados por etapa do pipeline, para nao baixar 100+ GB quando
 so se quer treinar. Exemplos:
 
     # so o necessario para treinar do zero (wds + betas + imagens COCO)
-    ./download_data.py --stage train --subj 1
+    setup/download_data.py --stage train --subj 1
 
     # fine-tune a partir do checkpoint multi-sujeito (protocolo do paper)
-    ./download_data.py --stage finetune --subj 1
+    setup/download_data.py --stage finetune --subj 1
 
     # gerar reconstrucoes de imagem depois de treinar
-    ./download_data.py --stage recon
+    setup/download_data.py --stage recon
 
     # so listar o que falta, sem baixar nada
-    ./download_data.py --stage finetune --subj 1 --dry-run
+    setup/download_data.py --stage finetune --subj 1 --dry-run
 
 Aceita varias etapas de uma vez: --stage train recon evals
 """
@@ -122,7 +122,7 @@ def main():
     try:
         from huggingface_hub import HfApi, hf_hub_download
     except ImportError:
-        sys.exit("huggingface_hub nao instalado. Rode ./setup_env.sh primeiro,\n"
+        sys.exit("huggingface_hub nao instalado. Rode setup/setup_env.sh primeiro,\n"
                  "ou instale so ele com: pip install huggingface_hub")
 
     # monta a lista de arquivos, sem duplicatas, preservando a ordem

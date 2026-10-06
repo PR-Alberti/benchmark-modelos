@@ -39,7 +39,7 @@ O `setup_env.sh` cria um ambiente 3.11 isolado, então a versão do sistema não
 
 ```bash
 git clone https://github.com/PR-Alberti/benchmark-modelos.git
-cd benchmark-modelos && ./bootstrap.sh --all --ckpts
+cd benchmark-modelos && setup/bootstrap.sh --all --ckpts
 ```
 
 É isso. O `bootstrap.sh` cria o ambiente, baixa os 62 GB de dados e traz os
@@ -48,7 +48,7 @@ checkpoints já treinados. Leva algumas horas, quase tudo em download.
 **Antes de começar**, se quiser só ver o que falta na máquina sem baixar nada:
 
 ```bash
-./bootstrap.sh --check
+setup/bootstrap.sh --check
 ```
 
 Ele imprime, seção por seção, o que já existe e o que falta — incluindo um
@@ -59,10 +59,10 @@ barramento PCI" (os dois se parecem, e a diferença muda completamente o que faz
 
 | Comando | O que faz |
 |---|---|
-| `./bootstrap.sh` | ambiente + dados de treino (~30 GB) |
-| `./bootstrap.sh --all` | ambiente + todos os dados (~62 GB) |
-| `./bootstrap.sh --all --ckpts` | + os modelos já treinados, para rodar sem treinar |
-| `./bootstrap.sh --check` | só diagnostica, não baixa nada |
+| `setup/bootstrap.sh` | ambiente + dados de treino (~30 GB) |
+| `setup/bootstrap.sh --all` | ambiente + todos os dados (~62 GB) |
+| `setup/bootstrap.sh --all --ckpts` | + os modelos já treinados, para rodar sem treinar |
+| `setup/bootstrap.sh --check` | só diagnostica, não baixa nada |
 | `--env-path X` / `--data-path Y` | muda onde o ambiente e os dados ficam |
 
 Toda etapa é idempotente: pode interromper com Ctrl+C e rodar de novo que ele
@@ -73,8 +73,8 @@ continua de onde parou.
 O `bootstrap.sh` só encadeia estes dois, que continuam funcionando sozinhos:
 
 ```bash
-./setup_env.sh --with-extras       # ambiente Python (~15 min)
-./download_data.py --stage finetune recon enhanced evals paper --subj 1 --num-sessions 1
+setup/setup_env.sh --with-extras       # ambiente Python (~15 min)
+setup/download_data.py --stage finetune recon enhanced evals paper --subj 1 --num-sessions 1
 ```
 
 O `setup_env.sh` termina imprimindo o que encontrou — confira que a GPU aparece:
@@ -96,7 +96,7 @@ repositório é público).
 
 ## 3. Todas as bibliotecas
 
-Tudo isto é instalado pelo `./setup_env.sh`. A tabela existe para você saber o que
+Tudo isto é instalado pelo `setup/setup_env.sh`. A tabela existe para você saber o que
 está lá dentro e conseguir remontar na mão, se precisar.
 
 ### 3.1 Stack principal
@@ -144,7 +144,7 @@ pip install sentence-transformers==2.5.1 evaluate==0.4.1 nltk==3.8.1 \
     rouge_score==0.1.2 "datasets==2.16.1" umap-learn
 ```
 
-Instalados por `./setup_env.sh --with-extras`. Dois detalhes:
+Instalados por `setup/setup_env.sh --with-extras`. Dois detalhes:
 
 - `datasets` fica em 2.x porque a série 5.x exige `huggingface_hub>=0.25`, que quebra o `diffusers` 0.23.0.
 - o `setup.sh` original (agora em `legacy/`) pede `umap==0.1.1`, que não existe mais no PyPI; `umap-learn` fornece o mesmo módulo `umap`.
@@ -232,22 +232,26 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 ```
 ~/benchmark-modelos/             ← este repositório (código)
 ├── README.md                    o que é e como rodar
-├── SETUP.md                     este arquivo
-├── MINDEYE1.md                  instalação e ajustes do MindEye1
-├── EXPERIMENTO.md               o que foi feito e por quê
 ├── BENCHMARK.md                 tabelas do benchmark (gerado)
-├── README-original.md           README do MindEye2, como referência
-├── bootstrap.sh                 prepara a máquina inteira (chama os dois abaixo)
-├── setup_env.sh                 cria o ambiente Python
-├── download_data.py             baixa os arquivos da seção 4.1
-├── restore_ckpt.py              conserta .pth que o Drive descompactou (seção 7)
+├── docs/
+│   ├── SETUP.md                 este arquivo
+│   ├── MINDEYE1.md              instalação, ajustes e protocolo do MindEye1
+│   ├── EXPERIMENTO.md           o que foi feito e por quê
+│   ├── ESTAGIO.md               plano de estágio: o que já está feito
+│   └── README-mindeye2-original.md   README do MindEye2, como referência
+├── setup/
+│   ├── bootstrap.sh             prepara a máquina inteira (chama os dois abaixo)
+│   ├── setup_env.sh             cria o ambiente Python
+│   ├── download_data.py         baixa os arquivos da seção 4.1
+│   └── restore_ckpt.py          conserta .pth que o Drive descompactou (seção 7)
 ├── scripts/
 │   ├── common.sh                caminhos e ambiente, lidos por todos os run_*.sh
 │   ├── run_ridgeonly_prior.sh   treino (fine-tune só da camada ridge)
 │   ├── run_recon.sh             reconstruções (recon + refinamento)
 │   ├── run_evals.sh             métricas finais
 │   ├── run_frr.sh               baseline linear FRR
-│   ├── me1_setup.sh  me1_run.sh   MindEye1: preparação e execução (MINDEYE1.md)
+│   ├── me1_setup.sh  me1_run.sh   MindEye1: preparação e uma etapa por vez (MINDEYE1.md)
+│   ├── run_me1_benchmark.sh     MindEye1 no benchmark: 1 e 40 sessões, do treino às métricas
 │   └── run_benchmark.sh         roda tudo o que o benchmark precisa (seção 6)
 ├── mindeye1/                    MindEye1: src/ (código original + ajustes), download.py,
 │                                train_logs/ (links e saídas, fora do git)
@@ -432,9 +436,8 @@ sobrevive o que está no GitHub.**
 
 ### O que já está seguro (não precisa backup)
 
-Tudo que é código está no repositório: `src/`, `scripts/`, `tests/`, `bootstrap.sh`,
-`setup_env.sh`, `download_data.py`, este guia e as tabelas de métricas em
-`results/tables/`. Uma máquina nova recupera tudo isso com `git clone`.
+Tudo que é código está no repositório: `src/`, `scripts/`, `tests/`, `mindeye1/`, `setup/`,
+os guias de `docs/` e as tabelas de métricas em `results/tables/`. Uma máquina nova recupera tudo isso com `git clone`.
 
 Os 62 GB de dados externos também não precisam de backup — o `bootstrap.sh` os
 rebaixa do HuggingFace.
@@ -451,7 +454,7 @@ rebaixa do HuggingFace.
 
 Os `.pth` **e as reconstruções** estão publicados no release
 [`checkpoints-v1`](https://github.com/PR-Alberti/mindeye2-ridge/releases), e o
-`./bootstrap.sh --ckpts` traz os dois de volta automaticamente — o que poupa
+`setup/bootstrap.sh --ckpts` traz os dois de volta automaticamente — o que poupa
 ~3 h de GPU a cada máquina nova. Para publicar um modelo novo, veja abaixo.
 
 ### Cuidado ao usar Google Drive como backup
@@ -464,8 +467,8 @@ registro comece alinhado em 64 bytes, coisa que o `zipfile` do Python não faz.
 Para consertar:
 
 ```bash
-./restore_ckpt.py pasta_do_checkpoint/ -o train_logs/meu_modelo/last.pth
-./restore_ckpt.py train_logs/meu_modelo/last.pth    # só verifica se está legível
+setup/restore_ckpt.py pasta_do_checkpoint/ -o train_logs/meu_modelo/last.pth
+setup/restore_ckpt.py train_logs/meu_modelo/last.pth    # só verifica se está legível
 ```
 
 Ele lê as storages e deixa o próprio torch regravar. Ao final confirma com um
