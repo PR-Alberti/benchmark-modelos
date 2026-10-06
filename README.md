@@ -146,7 +146,17 @@ vez, a tabela baixa as anotações COCO 2017 (~250 MB) para `$MINDEYE_DATA/seman
 
 O `treina.py` grava o manifesto do dataset e a configuração completa (com o commit do código) em
 `train_logs/<nome>/` e chama o script de treino do modelo com `DATASET` apontando para o
-manifesto. Os scripts aceitam a variável também quando chamados direto, com `MODEL_NAME`
+manifesto. O dicionário é a configuração inteira: variáveis exportadas no shell (`BATCH_SIZE`,
+`RESUME`...) não chegam ao treino.
+
+Com o dicionário `"dataset"` vazio, o padrão, o treino é o dataset completo (as 40 sessões) e
+roda exatamente como o benchmark, o que foi conferido treinando com e sem o manifesto. Num
+subconjunto, uma época encolhe junto com ele. No MindEye2, a época são 750 × sessões amostras
+(os trials nominais, como no original) vezes a fração das exibições mantidas. No MindEye1, ela é
+uma passada pelas imagens, cada uma com as repetições empilhadas. Com o mesmo `num_epochs`, um
+subconjunto menor treina menos passos. No MindEye1 isso pesa também na comparação entre imagens e
+repetições: 1.000 imagens × 3 repetições dão um terço dos passos por época de 3.000 × 1. Para
+comparar com o mesmo número de passos, ajuste `num_epochs`. O FRR não tem épocas. Os scripts aceitam a variável também quando chamados direto, com `MODEL_NAME`
 obrigatório (os nomes padrão são os dos modelos do benchmark), como
 `MODEL_NAME=<nome> DATASET=train_logs/<nome>/dataset.json NUM_SESSIONS=40 scripts/run_frr.sh`.
 O teste não muda: são sempre as 1.000 imagens compartilhadas. Um nome de experimento não muda de

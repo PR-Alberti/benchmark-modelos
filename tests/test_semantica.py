@@ -5,7 +5,11 @@
 import itertools
 import os
 import sys
+import tempfile
 import unittest
+import zipfile
+from pathlib import Path
+from unittest import mock
 
 import numpy as np
 import pandas as pd
@@ -107,6 +111,27 @@ class Regras(unittest.TestCase):
     def test_prioridade_como_no_process_data_roi(self):
         fr = tabela(sup_person=[6, 1, 1, 1], sup_animal=[50, 3, 0, 0], sup_vehicle=[0, 0, 20, 0], sup_food=[0, 0, 5, 20])
         self.assertEqual(semantica.rotulo_prioridade(fr).tolist(), ["pessoa", "animal", "outro", None])
+
+
+class Download(unittest.TestCase):
+    def test_baixa_extrai_e_apaga_o_zip(self):
+        def falso(url, destino):
+            if destino.name.endswith(".zip"):
+                with zipfile.ZipFile(destino, "w") as z:
+                    for sp in semantica.SPLITS_COCO:
+                        z.writestr(f"annotations/instances_{sp}2017.json", "{}")
+                    z.writestr("annotations/captions_train2017.json", "{}")
+            else:
+                Path(destino).write_text("nsdId\n")
+        with tempfile.TemporaryDirectory() as d, \
+                mock.patch.object(semantica.urllib.request, "urlretrieve", side_effect=falso) as baixa:
+            stim, anotacoes = semantica.baixa_se_faltar(d)
+            self.assertTrue(stim.exists() and all(a.exists() for a in anotacoes))
+            sem = Path(d) / "semantica"
+            self.assertFalse((sem / "annotations_trainval2017.zip").exists())
+            self.assertFalse((sem / "annotations" / "captions_train2017.json").exists())
+            semantica.baixa_se_faltar(d)                      # ja esta tudo: nao baixa de novo
+            self.assertEqual(baixa.call_count, 2)
 
 
 if __name__ == "__main__":
