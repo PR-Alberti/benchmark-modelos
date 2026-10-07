@@ -42,6 +42,9 @@ esses pesos e, no fim, importa o código de cada modelo para confirmar que ele c
 com o comando de treino de cada um. `--ckpts` traz também os ridge-only já treinados;
 `--minimo` prepara só o ridge-only de 1 sessão (~30 GB).
 
+Numa máquina só com terminal, do zero (o que baixar, quantos GB e um treino de exemplo), veja o
+[NOVO_COMPUTADOR.md](docs/NOVO_COMPUTADOR.md).
+
 Tudo é idempotente: interrompa e rode de novo que continua. Bibliotecas, cada arquivo baixado,
 onde fica e os erros conhecidos estão no [SETUP.md](docs/SETUP.md) (MindEye2 e FRR) e no
 [MINDEYE1.md](docs/MINDEYE1.md).
