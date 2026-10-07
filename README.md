@@ -1,236 +1,201 @@
 # benchmark-modelos
 
-Benchmark de modelos que decodificam a imagem vista a partir do fMRI, no sujeito 1 do
-[Natural Scenes Dataset](https://naturalscenesdataset.org/) (NSD), com o mesmo protocolo de
-avaliação para todos. Três modelos:
+Decodificação da imagem vista a partir do fMRI (NSD, sujeito 1): MindEye2, FRR e MindEye1, com o
+mesmo treino, o mesmo teste (1.000 imagens compartilhadas) e as mesmas métricas.
 
-| Modelo | O que é | Código | Situação |
-|---|---|---|---|
-| **MindEye2** | MLP + diffusion prior → CLIP ViT-bigG, imagem por SDXL unCLIP ([Scotti et al., 2024](https://arxiv.org/abs/2403.11207)). Aqui: fine-tune só da camada ridge (1 e 40 sessões) e os modelos publicados | `src/` | treinado, reconstruído e avaliado — [BENCHMARK.md](BENCHMARK.md) |
-| **FRR** | regressão ridge fracionária, linear, dos voxels direto para o embedding CLIP ([Rokem & Kay, 2020](https://doi.org/10.1093/gigascience/giaa133); como em Doerig et al., 2025) | `src/run_frr.py`, `src/mindeye_ridge/frr.py` | rodado com 1 e 40 sessões — [BENCHMARK.md](BENCHMARK.md) |
-| **MindEye1** | MLP + diffusion prior → CLIP ViT-L/14, imagem por Versatile Diffusion ([Scotti et al., 2023](https://arxiv.org/abs/2305.18274)). Aqui: treinado do zero com 1 e 40 sessões, nos mesmos dados dos outros | `mindeye1/` | adaptado para 20 GB; treinado, reconstruído e avaliado com 1 e 40 sessões — [BENCHMARK.md](BENCHMARK.md), [MINDEYE1.md](docs/MINDEYE1.md) |
-
-Este repositório junta o trabalho de [`mindeye2-ridge`](https://github.com/PR-Alberti/mindeye2-ridge)
-(que guarda o histórico completo do MindEye2 e do FRR) com o MindEye1. O que falta do plano de
-estágio está em [ESTAGIO.md](docs/ESTAGIO.md).
-
-## Requisitos
-
-| | |
-|---|---|
-| GPU NVIDIA | 20 GB de VRAM (testado numa RTX A4500). O MindEye2 ridge-only e o FRR cabem em 16 GB; o treino do MindEye1 precisa dos 20 |
-| RAM | 30 GB (o FRR de 40 sessões chega a ~25 GB) |
-| Disco | ~85 GB para o MindEye2 e o FRR, mais ~70 GB para o MindEye1 completo (~31 GB só para a inferência) |
-| Software | conda (ou python3.11) e git. Python 3.12+ não serve: o `torch==2.1.0` não tem wheel |
-| Dados | aceitar os [termos do NSD](https://cvnlab.slite.page/p/IB6BSeW_7o/Terms-and-Conditions) e preencher o [formulário de acesso](https://forms.gle/xue2bCdM9LaFNMeb7) |
+| Modelo | Código | Saída |
+|---|---|---|
+| **MindEye2** ridge-only ([Scotti et al., 2024](https://arxiv.org/abs/2403.11207)) | `src/train_ridgeonly.py` | embedding CLIP ViT-bigG + imagem (SDXL unCLIP) |
+| **FRR**, ridge fracionária ([Rokem & Kay, 2020](https://doi.org/10.1093/gigascience/giaa133)) | `src/run_frr.py` | embedding CLIP ViT-bigG |
+| **MindEye1** ([Scotti et al., 2023](https://arxiv.org/abs/2305.18274)) | `mindeye1/src/Train_MindEye.py` | embedding CLIP ViT-L/14 + imagem (Versatile Diffusion) |
 
 ## Instalação
 
-Um comando prepara a máquina para treinar e avaliar os três modelos:
-
 ```bash
-git clone https://github.com/PR-Alberti/benchmark-modelos.git
-cd benchmark-modelos
-setup/bootstrap.sh --check     # diagnóstico: GPU, ambiente, dados, pesos; não baixa nada
-setup/bootstrap.sh             # tudo (~130 GB, horas, quase tudo download)
+git clone https://github.com/PR-Alberti/benchmark-modelos.git && cd benchmark-modelos
+setup/bootstrap.sh --check        # diagnóstico, não baixa nada
+setup/bootstrap.sh                # tudo
+setup/bootstrap.sh --minimo       # só ridge-only e FRR de 1 sessão
+setup/bootstrap.sh --ckpts        # + checkpoints ridge-only do release (repositório privado)
+~/envs/fmri/bin/python -m unittest discover -s tests
 ```
 
-O `bootstrap.sh` cria o ambiente Python (`~/envs/fmri`, o mesmo para os três), baixa os dados do
-MindEye2 com as 40 sessões (que o FRR e o MindEye1 também usam), pré-baixa os pesos que os modelos
-buscariam na primeira execução (CLIP, Versatile Diffusion, redes das métricas), liga o MindEye1 a
-esses pesos e, no fim, importa o código de cada modelo para confirmar que ele carrega. Termina
-com o comando de treino de cada um. `--ckpts` traz também os ridge-only já treinados;
-`--minimo` prepara só o ridge-only de 1 sessão (~30 GB).
-
-Numa máquina só com terminal, do zero (o que baixar, quantos GB e um treino de exemplo), veja o
-[NOVO_COMPUTADOR.md](docs/NOVO_COMPUTADOR.md).
-
-Tudo é idempotente: interrompa e rode de novo que continua. Bibliotecas, cada arquivo baixado,
-onde fica e os erros conhecidos estão no [SETUP.md](docs/SETUP.md) (MindEye2 e FRR) e no
-[MINDEYE1.md](docs/MINDEYE1.md).
-
-Os caminhos padrão podem ser trocados por variáveis de ambiente:
-
-| Variável | Padrão | O quê |
+| Preparação | Download | Disco |
 |---|---|---|
-| `MINDEYE_ENV` | `~/envs/fmri` | ambiente Python |
-| `MINDEYE_DATA` | `~/mindeyev2` | dados do MindEye2 e cache de pesos do HuggingFace (`.cache/`) |
-| `ME1_DATA` | `~/mindeye1` | dados e modelos publicados do MindEye1 |
+| `--minimo` | ~35 GB | 40 GB |
+| FRR + MindEye2 nas 40 sessões (`setup_env.sh --with-extras` + `download_data.py --stage finetune --subj 1`) | ~43 GB | 60 GB |
+| completo | ~130 GB | 200 GB |
 
-## Preparar e rodar cada modelo
+| Requisito | |
+|---|---|
+| GPU | NVIDIA, 20 GB (16 GB para FRR e MindEye2) |
+| RAM | 30 GB |
+| Python | conda ou python3.11 (3.12+ não serve) |
+| Dados | [termos do NSD](https://cvnlab.slite.page/p/IB6BSeW_7o/Terms-and-Conditions) + [formulário](https://forms.gle/xue2bCdM9LaFNMeb7) |
 
-Todos os scripts rodam de qualquer diretório.
+| Variável | Padrão |
+|---|---|
+| `MINDEYE_ENV` | `~/envs/fmri` |
+| `MINDEYE_DATA` | `~/mindeyev2` |
+| `ME1_DATA` | `~/mindeye1` |
 
-### MindEye2 (ridge-only)
+Máquina só com terminal, passo a passo: [docs/NOVO_COMPUTADOR.md](docs/NOVO_COMPUTADOR.md).
 
-Precisa de: `setup/bootstrap.sh` (ou só `setup/bootstrap.sh --minimo` para o treino de 1 sessão).
+## Uso
 
-```bash
-scripts/run_ridgeonly_prior.sh                                   # treino, 1 sessão (~1h50)
-scripts/run_recon.sh subj01_ridgeonly_1sess_prior 1024 noblurry  # reconstruções + refinamento
-scripts/run_evals.sh subj01_ridgeonly_1sess_prior enhanced       # métricas
-```
-
-40 sessões (~8 h de treino; precisa de `setup/download_data.py --stage finetune --subj 1`, sem limitar
-as sessões):
-
-```bash
-MODEL_NAME=subj01_ridgeonly_40sess_prior NUM_SESSIONS=40 NUM_EPOCHS=20 FROZEN=1 scripts/run_ridgeonly_prior.sh
-```
-
-Sem treinar: `setup/bootstrap.sh --ckpts` baixa os checkpoints treinados do release `checkpoints-v1` de
-`mindeye2-ridge` (repositório privado: precisa estar logado no GitHub). Os modelos publicados no
-artigo vêm de `setup/download_data.py --stage paper paper40`.
-
-### FRR
-
-Precisa de: os dados de treino do MindEye2 e as imagens de teste
-(`setup/download_data.py --stage train evals --subj 1`, que já traz as 40 sessões).
-Não tem treino por gradiente: a validação cruzada e o ajuste final rodam de uma vez.
+### Treino por dicionário
 
 ```bash
-scripts/run_frr.sh                       # 1 sessão  (~1 min na A4500)
-NUM_SESSIONS=40 scripts/run_frr.sh       # 40 sessões (~30 min; ~25 GB de RAM)
+cd src
+python treina.py --lista                  # experimentos de src/experimentos.py
+python treina.py <nome> --so_dataset      # monta e resume o dataset
+python treina.py <nome> --dry_run         # mostra o comando
+python treina.py <nome> [<nome> ...]      # treina
+python treina.py <nome> --retoma          # MindEye2: continua do last.pth
 ```
-
-Na primeira execução calcula os embeddings CLIP das imagens de treino (8 GB, ~3 min) e os guarda
-em `$MINDEYE_DATA/clip_targets/`. Só produz o embedding, então só o retrieval é comparável com os
-outros modelos. Detalhes no [SETUP.md](docs/SETUP.md#frr-baseline-linear-plano-de-estágio).
-
-### MindEye1
-
-Precisa de: `setup/bootstrap.sh`, que já roda o `scripts/me1_setup.sh` e baixa o Versatile Diffusion. No benchmark, o
-MindEye1 usa os dados do MindEye2 — as mesmas sessões de treino e o mesmo teste dos outros modelos —
-e não precisa dos 39 GB de treino do `webdataset_avg_split`.
-
-```bash
-scripts/run_me1_benchmark.sh               # 1 e 40 sessões: treino, reconstrução e métricas (~37 h)
-SESSOES=1 scripts/run_me1_benchmark.sh     # só 1 sessão (~5 h)
-LOWLEVEL=0 scripts/run_me1_benchmark.sh    # sem low-level: subj01_me1_<N>sess_semlowlevel (~23 h)
-NUM_SESSIONS=1 scripts/me1_run.sh train    # uma etapa: train | lowlevel | recon | metrics
-```
-
-O treino como no artigo (batch 32, AdamW) não cabe em 20 GB; aqui ele usa batch 16 e Adam de
-8 bits, o que muda o treino. O protocolo do benchmark, os ajustes e as medições de memória e tempo
-estão no [MINDEYE1.md](docs/MINDEYE1.md). Sem `NUM_SESSIONS`, o `me1_run.sh` roda o MindEye1 original
-(dados do `webdataset_avg_split`, modelos publicados).
-
-### Treino por dicionário e dataset controlado
-
-O jeito mais simples de treinar é o [`notebooks/treino.ipynb`](notebooks/treino.ipynb): cada
-treino é um dicionário com o modelo, os hiperparâmetros e o dataset, e os modelos já treinados do
-benchmark estão lá como exemplo (o dicionário `BENCHMARK` de `src/experimentos.py`, que reproduz o
-treino de cada um). Os scripts acima continuam valendo; o dicionário só chama o script certo com as
-variáveis certas. Os notebooks rodam no ambiente do `setup_env.sh`: no VS Code, escolha
-`~/envs/fmri/bin/python` como kernel; no Jupyter, registre-o uma vez com
-`~/envs/fmri/bin/python -m ipykernel install --user --name fmri`.
-
-Os três modelos também treinam num subconjunto controlado do treino, em vez das N primeiras
-sessões. Cada experimento é um dicionário em `src/experimentos.py` (`EXPERIMENTOS`):
 
 ```python
-"subj01_frr_5classes_300img_1rep": {
-    "modelo": "frr",                       # frr | mindeye2 | mindeye1
-    "hiper": {"folds": 5, "seed": 42},     # o que faltar fica no padrão do modelo
-    "dataset": {"sessoes": 40,             # pool: as primeiras N sessões
-                "n_imagens": 300,          # imagens únicas (por classe, com balanceado)
-                "repeticoes": 1,           # exibições por imagem: 1, 2 ou 3
-                "classes": {"pessoa": ["sup_person"], "animal": ["sup_animal"]},
-                "minimo": 10, "maximo_outros": 2, "balanceado": True,
-                "agregacao": "media",      # como usar as repetições (abaixo)
-                "semente": 0},
-},
+import treina                               # de dentro de src/
+treina.roda("meu_modelo", {
+    "modelo": "frr",                        # frr | mindeye2 | mindeye1
+    "hiper": {"seed": 42},
+    "dataset": {"sessoes": 40, "classes": {"animal": ["sup_animal"]}, "minimo": 10},
+}, dry_run=True)
 ```
+
+Notebook: [notebooks/treino.ipynb](notebooks/treino.ipynb) (kernel `~/envs/fmri/bin/python`).
+
+### Scripts
 
 ```bash
-python src/treina.py --lista                       # os experimentos definidos
-python src/treina.py <nome> --so_dataset           # sorteia e resume o dataset, sem treinar
-python src/treina.py <nome> --dry_run              # mostra o comando que rodaria
-python src/treina.py <nome> [<nome> ...]           # treina, em sequência (o que já terminou é pulado)
+# MindEye2 ridge-only
+scripts/run_ridgeonly_prior.sh                                        # 1 sessão
+MODEL_NAME=subj01_ridgeonly_40sess_prior NUM_SESSIONS=40 NUM_EPOCHS=20 FROZEN=1 scripts/run_ridgeonly_prior.sh
+scripts/run_recon.sh <nome> 1024 noblurry                             # reconstrução + refinamento
+scripts/run_evals.sh <nome> enhanced                                  # métricas
+
+# FRR
+scripts/run_frr.sh                                                    # 1 sessão
+NUM_SESSIONS=40 scripts/run_frr.sh                                    # 40 sessões
+
+# MindEye1
+scripts/run_me1_benchmark.sh                                          # 1 e 40 sessões, treino → métricas
+SESSOES=1 scripts/run_me1_benchmark.sh                                # só 1 sessão
+LOWLEVEL=0 scripts/run_me1_benchmark.sh                               # sem low-level
+NUM_SESSIONS=1 scripts/me1_run.sh train|lowlevel|recon|metrics        # uma etapa
+
+# Dataset controlado direto nos scripts
+MODEL_NAME=<nome> DATASET=train_logs/<nome>/dataset.json NUM_SESSIONS=40 scripts/run_frr.sh
+
+# Benchmark
+scripts/run_benchmark.sh                                              # MindEye2 + FRR, tudo
+python src/make_benchmark.py                                          # remonta BENCHMARK.md e a página
 ```
 
-O sorteio é feito sobre as exibições (`src/mindeye_ridge/dataset_controlado.py`), com semente:
-mesmo dicionário, mesmo subconjunto. As classes são listas de colunas da tabela de frações da tela
-(`src/mindeye_ridge/semantica.py`): cada categoria COCO (`cat_*`) ou supercategoria (`sup_*`), em %
-da tela que o NSD mostrou. A imagem é da classe se ela ocupa pelo menos `minimo`% e as outras
-classes ficam abaixo de `maximo_outros`%. A exploração que calibrou esses limiares está em
-[`notebooks/classificacao_semantica.ipynb`](notebooks/classificacao_semantica.ipynb). Na primeira
-vez, a tabela baixa as anotações COCO 2017 (~250 MB) para `$MINDEYE_DATA/semantica/`.
-
-O `treina.py` grava o manifesto do dataset e a configuração completa (com o commit do código) em
-`train_logs/<nome>/` e chama o script de treino do modelo com `DATASET` apontando para o
-manifesto. O dicionário é a configuração inteira: variáveis exportadas no shell (`BATCH_SIZE`,
-`RESUME`...) não chegam ao treino.
-
-`agregacao` escolhe como o treino usa as repetições de cada imagem
-(`src/mindeye_ridge/agregacao.py`). As quatro opções são os esquemas que os próprios modelos do
-benchmark usam:
-
-| `agregacao` | Amostra de treino | De onde vem |
-|---|---|---|
-| `"exibicoes"` | cada trial, separado | MindEye2 e FRR |
-| `"media"` | a média dos betas das repetições, uma por imagem | o protocolo de teste de todos |
-| `"sorteio"` | uma repetição sorteada por imagem, a cada época | o alto nível do MindEye1 (que faz rodízio) |
-| `"combinacao"` | combinação aleatória das repetições, a cada época | o baixo nível do MindEye1 (`voxel_select`) |
-
-`None` (o padrão) é o que cada modelo faz no benchmark: trials separados no FRR e no MindEye2,
-rodízio no MindEye1. O FRR só aceita `exibicoes` e `media`, porque ajusta numa passada só. O
-teste é sempre a média das 3 repetições. Nos modos por imagem a época tem uma amostra por imagem,
-não por trial: para comparar com `exibicoes` no mesmo número de passos, multiplique `num_epochs`
-(os experimentos `subj01_me2_1000img_3rep_*` fazem isso).
-
-Com o dicionário `"dataset"` vazio, o padrão, o treino é o dataset completo (as 40 sessões) e
-roda exatamente como o benchmark, o que foi conferido treinando com e sem o manifesto. Num
-subconjunto, uma época encolhe junto com ele. No MindEye2, a época são 750 × sessões amostras
-(os trials nominais, como no original) vezes a fração das exibições mantidas. No MindEye1, ela é
-uma passada pelas imagens, cada uma com as repetições empilhadas. Com o mesmo `num_epochs`, um
-subconjunto menor treina menos passos. No MindEye1 isso pesa também na comparação entre imagens e
-repetições: 1.000 imagens × 3 repetições dão um terço dos passos por época de 3.000 × 1. Para
-comparar com o mesmo número de passos, ajuste `num_epochs`. O FRR não tem épocas. Os scripts aceitam a variável também quando chamados direto, com `MODEL_NAME`
-obrigatório (os nomes padrão são os dos modelos do benchmark), como
-`MODEL_NAME=<nome> DATASET=train_logs/<nome>/dataset.json NUM_SESSIONS=40 scripts/run_frr.sh`.
-O teste não muda: são sempre as 1.000 imagens compartilhadas. Um nome de experimento não muda de
-configuração: se `train_logs/<nome>` já tem outra, o treino para; e um modelo não retoma com
-outro manifesto (`dataset.sha1` no diretório do modelo). O `run_benchmark.sh` e o
-`run_me1_benchmark.sh` ignoram `DATASET`: o benchmark é sempre o dataset completo.
-
-## Resultados
-
-[BENCHMARK.md](BENCHMARK.md) traz as tabelas do MindEye2 (quatro ridge-only e os dois modelos do
-artigo), do FRR e do MindEye1 (1 e 40 sessões), todas com o mesmo pipeline e as mesmas métricas. `results/benchmark/index.html` é a
-página completa (galeria de reconstruções, curvas de treino, ruído entre sementes; um arquivo
-só, abre offline). O MindEye1 não tem refinamento: a mesma reconstrução aparece nas duas
-abas e nas duas tabelas, e ele não entra nas métricas de legenda.
+### Resultado de um modelo
 
 ```bash
-scripts/run_benchmark.sh                 # regenera tudo do MindEye2 e do FRR (~50 h numa A4500)
-python src/make_benchmark.py             # só remonta a página com o que já existe
-python -m unittest discover -s tests     # testes do FRR, da página, dos caminhos e do dataset controlado
+cd src && python -c "from mindeye_ridge import resultados; print(resultados.retrieval('<nome>'))"
 ```
 
-A página e o `BENCHMARK.md` versionados já estão prontos. Para remontá-los, o
-`make_benchmark.py` precisa dos tensores em `results/evals/` e das curvas em `train_logs/`, que
-ficam fora do git: num clone novo, sem eles, a página sai sem a galeria e sem as curvas.
-
-## Onde está o quê
-
-| | |
+| Onde | O quê |
 |---|---|
-| `src/` | MindEye2 e FRR: `train_ridgeonly.py`, `recon_inference.py`, `enhanced_recon_inference.py`, `final_evaluations.py`, `verify_retrieval.py`, `run_frr.py`, `make_benchmark.py`, `make_comparison.py`; treino com dataset controlado: `experimentos.py` (os dicionários) e `treina.py` |
-| `src/mindeye_ridge/` | biblioteca: `utils`, `models` e `modeling_git` (do MindEye2) e o que foi acrescentado — `paths`, `nsd_data`, `clip_targets`, `frr`, `embedding_metrics`, `semantica` (fração da tela e rótulos), `dataset_controlado` (subconjuntos de treino), `agregacao` (como usar as repetições), `resultados` (o retrieval de um modelo pelo nome) |
-| `src/report/` | código da página do benchmark e do `BENCHMARK.md` |
-| `src/generative_models/`, `src/autoencoder/` | código de terceiros usado como está (Stability AI; ConvNeXt) |
-| `mindeye1/` | MindEye1: `src/` (código original + ajustes marcados `# benchmark-modelos`), `download.py`, `README-original.md` |
-| `scripts/` | `run_*.sh` (MindEye2 e FRR), `me1_setup.sh`, `me1_run.sh` e `run_me1_benchmark.sh` (MindEye1); `common.sh` guarda caminhos e ambiente; utilitários: `me1_fake_data.py` (dados sintéticos do MindEye1), `inspect_ckpt.py` |
-| `results/` | tudo o que é gerado: `tables/` (métricas finais, no git), `benchmark/` (a página do benchmark, no git), `metrics/` e `figs/` (corridas antigas, no git), `evals/` (tensores) e `logs/` (logs dos scripts do benchmark), fora do git |
+| `train_logs/<nome>/` | checkpoint, logs, `dataset.json`, `experimento.json` (MindEye1: `mindeye1/train_logs/<nome>/`) |
+| `results/tables/` | métricas finais |
+| `results/evals/<nome>/` | tensores de embedding e reconstrução |
+| [BENCHMARK.md](BENCHMARK.md), `results/benchmark/index.html` | tabelas e página do benchmark |
+
+## Combinações possíveis
+
+### Dataset (`"dataset"`)
+
+| Campo | Valores | Padrão |
+|---|---|---|
+| `sessoes` | 1 a 40 | 40 |
+| `n_imagens` | inteiro (por classe com `balanceado`) | todas |
+| `repeticoes` | 1, 2, 3 | todas as do pool |
+| `classes` | `{nome: [colunas sup_*/cat_*]}` (exclusiva) ou lista de `pessoa`, `animal`, `outro` (prioridade) | nenhuma |
+| `regra` | `exclusiva`, `prioridade` | `exclusiva` |
+| `minimo` | % da tela da classe | 10 |
+| `maximo_outros` | % da tela das outras classes listadas | 2 |
+| `balanceado` | `True`, `False` | `False` |
+| `semente` | inteiro | 0 |
+| `agregacao` | `exibicoes`, `media`, `sorteio`, `combinacao` | `None` (nativo do modelo) |
+
+`{}` = dataset completo (40 sessões), igual ao benchmark.
+
+### Agregação × modelo
+
+| `agregacao` | FRR | MindEye2 | MindEye1 |
+|---|---|---|---|
+| `None` | = `exibicoes` | = `exibicoes` | rodízio das repetições |
+| `exibicoes` | ✓ | ✓ | ✓ |
+| `media` | ✓ | ✓ | ✓ |
+| `sorteio` | — | ✓ | ✓ |
+| `combinacao` | — | ✓ | ✓ |
+
+### Hiperparâmetros (`"hiper"`)
+
+| Modelo | Chave e padrão |
+|---|---|
+| `frr` | `folds=5`, `grid="doerig"` (ou `"extended"`), `fracs=None`, `global_fraction=False`, `seed=42`, `chunk=8192` |
+| `mindeye2` | `hidden_dim=1024` (ou 4096), `num_epochs=150`, `batch_size=None`, `max_lr=3e-4`, `prior=True`, `blurry=False`, `frozen_fp16=None`, `seed=42`, `ckpt_interval=None` |
+| `mindeye1` | `num_epochs=240`, `max_lr=3e-4`, `seed=42`, `mixup_pct=0.33`, `batch_size=None` (16), `paper=False`, `save_every=1` |
+
+| Restrição | |
+|---|---|
+| `mindeye2`, `mindeye1` | `num_epochs >= 2` |
+| `mindeye2` | `blurry=True` só com `hidden_dim=4096` |
+| `mindeye1` | imagens únicas >= `batch_size` |
+| `frr` | `agregacao` só `exibicoes` ou `media` |
+| todos | sujeito 1; nome já treinado é recusado |
+
+## Combinações testadas
+
+Treinadas e avaliadas (retrieval top-1 imagem → cérebro / cérebro → imagem, em %). Todas com o
+dataset completo das N primeiras sessões; os dicionários estão em `BENCHMARK` (`src/experimentos.py`).
+
+| Modelo | Nome | Sessões | Hiperparâmetros | fwd | bwd |
+|---|---|---|---|---|---|
+| FRR | `subj01_frr_1sess` | 1 | padrão | 55,0 | 3,1 |
+| FRR | `subj01_frr_1sess_global` | 1 | `global_fraction` | 33,2 | 1,3 |
+| FRR | `subj01_frr_1sess_ext` | 1 | `grid="extended"` | 55,7 | 2,0 |
+| FRR | `subj01_frr_40sess` | 40 | padrão | 96,4 | 37,7 |
+| FRR | `subj01_frr_40sess_global` | 40 | `global_fraction` | 96,3 | 37,7 |
+| FRR | `subj01_frr_40sess_ext` | 40 | `grid="extended"` | 92,4 | 21,3 |
+| MindEye2 | `subj01_ridgeonly_1sess_prior` | 1 | padrão | 92,8 | 88,1 |
+| MindEye2 | `subj01_ridgeonly_1sess` | 1 | `prior=False` | 78,5 | 72,1 |
+| MindEye2 | `subj01_ridgeonly_1sess_4096blurry` | 1 | `hidden_dim=4096`, `blurry` | 95,5 | 92,0 |
+| MindEye2 | `subj01_ridgeonly_1sess_prior_seed42` | 1 | `seed=42` | 92,9 | 88,1 |
+| MindEye2 | `subj01_ridgeonly_1sess_prior_seed1` | 1 | `seed=1` | 93,1 | 87,8 |
+| MindEye2 | `subj01_ridgeonly_1sess_prior_seed2` | 1 | `seed=2` | 93,2 | 88,1 |
+| MindEye2 | `subj01_ridgeonly_1sess_noprior_seed42` | 1 | `prior=False`, `seed=42` | 78,4 | 72,6 |
+| MindEye2 | `subj01_ridgeonly_40sess_prior` | 40 | `num_epochs=20`, `frozen_fp16` | 99,9 | 99,5 |
+| MindEye1 | `subj01_me1_1sess` | 1 | padrão + low-level | 30,6 | 23,2 |
+| MindEye1 | `subj01_me1_1sess_semlowlevel` | 1 | padrão, sem low-level | 30,6 | 23,2 |
+| MindEye1 | `subj01_me1_40sess` | 40 | padrão + low-level | 94,5 | 87,6 |
+| MindEye1 | `subj01_me1_40sess_semlowlevel` | 40 | padrão, sem low-level | em andamento | |
+| MindEye2 (artigo) | `final_subj01_pretrained_1sess_24bs` | 1 | fine-tune completo, baixado | 93,9 | 77,6 |
+| MindEye2 (artigo) | `final_subj01_pretrained_40sess_24bs` | 40 | fine-tune completo, baixado | 100 | 99,9 |
+
+Definidas e ainda não rodadas (`EXPERIMENTOS`): 5 classes semânticas, pessoa + animal, 1.000 imagens × 3
+repetições nos quatro modos de agregação, e 3.000 × 1, 1.500 × 2, 1.000 × 3 imagens × repetições.
+
+## Estrutura
+
+| Pasta | |
+|---|---|
+| `setup/` | preparar a máquina |
+| `scripts/` | rodar os modelos |
+| `src/` | MindEye2, FRR, `treina.py`, `experimentos.py`, página do benchmark |
+| `src/mindeye_ridge/` | biblioteca: dados, FRR, métricas, semântica, dataset controlado, agregação, resultados |
+| `mindeye1/` | MindEye1 adaptado |
+| `notebooks/` | `treino.ipynb`, `classificacao_semantica.ipynb`, originais do MindEye2 |
+| `results/` | tabelas e página (no git); tensores e logs (fora) |
+| `train_logs/` | checkpoints (fora do git) |
 | `tests/` | testes |
-| `train_logs/`, `mindeye1/train_logs/` | checkpoints e logs de treino, um diretório por modelo (fora do git) |
-| `setup/` | preparam a máquina: `bootstrap.sh` (tudo de uma vez), `setup_env.sh` (ambiente), `download_data.py` (dados do MindEye2), `restore_ckpt.py` |
-| `docs/` | [SETUP.md](docs/SETUP.md) e [MINDEYE1.md](docs/MINDEYE1.md) (instalação e operação), [EXPERIMENTO.md](docs/EXPERIMENTO.md) (o que foi feito e por quê), [ESTAGIO.md](docs/ESTAGIO.md) (plano de estágio) |
-| [BENCHMARK.md](BENCHMARK.md) | resultados (gerado pelo `make_benchmark.py`) |
-| `notebooks/` | `treino.ipynb` (como treinar: os modelos do benchmark e experimentos novos como dicionários), `classificacao_semantica.ipynb` (exploração dos rótulos semânticos); em `mindeye2_original/`, os notebooks e o README do MindEye2, só de referência |
+| `docs/` | [NOVO_COMPUTADOR](docs/NOVO_COMPUTADOR.md), [SETUP](docs/SETUP.md), [MINDEYE1](docs/MINDEYE1.md), [EXPERIMENTO](docs/EXPERIMENTO.md), [ESTAGIO](docs/ESTAGIO.md) |
 
 ## Licença
 
-MIT, como os dois repositórios de origem (MedARC). O código de terceiros em `src/generative_models/`
-e `src/autoencoder/` mantém as licenças próprias.
+MIT. `src/generative_models/` e `src/autoencoder/` mantêm as licenças próprias.
