@@ -372,7 +372,7 @@ def pagina(dados, args):
   <header class="topo">
     <p class="olho">MindEye2 · NSD sujeito 1 · fMRI → imagem</p>
     <h1>Benchmark ridge-only</h1>
-    <p class="lede">Quatro variações do fine-tune que treina só a camada ridge (a única parte do
+    <p class="lede">Cinco variações do fine-tune que treina só a camada ridge (a única parte do
       MindEye2 que é própria de cada pessoa), comparadas entre si, com os modelos publicados no
       artigo, que retreinam a rede inteira, com um baseline linear (FRR) que não usa rede nenhuma e
       com o MindEye1, treinado do zero.

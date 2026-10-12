@@ -11,7 +11,7 @@ from .texts import FRR_NOTA_HUBNESS, leitura
 
 def markdown(dados, args):
     L = ["# Benchmark ridge-only", "",
-         "MindEye2, sujeito 1 do NSD. Quatro variações do fine-tune só da camada ridge, comparadas "
+         "MindEye2, sujeito 1 do NSD. Cinco variações do fine-tune só da camada ridge, comparadas "
          "com os modelos publicados no artigo (fine-tune completo), com um baseline linear (FRR) "
          "que não usa rede nenhuma e com o MindEye1 treinado do zero. Mesmo teste (1.000 imagens), mesmo pipeline de reconstrução e "
          "mesmas métricas para todos.", "",
