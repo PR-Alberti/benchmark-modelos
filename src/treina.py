@@ -177,9 +177,9 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
     """Monta o dataset do experimento e treina. Devolve o resumo do dataset."""
     if not re.fullmatch(r"[A-Za-z0-9_.-]+", nome):
         raise ValueError(f"nome {nome!r}: so letras, numeros, _ . -")
-    sobra = set(exp) - {"modelo", "hiper", "dataset"}
+    sobra = set(exp) - {"modelo", "hiper", "dataset", "rotulo"}
     if sobra:
-        raise ValueError(f"chaves desconhecidas no experimento: {sorted(sobra)} (use modelo, hiper, dataset)")
+        raise ValueError(f"chaves desconhecidas no experimento: {sorted(sobra)} (use modelo, hiper, dataset, rotulo)")
     if exp.get("modelo") not in MODELOS:
         raise ValueError(f"modelo {exp.get('modelo')!r}: use um de {sorted(MODELOS)}")
     modelo = MODELOS[exp["modelo"]]
@@ -232,7 +232,8 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
         return resumo
 
     with open(registro, "w") as f:
-        json.dump({"nome": nome, "modelo": exp["modelo"], "hiper": hiper, "dataset": cfg.como_dict(),
+        json.dump({"nome": nome, "modelo": exp["modelo"], "rotulo": exp.get("rotulo"), "hiper": hiper,
+                   "dataset": cfg.como_dict(),
                    "assinatura_dataset": cfg.assinatura(), "resumo_dataset": resumo, "commit": _commit(),
                    "comando": {"env": env, "cmd": cmd}}, f, indent=1, ensure_ascii=False)
     subprocess.run(cmd, env=ambiente, check=True)

@@ -211,6 +211,11 @@ class Roda(unittest.TestCase):
         with open(Path(self.tmp.name) / "exp" / "experimento.json") as f:
             self.assertEqual(json.load(f)["hiper"]["num_epochs"], 5)
 
+    def test_rotulo_vai_para_o_registro(self):
+        self.roda({**self.EXP, "rotulo": "Ridge de teste"})
+        with open(Path(self.tmp.name) / "exp" / "experimento.json") as f:
+            self.assertEqual(json.load(f)["rotulo"], "Ridge de teste")
+
     def test_mesmo_nome_com_outra_configuracao_para(self):
         self.roda(self.EXP)
         self.roda(self.EXP)                                         # igual: segue

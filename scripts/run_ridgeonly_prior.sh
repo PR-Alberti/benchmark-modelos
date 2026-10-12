@@ -93,3 +93,4 @@ $ENVP/bin/python train_ridgeonly.py \
     --ckpt_interval=${CKPT_INTERVAL:-999} --ckpt_saving --no-wandb_log $RESUME_FLAG \
     --metrics_csv=$TRAIN_LOGS/$MODEL_NAME/metrics.csv ${DATASET:+--dataset="$DATASET"} \
     2>&1 | tee $TEE_FLAGS $TRAIN_LOGS/$MODEL_NAME/train.log
+atualiza_site

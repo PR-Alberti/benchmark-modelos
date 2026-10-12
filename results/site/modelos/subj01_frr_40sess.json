@@ -1,0 +1,217 @@
+{
+ "concluido": null,
+ "config": {
+  "dataset": {
+   "agregacao": null,
+   "balanceado": false,
+   "classes": null,
+   "maximo_outros": 2,
+   "minimo": 10,
+   "n_imagens": null,
+   "regra": "exclusiva",
+   "repeticoes": null,
+   "semente": 0,
+   "sessoes": 40,
+   "subj": 1
+  },
+  "hiper": {
+   "chunk": 8192,
+   "folds": 5,
+   "fracs": null,
+   "global_fraction": false,
+   "grid": "doerig",
+   "seed": 42
+  },
+  "modelo": "frr"
+ },
+ "config_descritiva": false,
+ "config_erro": null,
+ "config_fonte": "src/experimentos.py",
+ "curva": null,
+ "espaco_clip": "ViT-bigG/14",
+ "familia": "frr",
+ "fontes": [
+  "results/tables/subj01_frr_40sess_frr.json"
+ ],
+ "frr": {
+  "config": {
+   "agregacao": "exibicoes",
+   "amostras_treino": 27000,
+   "bias_step": 0.2,
+   "bloco": 8192,
+   "dataset": null,
+   "dim_alvo": 425984,
+   "dobras": 5,
+   "exibicoes_treino": 27000,
+   "grade": "doerig",
+   "imagens_teste": 1000,
+   "imagens_treino": 9000,
+   "semente": 42,
+   "sessoes": 40,
+   "sujeito": 1,
+   "voxels": 15724
+  },
+  "custo": {
+   "embeddings_calculados_nesta_corrida": 0,
+   "gpu": "NVIDIA RTX A4500",
+   "pico_gpu_gib": 3.2330446243286133,
+   "pico_ram_gib": 13.616016387939453,
+   "segundos_ajuste": 1250.3667697906494,
+   "segundos_embedding_alvos": 0.0010061264038085938,
+   "segundos_total": 231.09179496765137
+  },
+  "cv": {
+   "cv_r2_escolhida": 0.015699872648253566,
+   "cv_r2_por_fracao": [
+    0.015699466879157464,
+    -0.03559401619489089,
+    -0.10657877370839075,
+    -0.19248334236808673,
+    -0.28948365624952177,
+    -0.39523259195915705,
+    -0.5087594382590164,
+    -0.6297031427788036,
+    -0.7574873826149076,
+    -0.8893556681222077,
+    -1.0272911865138399,
+    -1.1703851343016418,
+    -1.3175949696948712,
+    -1.4699861890634018,
+    -1.6248525601686241,
+    -1.781982436198133,
+    -1.9440416623750272,
+    -2.1078282384419205,
+    -2.2748656763181074,
+    -2.4416373135369254
+   ],
+   "fracs": [
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9,
+    0.95,
+    1.0
+   ],
+   "histograma_fracoes": [
+    425982,
+    2,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "pares_fracao_alvo_inalcancaveis": 0,
+   "por_alvo": true,
+   "posto_final": 15724,
+   "segundos_cv": 1078.5162460803986,
+   "segundos_final": 81.15112781524658,
+   "segundos_total": 1159.6673738956451
+  },
+  "embedding": {
+   "cosseno_centrado_medio": 0.21973928809165955,
+   "cosseno_medio": 0.5315750241279602,
+   "pearson_mediana": 0.5165438055992126,
+   "pearson_medio": 0.5168646574020386
+  },
+  "hubness": {
+   "cos_alvo_media_treino": 0.4961661994457245,
+   "cos_previsao_media_treino": 0.9495147466659546
+  },
+  "parametros_lineares": 6698172416
+ },
+ "grupo": "benchmark",
+ "id": "subj01_frr_40sess",
+ "iniciado": null,
+ "legendas": null,
+ "notas": [],
+ "publicada": false,
+ "receita": {
+  "partida": null,
+  "prior": "sem prior, sem rede",
+  "treino": "20 frações · CV 5 dobras · uma fração por dimensão"
+ },
+ "resumo_dataset": {
+  "exibicoes": 27000,
+  "imagens_unicas": 9000,
+  "repeticoes": {
+   "3": 9000
+  },
+  "sessoes_usadas": 40
+ },
+ "retrieval": {
+  "bwd": {
+   "ic95": [
+    0.36136182738798767,
+    0.39308263069929766
+   ],
+   "media": 0.37722222904364267
+  },
+  "fonte": "frr",
+  "fwd": {
+   "ic95": [
+    0.9605960319260524,
+    0.9669595927179092
+   ],
+   "media": 0.9637778123219808
+  }
+ },
+ "retrieval_centrado": {
+  "bwd": {
+   "ic95": [
+    0.8592710754528202,
+    0.8705067375049435
+   ],
+   "media": 0.8648889064788818
+  },
+  "fwd": {
+   "ic95": [
+    0.9663889866198744,
+    0.9722777385388169
+   ],
+   "media": 0.9693333625793457
+  }
+ },
+ "rotulo": "FRR · 40 sessões",
+ "sessoes": 40,
+ "status": "completo",
+ "status_txt": "retrieval e embedding",
+ "tempo_s": 1250.3667697906494,
+ "valores": {
+  "refinada": {
+   "BwdRetrieval": 0.37722222904364267,
+   "FwdRetrieval": 0.9637778123219808
+  },
+  "unclip": {
+   "BwdRetrieval": 0.37722222904364267,
+   "FwdRetrieval": 0.9637778123219808
+  }
+ }
+}

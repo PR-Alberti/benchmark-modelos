@@ -20,6 +20,7 @@ FIGS = RESULTS / "figs"
 METRICS = RESULTS / "metrics"          # curvas de treino guardadas de corridas antigas
 BENCHMARK = RESULTS / "benchmark"      # pagina gerada pelo make_benchmark.py
 LOGS = RESULTS / "logs"                # logs dos scripts do benchmark (fora do git)
+SITE = RESULTS / "site"                # o site gerado pelo make_site.py
 
 
 def add_vendored_to_path():

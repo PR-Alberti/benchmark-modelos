@@ -151,7 +151,9 @@ def tabela_fracoes(data_path, subj):
     ids_teste, _ = nsd_data.exibicoes_teste(data_path, subj)
     ids = np.union1d(np.unique(treino), ids_teste)
     if cache.exists():
-        fr = pd.read_csv(cache, index_col="nsd_id")
+        # round_trip: o leitor padrao do pandas erra o ultimo digito de ~4% das fracoes, o que muda
+        # o lado do limiar quando a fracao cai exatamente nele
+        fr = pd.read_csv(cache, index_col="nsd_id", float_precision="round_trip")
         if not len(np.setdiff1d(ids, fr.index)):
             return fr.loc[ids]
     stim = le_stim_info(data_path)
