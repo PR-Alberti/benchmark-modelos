@@ -216,6 +216,10 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 .item-modelo:hover { background: var(--wash); }
 .item-modelo input { margin: 1px 0 0; }
 .item-modelo .meta { grid-column: 3; font-size: 12.5px; color: var(--muted); }
+/* modelo que nao tem o que mostrar na aba aberta: esmaecido, com o motivo ao lado do status */
+.item-modelo.fora > span:not(.amostra):not(.meta) { color: var(--muted); }
+.item-modelo.fora .amostra { opacity: .35; }
+.item-modelo.fora .meta::after { content: " · " attr(data-fora); font-style: italic; }
 .amostra { width: 11px; height: 11px; border-radius: 50%; margin-top: 3px; background: var(--c); flex: none; }
 .ponto-status { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
 .st-completo { background: var(--ok); }

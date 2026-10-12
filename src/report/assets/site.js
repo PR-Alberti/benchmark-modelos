@@ -507,6 +507,35 @@
     v.textContent = '';
     escondeDica();
     RENDER[E.aba](v);
+    marcaLista();
+  }
+  // O que falta a um modelo para aparecer em cada aba (null: aparece). Marcar ou desmarcar um desses
+  // nao muda a vista, e a lista diz por que, em vez de parecer que o clique nao funcionou.
+  var FORA = {
+    resumo: function (m) {
+      return D.pares.some(function (p) { return (p.de === m.id || p.para === m.id) && POR_ID[p.de] && POR_ID[p.para]; }) ? null : 'sem par de 1 e 40 sessões';
+    },
+    tabela: function (m) { return m.valores ? null : 'sem métricas'; },
+    graficos: function (m) {
+      return m.valores && METRICAS.some(function (mt) { return mt.grupo === E.grupo && valor(m, mt.id) != null; }) ? null : 'sem métricas deste grupo';
+    },
+    dispersao: function (m) {
+      var x = valor(m, E.x), y = valor(m, E.y);
+      return x != null && y != null && (!(EXTRAS[E.x] && E.logx) || x > 0) ? null : 'sem um dos dois valores';
+    },
+    treino: function (m) { return m.curva && m.curva.series[E.curva] ? null : 'sem curva de treino'; },
+    galeria: function (m) { return D.galeria && D.galeria.modelos[m.id] ? null : 'sem reconstruções'; },
+    frr: function (m) { return m.familia === 'frr' && m.frr ? null : 'não é FRR'; },
+    fichas: function () { return E.fichas === 'todos' ? 'a aba mostra todos' : E.fichas === 'planejados' ? 'a aba mostra os planejados' : null; }
+  };
+  function marcaLista() {
+    var fora = FORA[E.aba];
+    $$('.item-modelo').forEach(function (it) {
+      var m = POR_ID[$('input', it).value], motivo = fora && m ? fora(m) : null;
+      var meta = $('.meta', it);       // o CSS le o motivo do proprio .meta (attr() nao sobe para o pai)
+      it.classList.toggle('fora', !!motivo);
+      if (motivo) meta.setAttribute('data-fora', motivo); else meta.removeAttribute('data-fora');
+    });
   }
   function cabecalho(titulo, texto) {
     return h('div', {class: 'vista-cab'}, h('h2', {texto: titulo}), texto ? h('p', {class: 'nota', html: texto}) : null);
@@ -534,25 +563,28 @@
     // 1 -> 40 sessoes
     var opcoes = ['BwdRetrieval', 'FwdRetrieval', 'CLIP', 'InceptionV3', 'AlexNet(2)', 'PixCorr', 'SSIM'];
     var pares = D.pares.map(function (p) { return {nome: p.nome, a: POR_ID[p.de], b: POR_ID[p.para]}; })
-      .filter(function (p) { return p.a && p.b; });
+      .filter(function (p) { return p.a && p.b && (E.sel.has(p.a.id) || E.sel.has(p.b.id)); });      // o par de cada modelo marcado
     var painel = h('section', {class: 'painel'});
     var mt = MET[E.resumoMet] || MET.BwdRetrieval;
     painel.appendChild(h('header', null, h('b', {texto: 'De 1 para 40 sessões'}),
-      h('span', {texto: 'O mesmo modelo treinado com ~1 h e com ~40 h de fMRI. ' + (mt.nome || mt.rotulo) + (mt.maior ? ' (maior é melhor)' : ' (menor é melhor)') + '.'})));
+      h('span', {texto: 'Cada modelo marcado na lista, treinado com ~1 h e com ~40 h de fMRI. ' + (mt.nome || mt.rotulo) + (mt.maior ? ' (maior é melhor)' : ' (menor é melhor)') + '.'})));
     painel.appendChild(h('div', {class: 'controles'}, segmentado('Métrica', opcoes.map(function (id) { return [id, MET[id].rotulo]; }), mt.id,
       function (val) { E.resumoMet = val; guarda(); renderAba(); })));
     var caixaSvg = h('div', {class: 'svg-caixa'});
     painel.appendChild(caixaSvg);
     v.appendChild(painel);
-    requestAnimationFrame(function () { inclinacao(caixaSvg, pares, mt); });
+    if (pares.length) requestAnimationFrame(function () { inclinacao(caixaSvg, pares, mt); });
+    else caixaSvg.appendChild(vazio('Nenhum modelo marcado tem versão de 1 e de 40 sessões.', presetBotao('principais', 'Ver os modelos principais')));
     var faltam = pares.filter(function (p) { return valor(p.a, mt.id, 'refinada') == null || valor(p.b, mt.id, 'refinada') == null; })
       .map(function (p) { return p.nome; });
     if (faltam.length) painel.appendChild(h('p', {class: 'nota', texto: 'Sem esta métrica: ' + faltam.join(', ') + '.'}));
+    if (pares.some(function (p) { return !E.sel.has(p.a.id) || !E.sel.has(p.b.id); }))
+      painel.appendChild(h('p', {class: 'nota', texto: 'Ponto vazado: a versão que não está marcada na lista, mostrada como referência.'}));
     poe(painel, notasRodape(pares.map(function (p) { return p.a; }), [mt.id]));      // null quando nao ha nota
 
     if (D.leitura && D.leitura.length) {
       v.appendChild(h('section', {class: 'secao'}, h('h3', {texto: 'Leitura do benchmark'}),
-        h('p', {class: 'nota', texto: 'Escritas a partir das tabelas do benchmark (as do FRR são montadas dos números medidos).'}),
+        h('p', {class: 'nota', texto: 'Escritas a partir das tabelas do benchmark (as do FRR são montadas dos números medidos). Valem para o benchmark inteiro: não mudam com a seleção.'}),
         h('ul', {class: 'conclusoes'}, D.leitura.map(function (t) { return h('li', {html: t}); }))));
     }
   }
@@ -598,8 +630,11 @@
       var cor = x.p.b.cor;
       var g = sv('g', {style: 'color:' + cor}, svg);
       sv('line', {x1: x0, x2: x1, y1: Y(x.a), y2: Y(x.b), stroke: 'currentColor', 'stroke-width': 2.2}, g);
-      sv('circle', {cx: x0, cy: Y(x.a), r: 4.5, fill: 'currentColor'}, g);
-      sv('circle', {cx: x1, cy: Y(x.b), r: 4.5, fill: 'currentColor'}, g);
+      [[x0, x.a, x.p.a], [x1, x.b, x.p.b]].forEach(function (e) {      // ponta nao marcada na lista: vazada
+        var marcado = E.sel.has(e[2].id);
+        sv('circle', {cx: e[0], cy: Y(e[1]), r: marcado ? 4.5 : 3.6, fill: marcado ? 'currentColor' : 'var(--bg)',
+          stroke: 'currentColor', 'stroke-width': marcado ? 0 : 1.8}, g);
+      });
       g.addEventListener('pointermove', function (ev) {
         mostraDica(ev, '<b>' + esc(x.p.nome) + '</b><br>1 sessão: ' + fmt(x.a, mt.fmt) + '<br>40 sessões: ' + fmt(x.b, mt.fmt) +
           '<br>diferença: ' + diferenca(x.b - x.a, mt.fmt));
