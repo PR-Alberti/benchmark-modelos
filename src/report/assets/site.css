@@ -240,14 +240,18 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 .situacao { display: flex; flex-wrap: wrap; gap: 6px 22px; }
 
 /* tabela de metricas */
-.tm-caixa { overflow: auto; max-height: 72vh; border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); }
-.tm { min-width: 100%; }
+/* a sombra na borda direita avisa que a tabela continua; some quando a rolagem chega ao fim */
+.tm-caixa { overflow: auto; max-height: 72vh; border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink);
+  background: linear-gradient(var(--bg), var(--bg)) right / 28px 100% no-repeat local,
+    linear-gradient(to left, color-mix(in srgb, var(--ink) 22%, transparent), transparent) right / 16px 100% no-repeat scroll; }
+/* bordas separadas: com border-collapse a regua do cabecalho fixo fica para tras ao rolar */
+.tm { min-width: 100%; border-collapse: separate; border-spacing: 0; }
+.tm thead { position: sticky; top: 0; z-index: 2; }      /* o cabecalho inteiro, nao linha a linha */
 .tm th, .tm td { padding: 8px 12px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
-.tm thead th { position: sticky; top: 0; z-index: 2; background: var(--bg); font: 600 13px/1.25 var(--f-sans);
+.tm thead th { background: var(--bg); font: 600 13px/1.25 var(--f-sans);
   color: var(--ink); vertical-align: bottom; border-bottom: 1px solid var(--ink); }
-.tm thead tr.fam th { top: 0; font: 600 12.5px/1.2 var(--f-sans); color: var(--ink-2); text-align: center;
+.tm thead tr.fam th { font: 600 12.5px/1.2 var(--f-sans); color: var(--ink-2); text-align: center;
   border-bottom: 1px solid var(--rule-2); padding-bottom: 5px; }
-.tm thead tr.fam + tr.col th { top: 31px; }
 .tm thead th button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 .tm thead th button:hover { text-decoration: underline; text-underline-offset: 3px; }
 .tm .seta { color: var(--muted); font-weight: 400; margin-left: 2px; }

@@ -548,7 +548,7 @@
     var faltam = pares.filter(function (p) { return valor(p.a, mt.id, 'refinada') == null || valor(p.b, mt.id, 'refinada') == null; })
       .map(function (p) { return p.nome; });
     if (faltam.length) painel.appendChild(h('p', {class: 'nota', texto: 'Sem esta métrica: ' + faltam.join(', ') + '.'}));
-    painel.appendChild(notasRodape(pares.map(function (p) { return p.a; }), [mt.id]));
+    poe(painel, notasRodape(pares.map(function (p) { return p.a; }), [mt.id]));      // null quando nao ha nota
 
     if (D.leitura && D.leitura.length) {
       v.appendChild(h('section', {class: 'secao'}, h('h3', {texto: 'Leitura do benchmark'}),
@@ -701,7 +701,7 @@
       tf.appendChild(tr); tab.appendChild(tf);
     }
     v.appendChild(h('div', {class: 'tm-caixa'}, tab));
-    v.appendChild(notasRodape(ms, cols.map(function (c) { return c.id; })));
+    poe(v, notasRodape(ms, cols.map(function (c) { return c.id; })));      // null quando nao ha nota
     if (ms.some(function (m) { return m.familia === 'frr'; })) v.appendChild(h('p', {class: 'nota', texto: 'O FRR só prevê o embedding: tem retrieval, mas não reconstrução nem legendas.'}));
     botaoCopia.addEventListener('click', function () {
       var linhas = [['Modelo', 'id'].concat(cols.map(function (c) { return c.rotulo; })).join('\t')];
@@ -739,7 +739,7 @@
     });
     if (grade.children.length) v.appendChild(grade);
     else v.appendChild(vazio('Nenhum modelo selecionado tem métricas deste grupo.'));
-    v.appendChild(notasRodape(ms, mets.map(function (m) { return m.id; })));
+    poe(v, notasRodape(ms, mets.map(function (m) { return m.id; })));      // null quando nao ha nota
   }
 
   // ------------------------------------------------------------------ vista: dispersao
@@ -765,7 +765,7 @@
       h('span', {texto: (MET[E.y] ? (MET[E.y].maior ? '↑ maior é melhor' : '↓ menor é melhor') : '') + (MET[E.x] ? ' · x: ' + (MET[E.x].maior ? 'maior é melhor' : 'menor é melhor') : '')})), caixaSvg));
     var faltam = ms.filter(function (m) { return pts.every(function (p) { return p.m !== m; }); });
     if (faltam.length) v.appendChild(h('p', {class: 'nota', texto: 'Fora do gráfico (sem um dos dois valores): ' + faltam.map(function (m) { return m.rotulo; }).join(', ') + '.'}));
-    v.appendChild(notasRodape(ms, [E.x, E.y]));
+    poe(v, notasRodape(ms, [E.x, E.y]));      // null quando nao ha nota
     if (!pts.length) { caixaSvg.appendChild(vazio('Nenhum modelo selecionado tem os dois valores.')); return; }
     requestAnimationFrame(function () { dispersao(caixaSvg, pts, dx, dy, EXTRAS[E.x] && E.logx); });
   }

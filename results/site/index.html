@@ -247,14 +247,18 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 .situacao { display: flex; flex-wrap: wrap; gap: 6px 22px; }
 
 /* tabela de metricas */
-.tm-caixa { overflow: auto; max-height: 72vh; border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); }
-.tm { min-width: 100%; }
+/* a sombra na borda direita avisa que a tabela continua; some quando a rolagem chega ao fim */
+.tm-caixa { overflow: auto; max-height: 72vh; border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink);
+  background: linear-gradient(var(--bg), var(--bg)) right / 28px 100% no-repeat local,
+    linear-gradient(to left, color-mix(in srgb, var(--ink) 22%, transparent), transparent) right / 16px 100% no-repeat scroll; }
+/* bordas separadas: com border-collapse a regua do cabecalho fixo fica para tras ao rolar */
+.tm { min-width: 100%; border-collapse: separate; border-spacing: 0; }
+.tm thead { position: sticky; top: 0; z-index: 2; }      /* o cabecalho inteiro, nao linha a linha */
 .tm th, .tm td { padding: 8px 12px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
-.tm thead th { position: sticky; top: 0; z-index: 2; background: var(--bg); font: 600 13px/1.25 var(--f-sans);
+.tm thead th { background: var(--bg); font: 600 13px/1.25 var(--f-sans);
   color: var(--ink); vertical-align: bottom; border-bottom: 1px solid var(--ink); }
-.tm thead tr.fam th { top: 0; font: 600 12.5px/1.2 var(--f-sans); color: var(--ink-2); text-align: center;
+.tm thead tr.fam th { font: 600 12.5px/1.2 var(--f-sans); color: var(--ink-2); text-align: center;
   border-bottom: 1px solid var(--rule-2); padding-bottom: 5px; }
-.tm thead tr.fam + tr.col th { top: 31px; }
 .tm thead th button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 .tm thead th button:hover { text-decoration: underline; text-underline-offset: 3px; }
 .tm .seta { color: var(--muted); font-weight: 400; margin-left: 2px; }
@@ -896,7 +900,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
 </section>
 
 </main>
-<footer class="rodape">Gerado em 12/10/2026 14:09 a partir do commit <span class="mono">29780cc</span> por
+<footer class="rodape">Gerado em 12/10/2026 14:16 a partir do commit <span class="mono">af7fb9b</span> por
 <span class="mono">src/make_site.py</span>. 19 modelos com resultado, 19 avaliados por completo,
 12 experimentos planejados.</footer>
 <dialog class="lupa" id="lupa" aria-label="Imagens ampliadas"><div class="lupa-corpo"></div></dialog>
@@ -1642,7 +1646,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     var faltam = pares.filter(function (p) { return valor(p.a, mt.id, 'refinada') == null || valor(p.b, mt.id, 'refinada') == null; })
       .map(function (p) { return p.nome; });
     if (faltam.length) painel.appendChild(h('p', {class: 'nota', texto: 'Sem esta métrica: ' + faltam.join(', ') + '.'}));
-    painel.appendChild(notasRodape(pares.map(function (p) { return p.a; }), [mt.id]));
+    poe(painel, notasRodape(pares.map(function (p) { return p.a; }), [mt.id]));      // null quando nao ha nota
 
     if (D.leitura && D.leitura.length) {
       v.appendChild(h('section', {class: 'secao'}, h('h3', {texto: 'Leitura do benchmark'}),
@@ -1795,7 +1799,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
       tf.appendChild(tr); tab.appendChild(tf);
     }
     v.appendChild(h('div', {class: 'tm-caixa'}, tab));
-    v.appendChild(notasRodape(ms, cols.map(function (c) { return c.id; })));
+    poe(v, notasRodape(ms, cols.map(function (c) { return c.id; })));      // null quando nao ha nota
     if (ms.some(function (m) { return m.familia === 'frr'; })) v.appendChild(h('p', {class: 'nota', texto: 'O FRR só prevê o embedding: tem retrieval, mas não reconstrução nem legendas.'}));
     botaoCopia.addEventListener('click', function () {
       var linhas = [['Modelo', 'id'].concat(cols.map(function (c) { return c.rotulo; })).join('\t')];
@@ -1833,7 +1837,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     });
     if (grade.children.length) v.appendChild(grade);
     else v.appendChild(vazio('Nenhum modelo selecionado tem métricas deste grupo.'));
-    v.appendChild(notasRodape(ms, mets.map(function (m) { return m.id; })));
+    poe(v, notasRodape(ms, mets.map(function (m) { return m.id; })));      // null quando nao ha nota
   }
 
   // ------------------------------------------------------------------ vista: dispersao
@@ -1859,7 +1863,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
       h('span', {texto: (MET[E.y] ? (MET[E.y].maior ? '↑ maior é melhor' : '↓ menor é melhor') : '') + (MET[E.x] ? ' · x: ' + (MET[E.x].maior ? 'maior é melhor' : 'menor é melhor') : '')})), caixaSvg));
     var faltam = ms.filter(function (m) { return pts.every(function (p) { return p.m !== m; }); });
     if (faltam.length) v.appendChild(h('p', {class: 'nota', texto: 'Fora do gráfico (sem um dos dois valores): ' + faltam.map(function (m) { return m.rotulo; }).join(', ') + '.'}));
-    v.appendChild(notasRodape(ms, [E.x, E.y]));
+    poe(v, notasRodape(ms, [E.x, E.y]));      // null quando nao ha nota
     if (!pts.length) { caixaSvg.appendChild(vazio('Nenhum modelo selecionado tem os dois valores.')); return; }
     requestAnimationFrame(function () { dispersao(caixaSvg, pts, dx, dy, EXTRAS[E.x] && E.logx); });
   }
