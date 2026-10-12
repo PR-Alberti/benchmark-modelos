@@ -147,6 +147,18 @@ class Descricoes(unittest.TestCase):
         self.assertEqual(set(site.DATASET_DESC), campos)
         self.assertEqual(set(site.AGREGACAO_DESC), {None, *agregacao.MODOS})
 
+    def test_nome_da_metrica_liga_a_definicao_aos_resultados(self):
+        slugs = [m["slug"] for m in site.METRICAS]
+        self.assertEqual(len(set(slugs)), len(slugs))                # um endereco por metrica
+        self.assertTrue(all(re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", x) for x in slugs), slugs)
+        tabela = site.html_metricas()
+        js = (ASSETS / "site.js").read_text()
+        for x in slugs:
+            self.assertIn(f'<tr id="def-{x}">', tabela)              # destino dos nomes nos resultados
+            self.assertIn(f'href="#res-{x}"', tabela)                # e a ida para os resultados
+        self.assertIn("'#def-' + mt.slug", js)
+        self.assertIn("id: 'res-' + mt.slug", js)
+
     def test_presets_e_pares_apontam_para_modelos_do_benchmark(self):
         conhecidos = set(catalogo.ROTULOS)
         for _, _, _, ids in site.PRESETS:
