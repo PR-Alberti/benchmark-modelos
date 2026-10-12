@@ -9,6 +9,9 @@ mesmo treino, o mesmo teste (1.000 imagens compartilhadas) e as mesmas métricas
 | **FRR**, ridge fracionária ([Rokem & Kay, 2020](https://doi.org/10.1093/gigascience/giaa133)) | `src/run_frr.py` | embedding CLIP ViT-bigG |
 | **MindEye1** ([Scotti et al., 2023](https://arxiv.org/abs/2305.18274)) | `mindeye1/src/Train_MindEye.py` | embedding CLIP ViT-L/14 + imagem (Versatile Diffusion) |
 
+Site com início, uso e resultados interativos de todos os modelos: [`results/site/index.html`](results/site/index.html)
+(abre direto do disco; regenerado ao fim de cada treino e avaliação).
+
 ## Instalação
 
 ```bash
@@ -60,6 +63,7 @@ treina.roda("meu_modelo", {
     "modelo": "frr",                        # frr | mindeye2 | mindeye1
     "hiper": {"seed": 42},
     "dataset": {"sessoes": 40, "classes": {"animal": ["sup_animal"]}, "minimo": 10},
+    "rotulo": "FRR · só animais",           # opcional: o nome no site
 }, dry_run=True)
 ```
 
@@ -90,6 +94,7 @@ MODEL_NAME=<nome> DATASET=train_logs/<nome>/dataset.json NUM_SESSIONS=40 scripts
 # Benchmark
 scripts/run_benchmark.sh                                              # MindEye2 + FRR, tudo
 python src/make_benchmark.py                                          # remonta BENCHMARK.md e a página
+python src/make_site.py                                               # regenera o site (results/site)
 ```
 
 ### Resultado de um modelo
@@ -103,6 +108,8 @@ cd src && python -c "from mindeye_ridge import resultados; print(resultados.retr
 | `train_logs/<nome>/` | checkpoint, logs, `dataset.json`, `experimento.json` (MindEye1: `mindeye1/train_logs/<nome>/`) |
 | `results/tables/` | métricas finais |
 | `results/evals/<nome>/` | tensores de embedding e reconstrução |
+| `results/site/index.html` | o site: todos os modelos, com tabelas, gráficos, curvas, galeria e fichas |
+| `results/site/modelos/<nome>.json` | o registro do modelo no site (o que foi extraído de cada resultado) |
 | [BENCHMARK.md](BENCHMARK.md), `results/benchmark/index.html` | tabelas e página do benchmark |
 
 ## Combinações possíveis
@@ -171,6 +178,7 @@ dataset completo das N primeiras sessões; os dicionários estão em `BENCHMARK`
 | MindEye2 | `subj01_ridgeonly_1sess_prior_seed2` | 1 | `seed=2` | 93,2 | 88,1 |
 | MindEye2 | `subj01_ridgeonly_1sess_noprior_seed42` | 1 | `prior=False`, `seed=42` | 78,4 | 72,6 |
 | MindEye2 | `subj01_ridgeonly_40sess_prior` | 40 | `num_epochs=20`, `frozen_fp16` | 99,9 | 99,5 |
+| MindEye2 | `subj01_ridgeonly_40sess_4096blurry` | 40 | `hidden_dim=4096`, `blurry`, `num_epochs=20` | 100,0 | 99,4 |
 | MindEye1 | `subj01_me1_1sess` | 1 | padrão + low-level | 30,6 | 23,2 |
 | MindEye1 | `subj01_me1_1sess_semlowlevel` | 1 | padrão, sem low-level | 30,6 | 23,2 |
 | MindEye1 | `subj01_me1_40sess` | 40 | padrão + low-level | 94,5 | 87,6 |
@@ -187,11 +195,11 @@ repetições nos quatro modos de agregação, e 3.000 × 1, 1.500 × 2, 1.000 ×
 |---|---|
 | `setup/` | preparar a máquina |
 | `scripts/` | rodar os modelos |
-| `src/` | MindEye2, FRR, `treina.py`, `experimentos.py`, página do benchmark |
+| `src/` | MindEye2, FRR, `treina.py`, `experimentos.py`, o site (`make_site.py`) e a página do benchmark |
 | `src/mindeye_ridge/` | biblioteca: dados, FRR, métricas, semântica, dataset controlado, agregação, resultados |
 | `mindeye1/` | MindEye1 adaptado |
 | `notebooks/` | `treino.ipynb`, `classificacao_semantica.ipynb`, originais do MindEye2 |
-| `results/` | tabelas e página (no git); tensores e logs (fora) |
+| `results/` | tabelas, site e página (no git); tensores e logs (fora) |
 | `train_logs/` | checkpoints (fora do git) |
 | `tests/` | testes |
 | `docs/` | [NOVO_COMPUTADOR](docs/NOVO_COMPUTADOR.md), [SETUP](docs/SETUP.md), [MINDEYE1](docs/MINDEYE1.md), [EXPERIMENTO](docs/EXPERIMENTO.md), [ESTAGIO](docs/ESTAGIO.md) |

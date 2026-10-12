@@ -14,6 +14,8 @@ Cada experimento:
     "dataset": campos do ConfigDataset (src/mindeye_ridge/dataset_controlado.py):
                sessoes, n_imagens, repeticoes, classes, regra, minimo, maximo_outros,
                balanceado, semente, agregacao; vazio = o dataset completo (40 sessoes)
+    "rotulo":  opcional, o nome que o modelo ganha no site (results/site); sem ele, o site monta
+               um nome a partir da configuracao
 
 "agregacao" diz como o treino usa as repeticoes de cada imagem (src/mindeye_ridge/agregacao.py):
 "exibicoes" (cada trial uma amostra), "media" (media dos betas das repeticoes), "sorteio" (uma

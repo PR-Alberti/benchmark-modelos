@@ -31,3 +31,4 @@ $ENVP/bin/python run_frr.py --model_name="$MODEL_NAME" --data_path="$DATA" --sub
     --num_sessions="$NUM_SESSIONS" ${DATASET:+--dataset="$DATASET"} $EXTRA \
     2>&1 | grep --line-buffered -v -E "Warning|pynvml|warnings.warn|pkg_resources" \
     | tee -a "$TRAIN_LOGS/$MODEL_NAME/frr.log"
+atualiza_site

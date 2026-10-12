@@ -47,3 +47,4 @@ $ENVP/bin/python -u final_evaluations.py \
 
 echo "=== tabela salva em $TABLES/ ==="
 ls -la $TABLES/ 2>/dev/null | tail -5
+atualiza_site

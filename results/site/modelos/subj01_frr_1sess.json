@@ -1,0 +1,219 @@
+{
+ "concluido": null,
+ "config": {
+  "dataset": {
+   "agregacao": null,
+   "balanceado": false,
+   "classes": null,
+   "maximo_outros": 2,
+   "minimo": 10,
+   "n_imagens": null,
+   "regra": "exclusiva",
+   "repeticoes": null,
+   "semente": 0,
+   "sessoes": 1,
+   "subj": 1
+  },
+  "hiper": {
+   "chunk": 8192,
+   "folds": 5,
+   "fracs": null,
+   "global_fraction": false,
+   "grid": "doerig",
+   "seed": 42
+  },
+  "modelo": "frr"
+ },
+ "config_descritiva": false,
+ "config_erro": null,
+ "config_fonte": "src/experimentos.py",
+ "curva": null,
+ "espaco_clip": "ViT-bigG/14",
+ "familia": "frr",
+ "fontes": [
+  "results/tables/subj01_frr_1sess_frr.json"
+ ],
+ "frr": {
+  "config": {
+   "agregacao": "exibicoes",
+   "amostras_treino": 688,
+   "bias_step": 0.2,
+   "bloco": 8192,
+   "dataset": null,
+   "dim_alvo": 425984,
+   "dobras": 5,
+   "exibicoes_treino": 688,
+   "grade": "doerig",
+   "imagens_teste": 1000,
+   "imagens_treino": 536,
+   "semente": 42,
+   "sessoes": 1,
+   "sujeito": 1,
+   "voxels": 15724
+  },
+  "custo": {
+   "embeddings_calculados_nesta_corrida": 0,
+   "gpu": "NVIDIA RTX A4500",
+   "pico_gpu_gib": 0.6026468276977539,
+   "pico_ram_gib": 3.0178184509277344,
+   "segundos_ajuste": 10.098098993301392,
+   "segundos_embedding_alvos": 0.0002014636993408203,
+   "segundos_total": 47.87026500701904
+  },
+  "cv": {
+   "cv_r2_escolhida": 0.007160237766169475,
+   "cv_r2_por_fracao": [
+    0.004135241064210815,
+    -0.001368471577825714,
+    -0.009632423111054278,
+    -0.018935616281965828,
+    -0.02885736297051067,
+    -0.03960207971733509,
+    -0.050270443573425805,
+    -0.0614266724849406,
+    -0.07259438761259207,
+    -0.08409120487447486,
+    -0.09561819918763348,
+    -0.10733403754832405,
+    -0.11926913843965758,
+    -0.13119508292396853,
+    -0.14339761759608338,
+    -0.15583737479078774,
+    -0.16807174383201184,
+    -0.1806777705791407,
+    -0.19332444398271464,
+    -0.20619432754182876
+   ],
+   "fracs": [
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9,
+    0.95,
+    1.0
+   ],
+   "histograma_fracoes": [
+    368051,
+    42769,
+    10809,
+    2856,
+    871,
+    342,
+    143,
+    86,
+    35,
+    13,
+    5,
+    2,
+    2,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "pares_fracao_alvo_inalcancaveis": 0,
+   "por_alvo": true,
+   "posto_final": 687,
+   "segundos_cv": 8.345715761184692,
+   "segundos_final": 0.23894023895263672,
+   "segundos_total": 8.584656000137329
+  },
+  "embedding": {
+   "cosseno_centrado_medio": 0.11729031056165695,
+   "cosseno_medio": 0.5058859586715698,
+   "pearson_mediana": 0.4891238212585449,
+   "pearson_medio": 0.4898219108581543
+  },
+  "hubness": {
+   "cos_alvo_media_treino": 0.49505114555358887,
+   "cos_previsao_media_treino": 0.9806435704231262
+  },
+  "parametros_lineares": 6698172416
+ },
+ "grupo": "benchmark",
+ "id": "subj01_frr_1sess",
+ "iniciado": null,
+ "legendas": null,
+ "notas": [],
+ "publicada": false,
+ "receita": {
+  "partida": null,
+  "prior": "sem prior, sem rede",
+  "treino": "20 frações · CV 5 dobras · uma fração por dimensão"
+ },
+ "resumo_dataset": {
+  "exibicoes": 688,
+  "imagens_unicas": 536,
+  "repeticoes": {
+   "1": 413,
+   "2": 94,
+   "3": 29
+  },
+  "sessoes_usadas": 1
+ },
+ "retrieval": {
+  "bwd": {
+   "ic95": [
+    0.02651983572219377,
+    0.03636905478264327
+   ],
+   "media": 0.03144444525241852
+  },
+  "fonte": "frr",
+  "fwd": {
+   "ic95": [
+    0.5404380252865871,
+    0.5597842165919223
+   ],
+   "media": 0.5501111209392547
+  }
+ },
+ "retrieval_centrado": {
+  "bwd": {
+   "ic95": [
+    0.3070664181509798,
+    0.3271558171312824
+   ],
+   "media": 0.3171111176411311
+  },
+  "fwd": {
+   "ic95": [
+    0.5526468022930081,
+    0.5706865683925694
+   ],
+   "media": 0.5616666853427887
+  }
+ },
+ "rotulo": "FRR · 1 sessão",
+ "sessoes": 1,
+ "status": "completo",
+ "status_txt": "retrieval e embedding",
+ "tempo_s": 10.098098993301392,
+ "valores": {
+  "refinada": {
+   "BwdRetrieval": 0.03144444525241852,
+   "FwdRetrieval": 0.5501111209392547
+  },
+  "unclip": {
+   "BwdRetrieval": 0.03144444525241852,
+   "FwdRetrieval": 0.5501111209392547
+  }
+ }
+}

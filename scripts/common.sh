@@ -57,4 +57,13 @@ confere_dataset() {
     echo "$atual" > "$dir/dataset.sha1"
 }
 
+# O site (results/site) com o que houver de resultado: os scripts de treino e de avaliacao chamam
+# isto ao terminar, e um modelo novo entra no site sozinho (src/make_site.py). O site e um extra:
+# se a geracao falhar, o script que chamou continua, so com um aviso.
+atualiza_site() {
+    mkdir -p "$LOGS"
+    "$ENVP/bin/python" "$SRC/make_site.py" --quieto >> "$LOGS/site.log" 2>&1 \
+        || echo "aviso: o site (results/site) nao foi atualizado; veja $LOGS/site.log" >&2
+}
+
 cd "$SRC"

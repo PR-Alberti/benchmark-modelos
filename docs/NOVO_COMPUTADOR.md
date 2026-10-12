@@ -171,6 +171,16 @@ Num subconjunto, o tempo cai com o número de exibições.
 
 ## 5. Ver o resultado
 
+Todos os modelos treinados aparecem no site `results/site/index.html`, regenerado ao fim de cada
+treino e de cada avaliação. Numa máquina sem interface, copie a pasta para o seu computador e abra o
+`index.html` no navegador:
+
+```bash
+scp -r usuario@maquina:~/benchmark-modelos/results/site ./site-benchmark
+```
+
+Pelo terminal, o retrieval de um modelo:
+
 ```bash
 cd ~/benchmark-modelos/src
 ~/envs/fmri/bin/python -c "

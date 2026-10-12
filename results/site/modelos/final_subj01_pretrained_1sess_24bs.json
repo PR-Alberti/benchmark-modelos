@@ -1,0 +1,137 @@
+{
+ "_params_sig": [
+  8909277522,
+  1790683820113341759
+ ],
+ "concluido": null,
+ "config": {
+  "dataset": {
+   "sessoes": 1
+  },
+  "hiper": {
+   "batch_size": 24,
+   "blurry": true,
+   "hidden_dim": 4096,
+   "num_epochs": 150,
+   "prior": true,
+   "treino": "fine-tune completo"
+  },
+  "modelo": "mindeye2"
+ },
+ "config_descritiva": true,
+ "config_erro": null,
+ "config_fonte": "conhecida",
+ "curva": null,
+ "espaco_clip": "ViT-bigG/14",
+ "familia": "artigo",
+ "fontes": [
+  "results/tables/final_subj01_pretrained_1sess_24bs_all_enhancedrecons.csv",
+  "results/tables/final_subj01_pretrained_1sess_24bs_all_recons.csv"
+ ],
+ "grupo": "benchmark",
+ "id": "final_subj01_pretrained_1sess_24bs",
+ "iniciado": null,
+ "legendas": {
+  "CLIP-B_brain_img": 0.6773219108581543,
+  "CLIP-B_brain_ref": 0.670769214630127,
+  "CLIP-B_img_ref": 0.8392383456230164,
+  "CLIP-B_relative": 0.8070673942565918,
+  "CLIP-L_brain_img": 0.5759267210960388,
+  "CLIP-L_brain_ref": 0.552534282207489,
+  "CLIP-L_img_ref": 0.7765910625457764,
+  "CLIP-L_relative": 0.741608738899231,
+  "Meteor_brain_img": 0.25784296213946856,
+  "Meteor_brain_ref": 0.19735007281892689,
+  "Meteor_img_ref": 0.4196759954156638,
+  "Meteor_relative": 0.6143857760653921,
+  "Rouge1_brain_img": 0.365505613890961,
+  "Rouge1_brain_ref": 0.2975628142117613,
+  "Rouge1_img_ref": 0.5066996914549835,
+  "Rouge1_relative": 0.7213456413233941,
+  "RougeL_brain_img": 0.34450836386761974,
+  "RougeL_brain_ref": 0.27633461424642936,
+  "RougeL_img_ref": 0.46368458943691104,
+  "RougeL_relative": 0.74297997327447,
+  "Sentence_brain_img": 0.35831230878829956,
+  "Sentence_brain_ref": 0.33409741520881653,
+  "Sentence_img_ref": 0.7190179228782654,
+  "Sentence_relative": 0.49833571910858154
+ },
+ "notas": [
+  "Modelo publicado no artigo do MindEye2, baixado e reconstruído aqui com o mesmo pipeline dos outros: fine-tune completo a partir do pré-treino multi-sujeito, 150 épocas em batch 24 numa máquina com 8 A100."
+ ],
+ "params": {
+  "backbone": 1903020028,
+  "diffusion_prior": 259866596,
+  "ridge": 64409600
+ },
+ "publicada": false,
+ "receita": {
+  "partida": "final_multisubject_subj01",
+  "prior": "fine-tune completo",
+  "treino": "150 épocas · batch 24 · 8×A100"
+ },
+ "resumo_dataset": {
+  "exibicoes": 688,
+  "imagens_unicas": 536,
+  "repeticoes": {
+   "1": 413,
+   "2": 94,
+   "3": 29
+  },
+  "sessoes_usadas": 1
+ },
+ "retrieval": {
+  "bwd": {
+   "media": 0.7761111279328664
+  },
+  "fonte": "final_evaluations",
+  "fwd": {
+   "media": 0.9393333494663239
+  }
+ },
+ "retrieval_centrado": null,
+ "rotulo": "Artigo · fine-tune completo · 1 sessão",
+ "sessoes": 1,
+ "status": "completo",
+ "status_txt": "métricas completas",
+ "tempo_s": null,
+ "valores": {
+  "refinada": {
+   "AlexNet(2)": 0.8764544544544545,
+   "AlexNet(5)": 0.9313133133133132,
+   "Brain Corr. V1": 0.3202446401119232,
+   "Brain Corr. V2": 0.33946818113327026,
+   "Brain Corr. V3": 0.34440869092941284,
+   "Brain Corr. V4": 0.31639182567596436,
+   "Brain Corr. higher_vis": 0.34722796082496643,
+   "Brain Corr. nsd_general": 0.349958598613739,
+   "BwdRetrieval": 0.7761111279328664,
+   "CLIP": 0.8168358358358359,
+   "EffNet-B": 0.8038725408928551,
+   "FwdRetrieval": 0.9393333494663239,
+   "InceptionV3": 0.8300540540540541,
+   "PixCorr": 0.236934021120171,
+   "SSIM": 0.42139044568777195,
+   "SwAV": 0.4572121222683271
+  },
+  "unclip": {
+   "AlexNet(2)": 0.8675765765765765,
+   "AlexNet(5)": 0.9388598598598599,
+   "Brain Corr. V1": 0.34220656752586365,
+   "Brain Corr. V2": 0.3616364300251007,
+   "Brain Corr. V3": 0.36568886041641235,
+   "Brain Corr. V4": 0.33289632201194763,
+   "Brain Corr. higher_vis": 0.3540303707122803,
+   "Brain Corr. nsd_general": 0.3666294515132904,
+   "BwdRetrieval": 0.7761111279328664,
+   "CLIP": 0.8236076076076077,
+   "EffNet-B": 0.8079101874063891,
+   "FwdRetrieval": 0.9393333494663239,
+   "InceptionV3": 0.8406966966966967,
+   "PixCorr": 0.20113492178453127,
+   "SSIM": 0.3370822905186827,
+   "SwAV": 0.45437311114159334
+  }
+ }
+}
