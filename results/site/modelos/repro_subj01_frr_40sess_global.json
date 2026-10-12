@@ -1,6 +1,6 @@
 {
  "commit": "106a21a577c89638fba933938bd78b1f37640b13",
- "concluido": null,
+ "concluido": true,
  "config": {
   "dataset": {
    "agregacao": null,
