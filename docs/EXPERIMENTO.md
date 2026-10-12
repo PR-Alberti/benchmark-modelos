@@ -318,7 +318,8 @@ Em 30/09/2026 os quatro braços ridge-only e os dois modelos publicados no artig
 reconstrução, refinamento e as métricas do `final_evaluations.py`. Tabelas em
 [BENCHMARK.md](../BENCHMARK.md); galeria de reconstruções lado a lado, curvas de
 treino e ruído em `results/benchmark/index.html`. Para refazer tudo:
-`./scripts/run_benchmark.sh` (~50 h numa A4500).
+`./scripts/run_benchmark.sh` (~50 h numa A4500). O que cada modelo ainda deixou de
+registrar, e o que rodar para completar, está em [REEXECUTAR.md](REEXECUTAR.md).
 
 Reconstruções refinadas, com 25% de blurry misturado nos modelos que têm o ramo,
 como no artigo:
