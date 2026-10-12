@@ -409,6 +409,7 @@ RESULTADOS = """
         <div class="trilho-pe">
           <button class="botao leve" type="button" id="sel-todos">Marcar os visíveis</button>
           <button class="botao leve" type="button" id="sel-nenhum">Limpar</button>
+          <button class="botao leve" type="button" id="dobra-todos">Recolher grupos</button>
         </div>
       </div>
     </details>

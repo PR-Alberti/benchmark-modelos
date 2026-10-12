@@ -200,8 +200,17 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 .predef button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .predef-desc { font-size: 13px; color: var(--muted); min-height: 2.6em; line-height: 1.35; }
 .grupo-modelos { display: grid; gap: 1px; }
-.grupo-cab { display: flex; align-items: center; gap: 8px; font: 600 13.5px/1.3 var(--f-sans); color: var(--ink);
-  padding: 10px 0 4px; cursor: pointer; }
+.grupo-itens { display: grid; gap: 1px; }
+.grupo-modelos.fechado .grupo-itens { display: none; }
+.buscando .grupo-modelos.fechado .grupo-itens { display: grid; }      /* o filtro procura tambem nos recolhidos */
+.grupo-cab { display: flex; align-items: center; gap: 8px; padding: 10px 0 4px 6px; }
+.dobra { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 7px; font: 600 13.5px/1.3 var(--f-sans);
+  color: var(--ink); background: none; border: 0; padding: 2px 0; cursor: pointer; text-align: left; }
+.dobra .mudo { font-weight: 400; font-size: 12.5px; }
+.dobra::after { content: ""; flex: none; align-self: center; margin: -3px 7px 0 auto; width: 6px; height: 6px;
+  border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); }
+.dobra[aria-expanded="false"]::after { transform: rotate(-45deg); margin-top: 0; }
+.dobra:hover::after { border-color: var(--ink); }
 .item-modelo { display: grid; grid-template-columns: auto 12px minmax(0, 1fr); align-items: start; gap: 2px 8px;
   padding: 5px 6px; border-radius: 3px; cursor: pointer; font-size: 14px; line-height: 1.3; }
 .item-modelo:hover { background: var(--wash); }
