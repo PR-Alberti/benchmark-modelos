@@ -16,7 +16,7 @@ from . import paths
 FONTES = {
     "frr": "FRR: 30 sorteios de 300 imagens do teste",
     "verify_retrieval": "verify_retrieval.py: 30 sorteios de 300 imagens do teste",
-    "final_evaluations": "final_evaluations.py: as 1.000 imagens do teste, em blocos de 300",
+    "final_evaluations": "final_evaluations.py: 30 sorteios de 300 imagens do teste",
     "treino": "metrics.csv da ultima epoca: 300 imagens do teste, durante o treino",
 }
 

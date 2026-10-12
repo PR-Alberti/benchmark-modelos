@@ -1,0 +1,138 @@
+{
+ "_params_sig": null,
+ "concluido": null,
+ "config": {
+  "dataset": {
+   "agregacao": null,
+   "balanceado": false,
+   "classes": null,
+   "maximo_outros": 2,
+   "minimo": 10,
+   "n_imagens": null,
+   "regra": "exclusiva",
+   "repeticoes": null,
+   "semente": 0,
+   "sessoes": 1,
+   "subj": 1
+  },
+  "hiper": {
+   "batch_size": null,
+   "blurry": false,
+   "ckpt_interval": null,
+   "frozen_fp16": null,
+   "hidden_dim": 1024,
+   "max_lr": 0.0003,
+   "num_epochs": 150,
+   "prior": true,
+   "seed": 42
+  },
+  "modelo": "mindeye2"
+ },
+ "config_descritiva": false,
+ "config_erro": null,
+ "config_fonte": "a de subj01_ridgeonly_1sess_prior (src/experimentos.py)",
+ "curva": null,
+ "espaco_clip": "ViT-bigG/14",
+ "familia": "mindeye2",
+ "fontes": [
+  "results/tables/subj01_ridgeonly_1sess_prior_rseed7_all_enhancedrecons.csv",
+  "results/tables/subj01_ridgeonly_1sess_prior_rseed7_all_recons.csv"
+ ],
+ "grupo": "benchmark",
+ "id": "subj01_ridgeonly_1sess_prior_rseed7",
+ "iniciado": null,
+ "legendas": {
+  "CLIP-B_brain_img": 0.6817795634269714,
+  "CLIP-B_brain_ref": 0.6715248823165894,
+  "CLIP-B_img_ref": 0.8392383456230164,
+  "CLIP-B_relative": 0.8123789429664612,
+  "CLIP-L_brain_img": 0.580858051776886,
+  "CLIP-L_brain_ref": 0.5542910099029541,
+  "CLIP-L_img_ref": 0.7765910625457764,
+  "CLIP-L_relative": 0.7479587197303772,
+  "Meteor_brain_img": 0.270226028596476,
+  "Meteor_brain_ref": 0.20122352302369614,
+  "Meteor_img_ref": 0.4196759954156638,
+  "Meteor_relative": 0.6438920299190174,
+  "Rouge1_brain_img": 0.37736508094906235,
+  "Rouge1_brain_ref": 0.30140993508140296,
+  "Rouge1_img_ref": 0.5066996914549835,
+  "Rouge1_relative": 0.7447509586308647,
+  "RougeL_brain_img": 0.35440319959961697,
+  "RougeL_brain_ref": 0.2797775456451408,
+  "RougeL_img_ref": 0.46368458943691104,
+  "RougeL_relative": 0.764319556166395,
+  "Sentence_brain_img": 0.3757913410663605,
+  "Sentence_brain_ref": 0.34508857131004333,
+  "Sentence_img_ref": 0.7190179228782654,
+  "Sentence_relative": 0.5226452946662903
+ },
+ "notas": [
+  "O mesmo checkpoint do Ridge 1024 + prior de 1 sessão, reconstruído com a semente 7 em vez da 42: mede quanto as métricas de imagem mudam só por reamostrar a reconstrução."
+ ],
+ "params": null,
+ "publicada": false,
+ "resumo_dataset": {
+  "exibicoes": 688,
+  "imagens_unicas": 536,
+  "repeticoes": {
+   "1": 413,
+   "2": 94,
+   "3": 29
+  },
+  "sessoes_usadas": 1
+ },
+ "retrieval": {
+  "bwd": {
+   "media": 0.8805555760860443
+  },
+  "fonte": "final_evaluations",
+  "fwd": {
+   "media": 0.9281111280123393
+  }
+ },
+ "retrieval_centrado": null,
+ "rotulo": "Ridge 1024 + prior · 1 sessão · reconstrução semente 7",
+ "sessoes": 1,
+ "status": "completo",
+ "status_txt": "métricas completas",
+ "tempo_s": null,
+ "valores": {
+  "refinada": {
+   "AlexNet(2)": 0.848964964964965,
+   "AlexNet(5)": 0.9261721721721722,
+   "Brain Corr. V1": 0.2979466915130615,
+   "Brain Corr. V2": 0.3154597878456116,
+   "Brain Corr. V3": 0.32605820894241333,
+   "Brain Corr. V4": 0.3067978620529175,
+   "Brain Corr. higher_vis": 0.3475829064846039,
+   "Brain Corr. nsd_general": 0.3480621874332428,
+   "BwdRetrieval": 0.8805555760860443,
+   "CLIP": 0.8311171171171171,
+   "EffNet-B": 0.799521592048023,
+   "FwdRetrieval": 0.9281111280123393,
+   "InceptionV3": 0.8395865865865866,
+   "PixCorr": 0.17453356146649343,
+   "SSIM": 0.34424700948943876,
+   "SwAV": 0.4592083398250845
+  },
+  "unclip": {
+   "AlexNet(2)": 0.829880880880881,
+   "AlexNet(5)": 0.930134134134134,
+   "Brain Corr. V1": 0.31559833884239197,
+   "Brain Corr. V2": 0.3292825520038605,
+   "Brain Corr. V3": 0.3341233432292938,
+   "Brain Corr. V4": 0.3099463880062103,
+   "Brain Corr. higher_vis": 0.34417828917503357,
+   "Brain Corr. nsd_general": 0.3504842519760132,
+   "BwdRetrieval": 0.8805555760860443,
+   "CLIP": 0.8138748748748749,
+   "EffNet-B": 0.8143810999901292,
+   "FwdRetrieval": 0.9281111280123393,
+   "InceptionV3": 0.8519059059059059,
+   "PixCorr": 0.16927579976631807,
+   "SSIM": 0.28306879620099246,
+   "SwAV": 0.47204905677186265
+  }
+ }
+}

@@ -1,0 +1,101 @@
+{
+ "concluido": null,
+ "config": {
+  "dataset": {
+   "sessoes": 40
+  },
+  "hiper": {
+   "batch_size": 24,
+   "blurry": true,
+   "hidden_dim": 4096,
+   "num_epochs": 150,
+   "prior": true,
+   "treino": "fine-tune completo"
+  },
+  "modelo": "mindeye2"
+ },
+ "config_descritiva": true,
+ "config_erro": null,
+ "config_fonte": "conhecida",
+ "curva": null,
+ "espaco_clip": "ViT-bigG/14",
+ "familia": "artigo",
+ "fontes": [
+  "results/tables/final_subj01_pretrained_40sess_24bs_published_all_enhancedrecons.csv",
+  "results/tables/final_subj01_pretrained_40sess_24bs_published_all_recons.csv"
+ ],
+ "grupo": "benchmark",
+ "id": "final_subj01_pretrained_40sess_24bs__publicada",
+ "iniciado": null,
+ "legendas": null,
+ "notas": [
+  "Os tensores de reconstrução divulgados pelos autores, avaliados com as mesmas métricas: conferem o pipeline de reconstrução deste repositório."
+ ],
+ "publicada": true,
+ "receita": {
+  "partida": "final_multisubject_subj01",
+  "prior": "fine-tune completo",
+  "treino": "150 épocas · batch 24 · 8×A100"
+ },
+ "resumo_dataset": {
+  "exibicoes": 27000,
+  "imagens_unicas": 9000,
+  "repeticoes": {
+   "3": 9000
+  },
+  "sessoes_usadas": 40
+ },
+ "retrieval": {
+  "bwd": {
+   "media": 0.9986666679382324
+  },
+  "fonte": "final_evaluations",
+  "fwd": {
+   "media": 0.9995555559794108
+  }
+ },
+ "retrieval_centrado": null,
+ "rotulo": "Artigo · reconstruções publicadas · 40 sessões",
+ "sessoes": 40,
+ "status": "completo",
+ "status_txt": "métricas completas",
+ "tempo_s": null,
+ "valores": {
+  "refinada": {
+   "AlexNet(2)": 0.9782372372372372,
+   "AlexNet(5)": 0.991025025025025,
+   "Brain Corr. V1": 0.3890968859195709,
+   "Brain Corr. V2": 0.38121017813682556,
+   "Brain Corr. V3": 0.3665582239627838,
+   "Brain Corr. V4": 0.33697760105133057,
+   "Brain Corr. higher_vis": 0.36063018441200256,
+   "Brain Corr. nsd_general": 0.37392014265060425,
+   "BwdRetrieval": 0.9986666679382324,
+   "CLIP": 0.9356446446446446,
+   "EffNet-B": 0.6086021905116744,
+   "FwdRetrieval": 0.9995555559794108,
+   "InceptionV3": 0.9614854854854855,
+   "PixCorr": 0.37402805493781266,
+   "SSIM": 0.43945566572820133,
+   "SwAV": 0.3384467511663345
+  },
+  "unclip": {
+   "AlexNet(2)": 0.9717807807807808,
+   "AlexNet(5)": 0.9943293293293294,
+   "Brain Corr. V1": 0.40607255697250366,
+   "Brain Corr. V2": 0.39861786365509033,
+   "Brain Corr. V3": 0.3816460072994232,
+   "Brain Corr. V4": 0.34859445691108704,
+   "Brain Corr. higher_vis": 0.36505770683288574,
+   "Brain Corr. nsd_general": 0.3861342668533325,
+   "BwdRetrieval": 0.9986666679382324,
+   "CLIP": 0.9492052052052051,
+   "EffNet-B": 0.6107327091988238,
+   "FwdRetrieval": 0.9995555559794108,
+   "InceptionV3": 0.9679509509509509,
+   "PixCorr": 0.3247395691082371,
+   "SSIM": 0.3326336246536273,
+   "SwAV": 0.33415542751918526
+  }
+ }
+}

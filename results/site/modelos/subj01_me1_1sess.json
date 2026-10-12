@@ -1,0 +1,120 @@
+{
+ "_params_sig": [
+  6026220294,
+  1790908323540663573
+ ],
+ "concluido": null,
+ "config": {
+  "dataset": {
+   "agregacao": null,
+   "balanceado": false,
+   "classes": null,
+   "maximo_outros": 2,
+   "minimo": 10,
+   "n_imagens": null,
+   "regra": "exclusiva",
+   "repeticoes": null,
+   "semente": 0,
+   "sessoes": 1,
+   "subj": 1
+  },
+  "hiper": {
+   "batch_size": null,
+   "max_lr": 0.0003,
+   "mixup_pct": 0.33,
+   "num_epochs": 240,
+   "paper": false,
+   "save_every": 10,
+   "seed": 42
+  },
+  "modelo": "mindeye1"
+ },
+ "config_descritiva": false,
+ "config_erro": null,
+ "config_fonte": "src/experimentos.py",
+ "curva": null,
+ "espaco_clip": "ViT-L/14",
+ "familia": "mindeye1",
+ "fontes": [
+  "results/tables/subj01_me1_1sess_all_recons.csv"
+ ],
+ "grupo": "benchmark",
+ "id": "subj01_me1_1sess",
+ "iniciado": null,
+ "legendas": null,
+ "notas": [],
+ "params": {
+  "net": 56055264,
+  "noise_scheduler": 1300,
+  "voxel2clip": 947579904
+ },
+ "publicada": false,
+ "receita": {
+  "partida": null,
+  "prior": "do zero, com o prior",
+  "treino": "240 épocas + 120 do baixo nível · batch 16 · Adam 8 bits"
+ },
+ "resumo_dataset": {
+  "exibicoes": 688,
+  "imagens_unicas": 536,
+  "repeticoes": {
+   "1": 413,
+   "2": 94,
+   "3": 29
+  },
+  "sessoes_usadas": 1
+ },
+ "retrieval": {
+  "bwd": {
+   "media": 0.2317777822415034
+  },
+  "fonte": "final_evaluations",
+  "fwd": {
+   "media": 0.3060000071922938
+  }
+ },
+ "retrieval_centrado": null,
+ "rotulo": "MindEye1 · 1 sessão",
+ "sessoes": 1,
+ "status": "completo",
+ "status_txt": "métricas completas",
+ "tempo_s": 10351.0,
+ "valores": {
+  "refinada": {
+   "AlexNet(2)": 0.8703513513513513,
+   "AlexNet(5)": 0.8946196196196197,
+   "Brain Corr. V1": 0.2823163568973541,
+   "Brain Corr. V2": 0.2711489498615265,
+   "Brain Corr. V3": 0.27654045820236206,
+   "Brain Corr. V4": 0.2787383794784546,
+   "Brain Corr. higher_vis": 0.35526221990585327,
+   "Brain Corr. nsd_general": 0.34447258710861206,
+   "BwdRetrieval": 0.2317777822415034,
+   "CLIP": 0.8084614614614615,
+   "EffNet-B": 0.8096725679063019,
+   "FwdRetrieval": 0.3060000071922938,
+   "InceptionV3": 0.8124564564564565,
+   "PixCorr": 0.2523602385847424,
+   "SSIM": 0.3431784337877125,
+   "SwAV": 0.46484475856986984
+  },
+  "unclip": {
+   "AlexNet(2)": 0.8703513513513513,
+   "AlexNet(5)": 0.8946196196196197,
+   "Brain Corr. V1": 0.2823163568973541,
+   "Brain Corr. V2": 0.2711489498615265,
+   "Brain Corr. V3": 0.27654045820236206,
+   "Brain Corr. V4": 0.2787383794784546,
+   "Brain Corr. higher_vis": 0.35526221990585327,
+   "Brain Corr. nsd_general": 0.34447258710861206,
+   "BwdRetrieval": 0.2317777822415034,
+   "CLIP": 0.8084614614614615,
+   "EffNet-B": 0.8096725679063019,
+   "FwdRetrieval": 0.3060000071922938,
+   "InceptionV3": 0.8124564564564565,
+   "PixCorr": 0.2523602385847424,
+   "SSIM": 0.3431784337877125,
+   "SwAV": 0.46484475856986984
+  }
+ }
+}

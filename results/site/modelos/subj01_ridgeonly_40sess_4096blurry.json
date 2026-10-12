@@ -1,0 +1,139 @@
+{
+ "_params_sig": null,
+ "concluido": null,
+ "config": {
+  "dataset": {
+   "agregacao": null,
+   "balanceado": false,
+   "classes": null,
+   "maximo_outros": 2,
+   "minimo": 10,
+   "n_imagens": null,
+   "regra": "exclusiva",
+   "repeticoes": null,
+   "semente": 0,
+   "sessoes": 40,
+   "subj": 1
+  },
+  "hiper": {
+   "batch_size": null,
+   "blurry": true,
+   "ckpt_interval": 1,
+   "frozen_fp16": true,
+   "hidden_dim": 4096,
+   "max_lr": 0.0003,
+   "num_epochs": 20,
+   "prior": true,
+   "seed": 42
+  },
+  "modelo": "mindeye2"
+ },
+ "config_descritiva": false,
+ "config_erro": null,
+ "config_fonte": "src/experimentos.py",
+ "curva": null,
+ "espaco_clip": "ViT-bigG/14",
+ "familia": "mindeye2",
+ "fontes": [
+  "results/tables/subj01_ridgeonly_40sess_4096blurry_all_enhancedrecons.csv",
+  "results/tables/subj01_ridgeonly_40sess_4096blurry_all_recons.csv"
+ ],
+ "grupo": "benchmark",
+ "id": "subj01_ridgeonly_40sess_4096blurry",
+ "iniciado": null,
+ "legendas": {
+  "CLIP-B_brain_img": 0.7505707144737244,
+  "CLIP-B_brain_ref": 0.7314819097518921,
+  "CLIP-B_img_ref": 0.8392383456230164,
+  "CLIP-B_relative": 0.8943474888801575,
+  "CLIP-L_brain_img": 0.6645075082778931,
+  "CLIP-L_brain_ref": 0.6276630759239197,
+  "CLIP-L_img_ref": 0.7765910625457764,
+  "CLIP-L_relative": 0.8556723594665527,
+  "Meteor_brain_img": 0.3451307351099409,
+  "Meteor_brain_ref": 0.24730393030637926,
+  "Meteor_img_ref": 0.4196759954156638,
+  "Meteor_relative": 0.8223742574747686,
+  "Rouge1_brain_img": 0.451440680837581,
+  "Rouge1_brain_ref": 0.3489600643774148,
+  "Rouge1_img_ref": 0.5066996914549835,
+  "Rouge1_relative": 0.8909432716275655,
+  "RougeL_brain_img": 0.42204011335145153,
+  "RougeL_brain_ref": 0.32194262161559967,
+  "RougeL_img_ref": 0.46368458943691104,
+  "RougeL_relative": 0.9101879229240037,
+  "Sentence_brain_img": 0.5166898965835571,
+  "Sentence_brain_ref": 0.472890704870224,
+  "Sentence_img_ref": 0.7190179228782654,
+  "Sentence_relative": 0.7186050415039062
+ },
+ "notas": [],
+ "params": null,
+ "publicada": false,
+ "receita": {
+  "partida": "final_multisubject_subj01",
+  "prior": "com a loss do prior",
+  "treino": "20 épocas · batch 8 · congelados em fp16"
+ },
+ "resumo_dataset": {
+  "exibicoes": 27000,
+  "imagens_unicas": 9000,
+  "repeticoes": {
+   "3": 9000
+  },
+  "sessoes_usadas": 40
+ },
+ "retrieval": {
+  "bwd": {
+   "media": 0.9938888947168986
+  },
+  "fonte": "final_evaluations",
+  "fwd": {
+   "media": 0.9997777779897054
+  }
+ },
+ "retrieval_centrado": null,
+ "rotulo": "Ridge 4096 + blurry · 40 sessões",
+ "sessoes": 40,
+ "status": "completo",
+ "status_txt": "métricas completas",
+ "tempo_s": null,
+ "valores": {
+  "refinada": {
+   "AlexNet(2)": 0.949937937937938,
+   "AlexNet(5)": 0.9831581581581581,
+   "Brain Corr. V1": 0.34989306330680847,
+   "Brain Corr. V2": 0.34898707270622253,
+   "Brain Corr. V3": 0.34315794706344604,
+   "Brain Corr. V4": 0.3240950405597687,
+   "Brain Corr. higher_vis": 0.3549779951572418,
+   "Brain Corr. nsd_general": 0.3602181077003479,
+   "BwdRetrieval": 0.9938888947168986,
+   "CLIP": 0.9207487487487487,
+   "EffNet-B": 0.6497566805245281,
+   "FwdRetrieval": 0.9997777779897054,
+   "InceptionV3": 0.9397727727727727,
+   "PixCorr": 0.3385886166102067,
+   "SSIM": 0.43118968223877435,
+   "SwAV": 0.363424703697236
+  },
+  "unclip": {
+   "AlexNet(2)": 0.9437417417417417,
+   "AlexNet(5)": 0.9855365365365366,
+   "Brain Corr. V1": 0.3658243715763092,
+   "Brain Corr. V2": 0.36397236585617065,
+   "Brain Corr. V3": 0.35481297969818115,
+   "Brain Corr. V4": 0.3323330283164978,
+   "Brain Corr. higher_vis": 0.3560609221458435,
+   "Brain Corr. nsd_general": 0.3695358335971832,
+   "BwdRetrieval": 0.9938888947168986,
+   "CLIP": 0.922009009009009,
+   "EffNet-B": 0.671810991110056,
+   "FwdRetrieval": 0.9997777779897054,
+   "InceptionV3": 0.9502022022022022,
+   "PixCorr": 0.2913562047943056,
+   "SSIM": 0.33678075579333155,
+   "SwAV": 0.3753972051082531
+  }
+ }
+}

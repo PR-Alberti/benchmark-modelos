@@ -1,0 +1,160 @@
+<div class="leitura">
+  <nav class="indice" aria-label="Nesta página">
+    <p class="olho">Nesta página</p>
+    <a href="#inicio-projeto">O projeto</a>
+    <a href="#inicio-repositorio">O repositório</a>
+    <a href="#inicio-maquina">Preparar uma máquina</a>
+    <a href="#inicio-git">Fluxo com git</a>
+    <a href="#inicio-site">Este site</a>
+  </nav>
+  <div class="texto">
+    <header class="abertura">
+      <p class="olho">NSD · sujeito 1 · fMRI → imagem</p>
+      <h1>Quanto fMRI cada modelo precisa para recuperar o que a pessoa viu</h1>
+      <p class="lede">Três modelos de decodificação treinados nas mesmas exibições do Natural Scenes Dataset, testados
+        nas mesmas 1.000 imagens e medidos com as mesmas métricas. O repositório também treina qualquer um deles num
+        subconjunto controlado dos dados: menos sessões, menos imagens, menos repetições ou só algumas classes semânticas.</p>
+      <dl class="fatos">
+        <div><dt>Dados</dt><dd>NSD, sujeito 1 · 15.724 voxels (nsdgeneral)</dd></div>
+        <div><dt>Treino</dt><dd>até 40 sessões · 27.000 exibições de 9.000 imagens</dd></div>
+        <div><dt>Teste</dt><dd>1.000 imagens compartilhadas · 3 repetições cada</dd></div>
+        <div><dt>Acaso no retrieval</dt><dd>1 em 300 = 0,33%</dd></div>
+        <div><dt>Neste site</dt><dd>{{n_modelos}} modelos com resultado · {{n_planejados}} planejados</dd></div>
+        <div><dt>GPU</dt><dd>1 × RTX A4500 · 20 GB</dd></div>
+      </dl>
+      <div class="atalhos">
+        <a class="atalho" href="#resumo"><b>Resultados</b><span>Tabelas, gráficos, curvas e galeria, com os modelos
+          que você escolher.</span></a>
+        <a class="atalho" href="#uso"><b>Como usar</b><span>Os modelos, a avaliação e como treinar num dataset
+          controlado, com um simulador.</span></a>
+        <a class="atalho" href="#inicio-maquina"><b>Preparar uma máquina</b><span>Do computador zerado ao primeiro
+          treino, só com terminal.</span></a>
+      </div>
+    </header>
+
+    <section class="secao" id="inicio-projeto">
+      <header><p class="olho">Contexto</p><h2>O projeto</h2></header>
+      <p>Os modelos leem a resposta do córtex visual a uma imagem (os betas de fMRI de cada exibição) e recuperam o que
+        a pessoa viu: o embedding CLIP da imagem e, nos modelos com gerador, uma reconstrução. A comparação vale porque
+        todos treinam nas mesmas exibições, são testados nas mesmas 1.000 imagens e passam pelas mesmas métricas.</p>
+      {{cartoes_familias}}
+      <p>Ao lado deles ficam os dois modelos publicados no artigo do MindEye2 (fine-tune completo, com 1 e 40 sessões),
+        baixados e reconstruídos aqui com o mesmo pipeline, como referência.</p>
+      <p>A pergunta do plano de estágio é quanto dado cada modelo precisa. Para responder, o treino varia um fator de
+        cada vez: o número de sessões, de imagens únicas e de repetições por imagem, o conteúdo semântico das imagens e
+        o jeito de usar as repetições (trials separados, média dos betas, sorteio ou combinação).</p>
+    </section>
+
+    <section class="secao" id="inicio-repositorio">
+      <header><p class="olho">Código</p><h2>O repositório</h2></header>
+      <p>Tudo está em <a href="{{repo}}">{{repo_curto}}</a>, na branch <code>main</code>. Para baixar:</p>
+      <pre><code>git clone {{repo}}.git
+cd benchmark-modelos</code></pre>
+      <div class="rolagem"><table class="tab">
+        <thead><tr><th>Pasta</th><th>O que tem</th></tr></thead>
+        <tbody>
+          <tr><td><code>setup/</code></td><td>prepara a máquina; <code>bootstrap.sh</code> faz tudo: ambiente Python, dados,
+            pesos e MindEye1</td></tr>
+          <tr><td><code>scripts/</code></td><td>roda os modelos: treino, reconstrução e avaliação de cada um</td></tr>
+          <tr><td><code>src/</code></td><td>MindEye2 e FRR, o treino por dicionário (<code>treina.py</code> e
+            <code>experimentos.py</code>) e este site (<code>make_site.py</code> e <code>report/</code>)</td></tr>
+          <tr><td><code>src/mindeye_ridge/</code></td><td>a biblioteca: leitura do NSD, FRR, métricas, classes semânticas,
+            dataset controlado e agregação das repetições</td></tr>
+          <tr><td><code>mindeye1/</code></td><td>o MindEye1 como foi publicado, com os ajustes marcados
+            <code># benchmark-modelos</code></td></tr>
+          <tr><td><code>notebooks/</code></td><td><code>treino.ipynb</code> (como treinar) e
+            <code>classificacao_semantica.ipynb</code> (de onde vêm as classes semânticas)</td></tr>
+          <tr><td><code>results/</code></td><td>o que é gerado: as métricas (<code>tables/</code>) e este site
+            (<code>site/</code>) ficam no git; tensores e logs ficam fora</td></tr>
+          <tr><td><code>docs/</code></td><td>os guias: <a href="{{repo}}/blob/main/docs/NOVO_COMPUTADOR.md">computador
+            novo</a>, <a href="{{repo}}/blob/main/docs/SETUP.md">instalação</a>,
+            <a href="{{repo}}/blob/main/docs/MINDEYE1.md">MindEye1</a>,
+            <a href="{{repo}}/blob/main/docs/EXPERIMENTO.md">o que foi feito e por quê</a>,
+            <a href="{{repo}}/blob/main/docs/ESTAGIO.md">plano de estágio</a></td></tr>
+        </tbody>
+      </table></div>
+      <p class="nota">Fora do git ficam os dados (em <code>~/mindeyev2</code>), os checkpoints (<code>train_logs/</code>) e
+        os tensores de avaliação (<code>results/evals/</code>). Este site guarda o que extraiu de cada um, então abre igual
+        num clone novo.</p>
+    </section>
+
+    <section class="secao" id="inicio-maquina">
+      <header><p class="olho">Instalação</p><h2>Preparar uma máquina nova</h2>
+        <p>Do computador zerado ao primeiro treino, só com terminal (uma máquina acessada por SSH, sem interface
+          gráfica). O guia completo, com os erros conhecidos, está em
+          <a href="{{repo}}/blob/main/docs/NOVO_COMPUTADOR.md">docs/NOVO_COMPUTADOR.md</a>.</p></header>
+      <div class="rolagem"><table class="tab">
+        <thead><tr><th>Precisa de</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>GPU</td><td>NVIDIA com 20 GB (o FRR e o MindEye2 cabem em 16 GB; o MindEye1 precisa dos 20), só o
+            driver: o CUDA vem com o PyTorch</td></tr>
+          <tr><td>RAM</td><td>30 GB (o FRR de 40 sessões chega a ~25 GB)</td></tr>
+          <tr><td>Software</td><td>git, curl, tmux e conda (ou python3.11; o 3.12 não serve, o torch 2.1 não tem wheel)</td></tr>
+          <tr><td>Dados</td><td>aceitar os <a href="https://cvnlab.slite.page/p/IB6BSeW_7o/Terms-and-Conditions">termos do
+            NSD</a>; o download usa o dataset público <code>pscotti/mindeyev2</code> do HuggingFace</td></tr>
+        </tbody>
+      </table></div>
+      <div class="rolagem"><table class="tab">
+        <thead><tr><th>Para</th><th>Download</th><th>Disco</th></tr></thead>
+        <tbody>
+          <tr><td>FRR e MindEye2 com 1 sessão (<code>bootstrap.sh --minimo</code>)</td><td class="num">~35 GB</td><td class="num">40 GB</td></tr>
+          <tr><td>FRR e MindEye2 em qualquer subconjunto das 40 sessões</td><td class="num">~43 GB</td><td class="num">60 GB</td></tr>
+          <tr><td>Tudo: reconstrução, métricas e MindEye1 (<code>bootstrap.sh</code>)</td><td class="num">~130 GB</td><td class="num">200 GB</td></tr>
+        </tbody>
+      </table></div>
+      <ol class="passos">
+        <li><h3>Ferramentas</h3>
+          <pre><code>sudo apt update &amp;&amp; sudo apt install -y git curl tmux build-essential
+curl -fsSLo /tmp/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash /tmp/miniconda.sh -b -p ~/miniconda3 &amp;&amp; ~/miniconda3/bin/conda init bash &amp;&amp; exec bash</code></pre></li>
+        <li><h3>Clonar e preparar</h3>
+          <p>Dentro do tmux, para o download sobreviver a uma queda do SSH (sair sem matar: Ctrl-b e depois d; voltar:
+            <code>tmux attach</code>). Interrompido, é só rodar de novo: continua de onde parou.</p>
+          <pre><code>tmux new -s setup
+git clone {{repo}}.git &amp;&amp; cd benchmark-modelos
+setup/bootstrap.sh --check     # diagnóstico: GPU, disco e o que falta; não baixa nada
+setup/bootstrap.sh             # tudo (ou --minimo, só 1 sessão)</code></pre>
+          <p class="nota">Só o necessário para treinar o FRR e o MindEye2 nas 40 sessões:
+            <code>setup/setup_env.sh --with-extras</code> e depois
+            <code>~/envs/fmri/bin/python setup/download_data.py --stage finetune --subj 1</code>.</p></li>
+        <li><h3>Conferir</h3>
+          <pre><code>~/envs/fmri/bin/python -m unittest discover -s tests    # "OK (skipped=3)"</code></pre></li>
+        <li><h3>Treinar</h3>
+          <p>Um treino é um dicionário; o <code>treina.py</code> faz o resto (veja <a href="#uso-treino">Como usar</a>).</p>
+          <pre><code>cd src
+~/envs/fmri/bin/python treina.py --lista                 # os experimentos de src/experimentos.py
+~/envs/fmri/bin/python treina.py &lt;nome&gt; --so_dataset    # confere o dataset sem treinar
+nohup ~/envs/fmri/bin/python treina.py &lt;nome&gt; &gt; ~/treino.log 2&gt;&amp;1 &amp;</code></pre></li>
+      </ol>
+      <p class="aviso-caixa">Os ridge-only já treinados (<code>bootstrap.sh --ckpts</code>) vêm do release do repositório
+        privado <code>mindeye2-ridge</code> e só baixam com acesso a ele. Sem isso, os modelos se retreinam com os
+        dicionários de <code>src/experimentos.py</code>.</p>
+    </section>
+
+    <section class="secao" id="inicio-git">
+      <header><p class="olho">Versionamento</p><h2>Fluxo com git</h2>
+        <p>O trabalho do dia a dia vai direto na <code>main</code>: atualizar a máquina, commitar e enviar.</p></header>
+      <pre><code>git pull --rebase              # traz o que o GitHub tem a mais e põe os seus commits por cima
+git add &lt;arquivos&gt;             # escolha o que entra (results/tables, results/site, código)
+git commit -m "o que mudou"
+git push</code></pre>
+      <ul>
+        <li><code>git status</code> e <code>git branch -vv</code> dizem onde você está: "ahead 2" são dois commits seus
+          que o GitHub não tem; "behind 1", um do GitHub que você não tem.</li>
+        <li>O <code>push</code> recusado quer dizer que o GitHub andou: rode <code>git pull --rebase</code> e envie de
+          novo. O rebase muda o hash dos seus commits, não o conteúdo.</li>
+        <li>Uma branch e um pull request só valem a pena para uma mudança que alguém precisa revisar antes de entrar.</li>
+      </ul>
+    </section>
+
+    <section class="secao" id="inicio-site">
+      <header><p class="olho">Esta página</p><h2>Este site</h2></header>
+      <p>É o arquivo <code>results/site/index.html</code>, gerado por <code>src/make_site.py</code>. Abre direto do disco,
+        sem servidor e sem internet (só as fontes vêm da rede). Os resultados se atualizam sozinhos: ao fim de cada treino
+        e de cada avaliação, os scripts regeneram o site, e um modelo novo, treinado pelo <code>treina.py</code>, aparece
+        com a configuração completa. O que conta como modelo novo e como tirar um modelo do site está em
+        <a href="#uso-novo">Como usar</a>.</p>
+      <pre><code>~/envs/fmri/bin/python src/make_site.py      # regenera na mão (segundos, se nada mudou)</code></pre>
+    </section>
+  </div>
+</div>
