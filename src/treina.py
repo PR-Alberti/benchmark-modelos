@@ -242,7 +242,7 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
 
 
 def main():
-    from experimentos import BENCHMARK, EXPERIMENTOS, TODOS
+    from experimentos import BENCHMARK, EXPERIMENTOS, REPRODUCOES, TODOS
 
     p = argparse.ArgumentParser(description="treina um experimento de src/experimentos.py")
     p.add_argument("nomes", nargs="*", help="experimentos a rodar, em sequencia")
@@ -253,7 +253,8 @@ def main():
     a = p.parse_args()
 
     if a.lista or not a.nomes:
-        for titulo, grupo in (("benchmark (ja treinados)", BENCHMARK), ("experimentos", EXPERIMENTOS)):
+        for titulo, grupo in (("benchmark (ja treinados)", BENCHMARK), ("experimentos", EXPERIMENTOS),
+                              ("reproducoes do benchmark", REPRODUCOES)):
             print(f"-- {titulo}")
             for nome, exp in grupo.items():
                 print(f"{nome:40s} {exp['modelo']:9s} hiper={exp.get('hiper', {})} dataset={exp.get('dataset', {})}")
