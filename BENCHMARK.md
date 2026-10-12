@@ -1,10 +1,10 @@
 # Benchmark ridge-only
 
-MindEye2, sujeito 1 do NSD. Quatro variações do fine-tune só da camada ridge, comparadas com os modelos publicados no artigo (fine-tune completo), com um baseline linear (FRR) que não usa rede nenhuma e com o MindEye1 treinado do zero. Mesmo teste (1.000 imagens), mesmo pipeline de reconstrução e mesmas métricas para todos.
+MindEye2, sujeito 1 do NSD. Cinco variações do fine-tune só da camada ridge, comparadas com os modelos publicados no artigo (fine-tune completo), com um baseline linear (FRR) que não usa rede nenhuma e com o MindEye1 treinado do zero. Mesmo teste (1.000 imagens), mesmo pipeline de reconstrução e mesmas métricas para todos.
 
 A versão completa, com a galeria de reconstruções, curvas de treino e seletor refinada/unCLIP, está em [results/benchmark/index.html](results/benchmark/index.html) — um arquivo só, abre offline.
 
-Gerado por `src/make_benchmark.py` em 06/10/2026 07:41 (commit `16307d6`).
+Gerado por `src/make_benchmark.py` em 12/10/2026 09:06 (commit `9bdff29`).
 
 ## Modelos
 
@@ -18,6 +18,7 @@ Gerado por `src/make_benchmark.py` em 06/10/2026 07:41 (commit `16307d6`).
 | Ridge 4096 + blurry | 1 | 4096 | sim | 64,4 M de 2.227,3 M (2,89%) | 150 épocas · batch 8 · congelados em fp16 | 2 h 41 |
 | Ridge 1024 sem prior | 1 | 1024 | não | 16,1 M de 469,5 M (3,43%) | 150 épocas · batch 16 | — |
 | Ridge 1024 + prior · 40 sessões | 40 | 1024 | não | 16,1 M de 729,3 M (2,21%) | 20 épocas · batch 16 · congelados em fp16 | 7 h 51 |
+| Ridge 4096 + blurry · 40 sessões | 40 | 4096 | sim | 64,4 M de 2.227,3 M (2,89%) | 20 épocas · batch 8 · congelados em fp16 | 12 h 22 |
 | Paper · 1 sessão | 1 | 4096 | sim | todos (2.227,3 M) | 150 épocas · batch 24 · 8×A100 | — |
 | Paper · 40 sessões | 40 | 4096 | sim | todos (2.227,3 M) | 150 épocas · batch 24 · 8×A100 | — |
 
@@ -50,7 +51,8 @@ Gerado por `src/make_benchmark.py` em 06/10/2026 07:41 (commit `16307d6`).
 | FRR · 40 sessões (só retrieval, sem reconstrução) | — | — | — | — | — | — | — | — | 96,4% | 37,7% |
 | MindEye1 · 40 sessões (sem refinamento: a mesma reconstrução nas duas abas) | **0,382** | 0,347 | 96,5% | 98,0% | 94,6% | 92,9% | 0,631 | 0,356 | 94,5% | 87,6% |
 | Ridge 1024 + prior · 40 sessões | 0,277 | 0,383 | 94,5% | 98,2% | 94,7% | 92,3% | 0,645 | 0,364 | 99,9% | 99,5% |
-| Paper · 40 sessões (nossa execução) | 0,373 | **0,432** | **97,5%** | **99,2%** | **96,0%** | **93,6%** | **0,606** | **0,331** | **100,0%** | **99,9%** |
+| Ridge 4096 + blurry · 40 sessões | 0,339 | 0,431 | 95,0% | 98,3% | 94,0% | 92,1% | 0,650 | 0,363 | **100,0%** | 99,4% |
+| Paper · 40 sessões (nossa execução) | 0,373 | **0,432** | **97,5%** | **99,2%** | **96,0%** | **93,6%** | **0,606** | **0,331** | 100,0% | **99,9%** |
 | ↳ reconstruções publicadas pelos autores | 0,374 | 0,439 | 97,8% | 99,1% | 96,1% | 93,6% | 0,609 | 0,338 | 100,0% | 99,9% |
 
 ## Reconstrução — unCLIP (sem refinar)
@@ -67,6 +69,7 @@ Gerado por `src/make_benchmark.py` em 06/10/2026 07:41 (commit `16307d6`).
 | **40 sessões · ~40 h de fMRI, 30.000 exibições** | | | | | | | | |
 | MindEye1 · 40 sessões (sem refinamento: a mesma reconstrução nas duas abas) | **0,382** | **0,347** | 96,5% | 98,0% | 94,6% | 92,9% | 0,631 | 0,356 |
 | Ridge 1024 + prior · 40 sessões | 0,271 | 0,330 | 93,5% | 98,3% | 95,3% | 92,1% | 0,669 | 0,382 |
+| Ridge 4096 + blurry · 40 sessões | 0,291 | 0,337 | 94,4% | 98,6% | 95,0% | 92,2% | 0,672 | 0,375 |
 | Paper · 40 sessões (nossa execução) | 0,324 | 0,332 | **96,9%** | **99,4%** | **96,7%** | **95,1%** | **0,610** | **0,332** |
 | ↳ reconstruções publicadas pelos autores | 0,325 | 0,333 | 97,2% | 99,4% | 96,8% | 94,9% | 0,611 | 0,334 |
 
@@ -84,6 +87,7 @@ Gerado por `src/make_benchmark.py` em 06/10/2026 07:41 (commit `16307d6`).
 | **40 sessões · ~40 h de fMRI, 30.000 exibições** | | | | | | |
 | MindEye1 · 40 sessões (sem refinamento: a mesma reconstrução nas duas abas) | 0,354 | 0,334 | 0,317 | 0,310 | 0,302 | 0,352 |
 | Ridge 1024 + prior · 40 sessões | 0,371 | 0,357 | 0,361 | 0,354 | 0,332 | 0,362 |
+| Ridge 4096 + blurry · 40 sessões | 0,360 | 0,350 | 0,349 | 0,343 | 0,324 | 0,355 |
 | Paper · 40 sessões (nossa execução) | **0,380** | **0,395** | **0,388** | **0,372** | **0,340** | **0,365** |
 | ↳ reconstruções publicadas pelos autores | 0,374 | 0,389 | 0,381 | 0,367 | 0,337 | 0,361 |
 

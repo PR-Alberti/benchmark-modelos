@@ -13,6 +13,7 @@
 #   subj01_ridgeonly_1sess_4096blurry   4096 + blurry, com prior, 1 sessao
 #   subj01_ridgeonly_1sess              1024, sem prior, 1 sessao
 #   subj01_ridgeonly_40sess_prior       1024, com prior, 40 sessoes
+#   subj01_ridgeonly_40sess_4096blurry  4096 + blurry, com prior, 40 sessoes
 # Referencias (fine-tune completo, checkpoints publicados):
 #   final_subj01_pretrained_1sess_24bs  e  final_subj01_pretrained_40sess_24bs
 set -e
@@ -99,6 +100,7 @@ frr subj01_frr_40sess_ext 40 --grid extended
 # treinos primeiro: sao os passos com mais risco (memoria), melhor falhar cedo
 treina subj01_ridgeonly_1sess_4096blurry BLURRY=1 HIDDEN_DIM=4096 CKPT_INTERVAL=10
 treina subj01_ridgeonly_40sess_prior NUM_SESSIONS=40 NUM_EPOCHS=20 CKPT_INTERVAL=1 FROZEN=1
+treina subj01_ridgeonly_40sess_4096blurry BLURRY=1 HIDDEN_DIM=4096 NUM_SESSIONS=40 NUM_EPOCHS=20 CKPT_INTERVAL=1
 
 # Nos ridge-only, backbone e prior sao os do ckpt de partida (FROZEN_CKPT):
 # o sem prior nao tem prior no ckpt, e os treinados com congelados em fp16
@@ -122,6 +124,10 @@ avalia subj01_ridgeonly_1sess_4096blurry enhanced
 reconstroi subj01_ridgeonly_40sess_prior 1024 noblurry FROZEN_CKPT="$MS1024"
 avalia subj01_ridgeonly_40sess_prior base
 avalia subj01_ridgeonly_40sess_prior enhanced
+
+reconstroi subj01_ridgeonly_40sess_4096blurry 4096 blurry FROZEN_CKPT="$MS4096"
+avalia subj01_ridgeonly_40sess_4096blurry base
+avalia subj01_ridgeonly_40sess_4096blurry enhanced
 
 reconstroi final_subj01_pretrained_40sess_24bs 4096 blurry
 avalia final_subj01_pretrained_40sess_24bs base
