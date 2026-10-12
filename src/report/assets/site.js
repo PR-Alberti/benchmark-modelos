@@ -68,8 +68,8 @@
   var MODELOS = D.modelos;
   var POR_ID = {};
   MODELOS.forEach(function (m) { POR_ID[m.id] = m; });
-  var METRICAS = D.metricas, MET = {};
-  METRICAS.forEach(function (m) { MET[m.id] = m; });
+  var METRICAS = D.metricas, MET = {}, POR_SLUG = {};
+  METRICAS.forEach(function (m) { MET[m.id] = m; POR_SLUG[m.slug] = m; });
   var FAM = {};
   D.familias.forEach(function (f) { FAM[f.id] = f; });
   var DEGRAUS = [0, 13, -9, 23, -16, 7, 30, -4, 18, -12, 27, 3, -19, 11];
@@ -206,6 +206,10 @@
     if (NOMES_ABAS[t]) { pag = 'resultados'; aba = t; }
     else if (t === 'resultados') pag = 'resultados';
     else if (t === 'uso' || t === 'inicio') pag = t;
+    else if (t.slice(0, 4) === 'res-' && POR_SLUG[t.slice(4)]) {      // os resultados de uma metrica
+      E.grupo = POR_SLUG[t.slice(4)].grupo;
+      pag = 'resultados'; aba = 'graficos'; alvo = t;
+    }
     else {
       var el = doc.getElementById(t), p = el && el.closest('.pagina');
       if (p) { pag = p.getAttribute('data-pag'); alvo = t; }
@@ -221,7 +225,13 @@
     if (pag === 'uso') iniciaSimulador();
     if (alvo) {
       var el = doc.getElementById(alvo), suave = !primeira;
-      if (el) requestAnimationFrame(function () { el.scrollIntoView({behavior: suave ? 'smooth' : 'instant', block: 'start'}); });
+      if (el) requestAnimationFrame(function () {
+        // a linha de uma metrica vai para o meio da tela, com o cabecalho da tabela a vista
+        el.scrollIntoView({behavior: suave ? 'smooth' : 'instant', block: /^def-/.test(alvo) ? 'center' : 'start'});
+        if (/^(def|res)-/.test(alvo)) {            // veio do nome de uma metrica: marca onde ela esta
+          el.classList.remove('alvo'); void el.offsetWidth; el.classList.add('alvo');
+        }
+      });
     } else if (trocou) {
       window.scrollTo(0, 0);
     }
@@ -376,6 +386,10 @@
   }
   function vazio(texto, acao) {
     return h('div', {class: 'vazio'}, h('p', {texto: texto}), acao || null);
+  }
+  // o nome de uma metrica, ligado a linha que a explica em Como usar > A avaliacao
+  function eloDef(mt, texto) {
+    return h('a', {class: 'elo-metrica', href: '#def-' + mt.slug, title: mt.nome + ': ' + mt.desc + '. Clique para ver em Como usar.', texto: texto || mt.nome});
   }
   function opcoesTipo() {
     return segmentado('Reconstrução', [['refinada', 'Refinadas', null, 'img2img guiado pela legenda prevista; nos modelos com ramo blurry, 75% refinada + 25% borrada, como no artigo'],
@@ -551,7 +565,7 @@
     var painel = h('section', {class: 'painel'});
     var mt = MET[E.resumoMet] || MET.BwdRetrieval;
     painel.appendChild(h('header', null, h('b', {texto: 'De 1 para 40 sessões'}),
-      h('span', {texto: 'Cada modelo marcado na lista, treinado com ~1 h e com ~40 h de fMRI. ' + (mt.nome || mt.rotulo) + (mt.maior ? ' (maior é melhor)' : ' (menor é melhor)') + '.'})));
+      h('span', null, 'Cada modelo marcado na lista, treinado com ~1 h e com ~40 h de fMRI. ', eloDef(mt), (mt.maior ? ' (maior é melhor)' : ' (menor é melhor)') + '.')));
     painel.appendChild(h('div', {class: 'controles'}, segmentado('Métrica', opcoes.map(function (id) { return [id, MET[id].rotulo]; }), mt.id,
       function (val) { E.resumoMet = val; guarda(); renderAba(); })));
     var caixaSvg = h('div', {class: 'svg-caixa'});
@@ -635,7 +649,7 @@
 
   // ------------------------------------------------------------------ vista: tabela
   function renderTabela(v) {
-    v.appendChild(cabecalho('Tabela', 'Todas as métricas dos modelos selecionados. Clique no nome de uma coluna para ordenar. Em destaque, o melhor valor da coluna entre os selecionados (sem contar as reconstruções publicadas); a barrinha mostra a posição de cada valor entre o pior e o melhor. A última linha é a amplitude (maior − menor), que serve de régua quando a seleção difere só na semente.'));
+    v.appendChild(cabecalho('Tabela', 'Todas as métricas dos modelos selecionados. Clique no nome de uma métrica para ver o que ela mede, e em ↕ para ordenar pela coluna. Em destaque, o melhor valor da coluna entre os selecionados (sem contar as reconstruções publicadas); a barrinha mostra a posição de cada valor entre o pior e o melhor. A última linha é a amplitude (maior − menor), que serve de régua quando a seleção difere só na semente.'));
     var grupos = D.grupos_metricas;
     var ctrl = h('div', {class: 'controles'}, opcoesTipo());
     var gseg = h('div', {class: 'seg', role: 'group', 'aria-label': 'Colunas'});
@@ -681,17 +695,20 @@
       var n = cols.filter(function (c) { return c.grupo === g.id; }).length;
       if (n) fam.appendChild(h('th', {colspan: n, texto: g.curto || g.nome}));
     });
-    function cabCol(id, texto, titulo, seta) {
-      var b = h('button', {type: 'button', title: titulo}, texto, seta ? h('span', {class: 'seta', texto: seta}) : null,
-        E.ordem === id ? h('span', {class: 'seta', texto: E.ordemDesc ? ' ▾' : ' ▴'}) : null);
+    function ordena(id, nome) {       // 1o clique: decrescente; 2o: crescente; 3o: volta a ordem da lista
+      var ativo = E.ordem === id;
+      var b = h('button', {class: 'ordena' + (ativo ? ' ativo' : ''), type: 'button', title: 'Ordenar por ' + nome,
+        'aria-label': 'Ordenar por ' + nome, texto: ativo ? (E.ordemDesc ? '▾' : '▴') : '↕'});
       b.addEventListener('click', function () {
         if (E.ordem === id) { if (E.ordemDesc) E.ordemDesc = false; else E.ordem = null; } else { E.ordem = id; E.ordemDesc = true; }
         guarda(); renderAba();
       });
       return b;
     }
-    col.appendChild(h('th', {class: 'mod', scope: 'col'}, cabCol('rotulo', 'Modelo', 'Ordenar pelo nome')));
-    cols.forEach(function (mt) { col.appendChild(h('th', {scope: 'col'}, cabCol(mt.id, mt.rotulo, mt.nome + ': ' + mt.desc, mt.maior ? '↑' : '↓'))); });
+    col.appendChild(h('th', {class: 'mod', scope: 'col'}, 'Modelo', ordena('rotulo', 'nome')));
+    cols.forEach(function (mt) {
+      col.appendChild(h('th', {scope: 'col'}, eloDef(mt, mt.rotulo), h('span', {class: 'seta', title: mt.maior ? 'maior é melhor' : 'menor é melhor', texto: mt.maior ? '↑' : '↓'}), ordena(mt.id, mt.nome)));
+    });
     thead.appendChild(fam); thead.appendChild(col); tab.appendChild(thead);
     var tbody = h('tbody');
     ms.forEach(function (m) {
@@ -751,8 +768,8 @@
       if (!itens.length) { semNada.push(mt.rotulo); return; }
       if (E.ordenaGraf) itens.sort(function (a, b) { return mt.maior ? b.v - a.v : a.v - b.v; });
       var faltam = ms.filter(function (m) { return valor(m, mt.id) == null; }).map(function (m) { return m.rotulo; });
-      grade.appendChild(h('section', {class: 'painel'},
-        h('header', null, h('b', {texto: mt.nome}), h('span', {texto: (mt.maior ? '↑ maior é melhor' : '↓ menor é melhor') + ' · ' + mt.desc})),
+      grade.appendChild(h('section', {class: 'painel', id: 'res-' + mt.slug},
+        h('header', null, h('b', null, eloDef(mt)), h('span', {texto: (mt.maior ? '↑ maior é melhor' : '↓ menor é melhor') + ' · ' + mt.desc})),
         grafico(itens, mt, {barras: E.escala === 'zero'}),
         faltam.length ? h('p', {class: 'nota', texto: 'Sem esta métrica: ' + faltam.join(', ') + '.'}) : null));
     });
@@ -780,7 +797,7 @@
     var pts = ms.map(function (m) { return {m: m, x: valor(m, E.x), y: valor(m, E.y)}; })
       .filter(function (p) { return p.x != null && p.y != null && (!(EXTRAS[E.x] && E.logx) || p.x > 0); });
     var caixaSvg = h('div', {class: 'svg-caixa'});
-    v.appendChild(h('section', {class: 'painel'}, h('header', null, h('b', {texto: dy.nome + ' × ' + dx.nome}),
+    v.appendChild(h('section', {class: 'painel'}, h('header', null, h('b', null, MET[E.y] ? eloDef(dy) : dy.nome, ' × ', MET[E.x] ? eloDef(dx) : dx.nome),
       h('span', {texto: (MET[E.y] ? (MET[E.y].maior ? '↑ maior é melhor' : '↓ menor é melhor') : '') + (MET[E.x] ? ' · x: ' + (MET[E.x].maior ? 'maior é melhor' : 'menor é melhor') : '')})), caixaSvg));
     var faltam = ms.filter(function (m) { return pts.every(function (p) { return p.m !== m; }); });
     if (faltam.length) v.appendChild(h('p', {class: 'nota', texto: 'Fora do gráfico (sem um dos dois valores): ' + faltam.map(function (m) { return m.rotulo; }).join(', ') + '.'}));
