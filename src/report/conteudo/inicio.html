@@ -15,12 +15,12 @@
         nas mesmas 1.000 imagens e medidos com as mesmas métricas. O repositório também treina qualquer um deles num
         subconjunto controlado dos dados: menos sessões, menos imagens, menos repetições ou só algumas classes semânticas.</p>
       <dl class="fatos">
-        <div><dt>Dados</dt><dd>NSD, sujeito 1 · 15.724 voxels (nsdgeneral)</dd></div>
-        <div><dt>Treino</dt><dd>até 40 sessões · 27.000 exibições de 9.000 imagens</dd></div>
-        <div><dt>Teste</dt><dd>1.000 imagens compartilhadas · 3 repetições cada</dd></div>
-        <div><dt>Acaso no retrieval</dt><dd>1 em 300 = 0,33%</dd></div>
-        <div><dt>Neste site</dt><dd>{{n_modelos}} modelos com resultado · {{n_planejados}} planejados</dd></div>
-        <div><dt>GPU</dt><dd>1 × RTX A4500 · 20 GB</dd></div>
+        <div><dt>Dados</dt><dd>NSD, sujeito 1<br>15.724 voxels (nsdgeneral)</dd></div>
+        <div><dt>Treino</dt><dd>até 40 sessões<br>9.000 imagens, 27.000 exibições</dd></div>
+        <div><dt>Teste</dt><dd>1.000 imagens<br>3 repetições de cada</dd></div>
+        <div><dt>Modelos no site</dt><dd>{{n_modelos}} com resultado<br>{{n_planejados}} planejados</dd></div>
+        <div><dt>Acaso no retrieval</dt><dd>1 em 300<br>0,33%</dd></div>
+        <div><dt>GPU</dt><dd>1 × RTX A4500<br>20 GB</dd></div>
       </dl>
       <div class="atalhos">
         <a class="atalho" href="#resumo"><b>Resultados</b><span>Tabelas, gráficos, curvas e galeria, com os modelos
@@ -84,7 +84,7 @@ cd benchmark-modelos</code></pre>
           gráfica). O guia completo, com os erros conhecidos, está em
           <a href="{{repo}}/blob/main/docs/NOVO_COMPUTADOR.md">docs/NOVO_COMPUTADOR.md</a>.</p></header>
       <div class="rolagem"><table class="tab">
-        <thead><tr><th>Precisa de</th><th></th></tr></thead>
+        <thead><tr><th>Item</th><th>O que a máquina precisa</th></tr></thead>
         <tbody>
           <tr><td>GPU</td><td>NVIDIA com 20 GB (o FRR e o MindEye2 cabem em 16 GB; o MindEye1 precisa dos 20), só o
             driver: o CUDA vem com o PyTorch</td></tr>
@@ -95,7 +95,7 @@ cd benchmark-modelos</code></pre>
         </tbody>
       </table></div>
       <div class="rolagem"><table class="tab">
-        <thead><tr><th>Para</th><th>Download</th><th>Disco</th></tr></thead>
+        <thead><tr><th>Para usar</th><th>Download</th><th>Disco livre</th></tr></thead>
         <tbody>
           <tr><td>FRR e MindEye2 com 1 sessão (<code>bootstrap.sh --minimo</code>)</td><td class="num">~35 GB</td><td class="num">40 GB</td></tr>
           <tr><td>FRR e MindEye2 em qualquer subconjunto das 40 sessões</td><td class="num">~43 GB</td><td class="num">60 GB</td></tr>
@@ -114,9 +114,9 @@ bash /tmp/miniconda.sh -b -p ~/miniconda3 &amp;&amp; ~/miniconda3/bin/conda init
 git clone {{repo}}.git &amp;&amp; cd benchmark-modelos
 setup/bootstrap.sh --check     # diagnóstico: GPU, disco e o que falta; não baixa nada
 setup/bootstrap.sh             # tudo (ou --minimo, só 1 sessão)</code></pre>
-          <p class="nota">Só o necessário para treinar o FRR e o MindEye2 nas 40 sessões:
-            <code>setup/setup_env.sh --with-extras</code> e depois
-            <code>~/envs/fmri/bin/python setup/download_data.py --stage finetune --subj 1</code>.</p></li>
+          <p class="nota">Só o necessário para treinar o FRR e o MindEye2 nas 40 sessões (~43 GB):</p>
+          <pre><code>setup/setup_env.sh --with-extras
+~/envs/fmri/bin/python setup/download_data.py --stage finetune --subj 1</code></pre></li>
         <li><h3>Conferir</h3>
           <pre><code>~/envs/fmri/bin/python -m unittest discover -s tests    # "OK (skipped=3)"</code></pre></li>
         <li><h3>Treinar</h3>

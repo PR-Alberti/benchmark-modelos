@@ -94,20 +94,20 @@ p { margin: 0; }
 .secao ul, .secao ol { margin: 0; padding-left: 1.25em; display: grid; gap: 6px; }
 .lede { font-size: 18px; line-height: 1.5; color: var(--ink-2); max-width: 64ch; }
 .abertura { display: grid; gap: 18px; padding-bottom: 32px; border-bottom: 1px solid var(--rule); }
-.fatos { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 14px 28px; margin: 6px 0 0; }
+.fatos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 28px; margin: 6px 0 0; }
 .fatos div { display: grid; gap: 2px; align-content: start; }
 .fatos dt { font: 500 11px/1.3 var(--f-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
 .fatos dd { margin: 0; font-variant-numeric: tabular-nums; }
 .atalhos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-.atalho { display: grid; gap: 4px; padding: 14px 16px; text-decoration: none; color: var(--ink);
+.atalho { display: grid; gap: 4px; align-content: start; padding: 14px 16px; text-decoration: none; color: var(--ink);
   background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; }
 .atalho:hover { border-color: var(--accent); color: var(--ink); }
 .atalho b { font-family: var(--f-display); font-stretch: 85%; font-size: 17px; }
 .atalho span { font-size: 13.5px; color: var(--ink-2); }
 .passos { counter-reset: passo; list-style: none; padding: 0 !important; gap: 18px !important; }
-.passos > li { counter-increment: passo; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 4px 12px;
+.passos > li { counter-increment: passo; position: relative; display: grid; gap: 8px; padding-left: 44px;
   max-width: none !important; }
-.passos > li::before { content: counter(passo); grid-row: span 3; font: 700 15px/30px var(--f-mono);
+.passos > li::before { content: counter(passo); position: absolute; left: 0; top: -3px; font: 700 15px/30px var(--f-mono);
   width: 30px; height: 30px; text-align: center; border-radius: 50%; background: var(--accent-wash); color: var(--accent-ink); }
 .passos > li > * { min-width: 0; }
 .modelos-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 14px; }
@@ -379,6 +379,7 @@ footer.rodape { max-width: 1320px; margin: 0 auto; padding: 24px clamp(16px, 3vw
 }
 @media (max-width: 560px) {
   body { font-size: 14.5px; }
+  .fatos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .paineis { grid-template-columns: minmax(0, 1fr); }
   .gb { grid-template-columns: minmax(84px, 40%) minmax(0, 1fr); }
   .tm th.mod, .tm td.mod { min-width: 150px; }
@@ -418,12 +419,12 @@ footer.rodape { max-width: 1320px; margin: 0 auto; padding: 24px clamp(16px, 3vw
         nas mesmas 1.000 imagens e medidos com as mesmas métricas. O repositório também treina qualquer um deles num
         subconjunto controlado dos dados: menos sessões, menos imagens, menos repetições ou só algumas classes semânticas.</p>
       <dl class="fatos">
-        <div><dt>Dados</dt><dd>NSD, sujeito 1 · 15.724 voxels (nsdgeneral)</dd></div>
-        <div><dt>Treino</dt><dd>até 40 sessões · 27.000 exibições de 9.000 imagens</dd></div>
-        <div><dt>Teste</dt><dd>1.000 imagens compartilhadas · 3 repetições cada</dd></div>
-        <div><dt>Acaso no retrieval</dt><dd>1 em 300 = 0,33%</dd></div>
-        <div><dt>Neste site</dt><dd>19 modelos com resultado · 12 planejados</dd></div>
-        <div><dt>GPU</dt><dd>1 × RTX A4500 · 20 GB</dd></div>
+        <div><dt>Dados</dt><dd>NSD, sujeito 1<br>15.724 voxels (nsdgeneral)</dd></div>
+        <div><dt>Treino</dt><dd>até 40 sessões<br>9.000 imagens, 27.000 exibições</dd></div>
+        <div><dt>Teste</dt><dd>1.000 imagens<br>3 repetições de cada</dd></div>
+        <div><dt>Modelos no site</dt><dd>19 com resultado<br>12 planejados</dd></div>
+        <div><dt>Acaso no retrieval</dt><dd>1 em 300<br>0,33%</dd></div>
+        <div><dt>GPU</dt><dd>1 × RTX A4500<br>20 GB</dd></div>
       </dl>
       <div class="atalhos">
         <a class="atalho" href="#resumo"><b>Resultados</b><span>Tabelas, gráficos, curvas e galeria, com os modelos
@@ -487,7 +488,7 @@ cd benchmark-modelos</code></pre>
           gráfica). O guia completo, com os erros conhecidos, está em
           <a href="https://github.com/PR-Alberti/benchmark-modelos/blob/main/docs/NOVO_COMPUTADOR.md">docs/NOVO_COMPUTADOR.md</a>.</p></header>
       <div class="rolagem"><table class="tab">
-        <thead><tr><th>Precisa de</th><th></th></tr></thead>
+        <thead><tr><th>Item</th><th>O que a máquina precisa</th></tr></thead>
         <tbody>
           <tr><td>GPU</td><td>NVIDIA com 20 GB (o FRR e o MindEye2 cabem em 16 GB; o MindEye1 precisa dos 20), só o
             driver: o CUDA vem com o PyTorch</td></tr>
@@ -498,7 +499,7 @@ cd benchmark-modelos</code></pre>
         </tbody>
       </table></div>
       <div class="rolagem"><table class="tab">
-        <thead><tr><th>Para</th><th>Download</th><th>Disco</th></tr></thead>
+        <thead><tr><th>Para usar</th><th>Download</th><th>Disco livre</th></tr></thead>
         <tbody>
           <tr><td>FRR e MindEye2 com 1 sessão (<code>bootstrap.sh --minimo</code>)</td><td class="num">~35 GB</td><td class="num">40 GB</td></tr>
           <tr><td>FRR e MindEye2 em qualquer subconjunto das 40 sessões</td><td class="num">~43 GB</td><td class="num">60 GB</td></tr>
@@ -517,9 +518,9 @@ bash /tmp/miniconda.sh -b -p ~/miniconda3 &amp;&amp; ~/miniconda3/bin/conda init
 git clone https://github.com/PR-Alberti/benchmark-modelos.git &amp;&amp; cd benchmark-modelos
 setup/bootstrap.sh --check     # diagnóstico: GPU, disco e o que falta; não baixa nada
 setup/bootstrap.sh             # tudo (ou --minimo, só 1 sessão)</code></pre>
-          <p class="nota">Só o necessário para treinar o FRR e o MindEye2 nas 40 sessões:
-            <code>setup/setup_env.sh --with-extras</code> e depois
-            <code>~/envs/fmri/bin/python setup/download_data.py --stage finetune --subj 1</code>.</p></li>
+          <p class="nota">Só o necessário para treinar o FRR e o MindEye2 nas 40 sessões (~43 GB):</p>
+          <pre><code>setup/setup_env.sh --with-extras
+~/envs/fmri/bin/python setup/download_data.py --stage finetune --subj 1</code></pre></li>
         <li><h3>Conferir</h3>
           <pre><code>~/envs/fmri/bin/python -m unittest discover -s tests    # "OK (skipped=3)"</code></pre></li>
         <li><h3>Treinar</h3>
@@ -862,7 +863,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
 </section>
 
 </main>
-<footer class="rodape">Gerado em 12/10/2026 11:40 a partir do commit <span class="mono">5e845f9</span> por
+<footer class="rodape">Gerado em 12/10/2026 11:46 a partir do commit <span class="mono">6a7d1b3</span> por
 <span class="mono">src/make_site.py</span>. 19 modelos com resultado, 19 avaliados por completo,
 12 experimentos planejados.</footer>
 <dialog class="lupa" id="lupa" aria-label="Imagens ampliadas"><div class="lupa-corpo"></div></dialog>
