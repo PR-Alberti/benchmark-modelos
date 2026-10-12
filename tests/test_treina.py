@@ -125,6 +125,8 @@ class Benchmark(unittest.TestCase):
         "subj01_ridgeonly_1sess": ({"PRIOR": "0"}, 1),
         "subj01_ridgeonly_1sess_4096blurry": ({"BLURRY": "1", "HIDDEN_DIM": "4096", "CKPT_INTERVAL": "10"}, 1),
         "subj01_ridgeonly_40sess_prior": ({"NUM_EPOCHS": "20", "CKPT_INTERVAL": "1", "FROZEN": "1"}, 40),
+        "subj01_ridgeonly_40sess_4096blurry": ({"BLURRY": "1", "HIDDEN_DIM": "4096", "NUM_EPOCHS": "20",
+                                                "CKPT_INTERVAL": "1", "FROZEN": "1"}, 40),
         "subj01_ridgeonly_1sess_prior_seed1": ({"SEED": "1"}, 1),
         "subj01_ridgeonly_1sess_noprior_seed42": ({"PRIOR": "0", "SEED": "42"}, 1),
         "subj01_me1_1sess": ({"SAVE_EVERY": "10"}, 1),
