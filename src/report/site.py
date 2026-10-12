@@ -96,6 +96,13 @@ FONTES_RETRIEVAL = {"frr": "run_frr.py, 30 sorteios de 300", "verify_retrieval":
                     "final_evaluations": "final_evaluations.py, 30 sorteios de 300",
                     "treino": "última época do treino, 300 imagens fixas"}
 
+# Um resultado por configuracao: as repeticoes que mudam so a semente (do treino ou da reconstrucao)
+# ficam fora do site, e fica o modelo de metricas completas. Os registros continuam em
+# results/site/modelos/; para mostrar de novo, tire o id daqui.
+OCULTOS = {"subj01_ridgeonly_1sess_prior_seed42", "subj01_ridgeonly_1sess_prior_seed1",
+           "subj01_ridgeonly_1sess_prior_seed2", "subj01_ridgeonly_1sess_noprior_seed42",
+           "subj01_ridgeonly_1sess_prior_rseed7"}
+
 # Selecoes prontas da lista de modelos (so entram os modelos que existem)
 P = PUBLICADA
 PRESETS = [
@@ -113,12 +120,6 @@ PRESETS = [
      "retreino com o mesmo script e a mesma semente.",
      ["subj01_ridgeonly_1sess_prior", "subj01_ridgeonly_1sess", "subj01_ridgeonly_1sess_prior_seed42",
       "subj01_ridgeonly_1sess_noprior_seed42"]),
-    ("sementes", "Ruído do treino", "A mesma configuração treinada com sementes diferentes. A amplitude na tabela é a "
-     "régua do ruído: diferenças menores que ela entre outros modelos não significam nada.",
-     ["subj01_ridgeonly_1sess_prior", "subj01_ridgeonly_1sess_prior_seed42", "subj01_ridgeonly_1sess_prior_seed1",
-      "subj01_ridgeonly_1sess_prior_seed2"]),
-    ("amostragem", "Ruído da reconstrução", "O mesmo checkpoint reconstruído com duas sementes: quanto as métricas de "
-     "imagem mudam só por reamostrar.", ["subj01_ridgeonly_1sess_prior", "subj01_ridgeonly_1sess_prior_rseed7"]),
     ("lowlevel", "MindEye1 e o low-level", "O MindEye1 com e sem a imagem borrada do low-level guiando a reconstrução.",
      ["subj01_me1_1sess", "subj01_me1_1sess_semlowlevel", "subj01_me1_40sess", "subj01_me1_40sess_semlowlevel"]),
     ("frr", "Variantes do FRR", "A grade de Doerig, uma fração só para todas as dimensões e a grade estendida.",
@@ -426,6 +427,7 @@ ABAS = ["resumo", "tabela", "graficos", "dispersao", "treino", "galeria", "frr",
 
 def monta(modelos, planejados, galeria, semantica):
     """Devolve (cabeca, corpo): o <title>, as fontes e o estilo, e o resto da pagina."""
+    modelos = [m for m in modelos if m["id"] not in OCULTOS]
     agora = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
     rev = commit()
     avaliados = sum(m["status"] == "completo" for m in modelos)
