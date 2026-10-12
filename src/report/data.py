@@ -157,6 +157,8 @@ def coleta(args):
         curvas.append(("Ridge 4096 + blurry", "corrida anterior (repositório)", antes))
     curvas.append(("Ridge 1024 + prior · 40 sessões", "esta corrida",
                    le_curva(paths.TRAIN_LOGS / "subj01_ridgeonly_40sess_prior/metrics.csv")))
+    curvas.append(("Ridge 4096 + blurry · 40 sessões", "esta corrida",
+                   le_curva(paths.TRAIN_LOGS / "subj01_ridgeonly_40sess_4096blurry/metrics.csv")))
     for sem, sub in [(42, "retreino com o código atual"), (1, "outra semente"), (2, "outra semente")]:
         curvas.append((f"Ridge 1024 + prior · semente {sem}", sub,
                        le_curva(paths.TRAIN_LOGS / f"subj01_ridgeonly_1sess_prior_seed{sem}/metrics.csv")))

@@ -59,6 +59,10 @@ BENCHMARK = {
     "subj01_ridgeonly_40sess_prior": {
         "modelo": "mindeye2", "hiper": {"num_epochs": 20, "frozen_fp16": True, "ckpt_interval": 1},
         "dataset": {"sessoes": 40}},
+    "subj01_ridgeonly_40sess_4096blurry": {
+        "modelo": "mindeye2",
+        "hiper": {"hidden_dim": 4096, "blurry": True, "num_epochs": 20, "frozen_fp16": True, "ckpt_interval": 1},
+        "dataset": {"sessoes": 40}},
     # ruido entre sementes (mesma configuracao do 1sess_prior) e o controle sem prior
     **{f"subj01_ridgeonly_1sess_prior_seed{s}": {"modelo": "mindeye2", "hiper": {"seed": s}, "dataset": {"sessoes": 1}}
        for s in (42, 1, 2)},
