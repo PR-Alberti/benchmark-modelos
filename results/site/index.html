@@ -909,7 +909,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
 </section>
 
 </main>
-<footer class="rodape">Gerado em 12/10/2026 16:08 a partir do commit <span class="mono">a918aed</span> por
+<footer class="rodape">Gerado em 12/10/2026 16:13 a partir do commit <span class="mono">99a5891</span> por
 <span class="mono">src/make_site.py</span>. 19 modelos com resultado, 19 avaliados por completo,
 12 experimentos planejados.</footer>
 <dialog class="lupa" id="lupa" aria-label="Imagens ampliadas"><div class="lupa-corpo"></div></dialog>
@@ -1250,6 +1250,20 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     try { localStorage.setItem(CHAVE, JSON.stringify(o)); } catch (e) { /* sem armazenamento */ }
   }
   function selecionados() { return MODELOS.filter(function (m) { return E.sel.has(m.id); }); }
+  function enumera(nomes) { return nomes.length < 2 ? nomes.join('') : nomes.slice(0, -1).join(', ') + ' e ' + nomes[nomes.length - 1]; }
+  // Quem ficou sem um valor. Quando nenhum modelo da familia tem esse valor (o FRR nao reconstroi, o
+  // MindEye1 nao preve legenda), o que falta e do modelo, e basta o nome dele: "FRR e MindEye1", e nao
+  // cada configuracao. So entra a configuracao quando a falta e dela (um checkpoint sem curva de treino).
+  function quemFalta(ms, tem) {
+    var familias = [], configs = [];
+    ms.forEach(function (m) {      // os tensores publicados pelos autores contam a parte dos modelos do artigo
+      var capaz = MODELOS.some(function (x) { return x.familia === m.familia && !x.publicada === !m.publicada && tem(x); });
+      if (capaz) { configs.push(m.rotulo); return; }
+      var nome = m.publicada ? 'reconstruções publicadas do artigo' : FAM[m.familia] ? FAM[m.familia].nome : m.familia;
+      if (familias.indexOf(nome) < 0) familias.push(nome);
+    });
+    return enumera(familias.concat(configs));
+  }
 
   // ------------------------------------------------------------------ dica flutuante
   var dica = h('div', {class: 'dica', role: 'tooltip', hidden: true});
@@ -1682,7 +1696,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     else caixaSvg.appendChild(vazio('Nenhum modelo marcado tem versão de 1 e de 40 sessões.', presetBotao('principais', 'Ver os modelos principais')));
     var faltam = pares.filter(function (p) { return valor(p.a, mt.id, 'refinada') == null || valor(p.b, mt.id, 'refinada') == null; })
       .map(function (p) { return p.nome; });
-    if (faltam.length) painel.appendChild(h('p', {class: 'nota', texto: 'Sem esta métrica: ' + faltam.join(', ') + '.'}));
+    if (faltam.length) painel.appendChild(h('p', {class: 'nota', texto: 'Sem esta métrica: ' + enumera(faltam) + '.'}));
     if (pares.some(function (p) { return !E.sel.has(p.a.id) || !E.sel.has(p.b.id); }))
       painel.appendChild(h('p', {class: 'nota', texto: 'Ponto vazado: a versão que não está marcada na lista, mostrada como referência.'}));
     poe(painel, notasRodape(pares.map(function (p) { return p.a; }), [mt.id]));      // null quando nao ha nota
@@ -1874,11 +1888,11 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
         .filter(function (it) { return it.v != null; });
       if (!itens.length) { semNada.push(mt.rotulo); return; }
       if (E.ordenaGraf) itens.sort(function (a, b) { return mt.maior ? b.v - a.v : a.v - b.v; });
-      var faltam = ms.filter(function (m) { return valor(m, mt.id) == null; }).map(function (m) { return m.rotulo; });
+      var faltam = ms.filter(function (m) { return valor(m, mt.id) == null; });
       grade.appendChild(h('section', {class: 'painel', id: 'res-' + mt.slug},
         h('header', null, h('b', null, eloDef(mt)), h('span', {texto: (mt.maior ? '↑ maior é melhor' : '↓ menor é melhor') + ' · ' + mt.desc})),
         grafico(itens, mt, {barras: E.escala === 'zero'}),
-        faltam.length ? h('p', {class: 'nota', texto: 'Sem esta métrica: ' + faltam.join(', ') + '.'}) : null));
+        faltam.length ? h('p', {class: 'nota', texto: 'Sem esta métrica: ' + quemFalta(faltam, function (m) { return valor(m, mt.id) != null; }) + '.'}) : null));
     });
     if (grade.children.length) v.appendChild(grade);
     else v.appendChild(vazio('Nenhum modelo selecionado tem métricas deste grupo.'));
@@ -1907,7 +1921,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     v.appendChild(h('section', {class: 'painel'}, h('header', null, h('b', null, MET[E.y] ? eloDef(dy) : dy.nome, ' × ', MET[E.x] ? eloDef(dx) : dx.nome),
       h('span', {texto: (MET[E.y] ? (MET[E.y].maior ? '↑ maior é melhor' : '↓ menor é melhor') : '') + (MET[E.x] ? ' · x: ' + (MET[E.x].maior ? 'maior é melhor' : 'menor é melhor') : '')})), caixaSvg));
     var faltam = ms.filter(function (m) { return pts.every(function (p) { return p.m !== m; }); });
-    if (faltam.length) v.appendChild(h('p', {class: 'nota', texto: 'Fora do gráfico (sem um dos dois valores): ' + faltam.map(function (m) { return m.rotulo; }).join(', ') + '.'}));
+    if (faltam.length) v.appendChild(h('p', {class: 'nota', texto: 'Fora do gráfico (sem um dos dois valores): ' + quemFalta(faltam, function (m) { return valor(m, E.x) != null && valor(m, E.y) != null; }) + '.'}));
     poe(v, notasRodape(ms, [E.x, E.y]));      // null quando nao ha nota
     if (!pts.length) { caixaSvg.appendChild(vazio('Nenhum modelo selecionado tem os dois valores.')); return; }
     requestAnimationFrame(function () { dispersao(caixaSvg, pts, dx, dy, EXTRAS[E.x] && E.logx); });
@@ -1990,7 +2004,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     var legenda = h('ul', {class: 'legenda-series'});
     v.appendChild(h('section', {class: 'painel'}, h('header', null, h('b', {texto: desc.nome}), h('span', {texto: desc.desc})), legenda, caixaSvg));
     var semCurva = ms.filter(function (m) { return !m.curva; });
-    if (semCurva.length) v.appendChild(h('p', {class: 'nota', texto: 'Sem curva de treino: ' + semCurva.map(function (m) { return m.rotulo; }).join(', ') + '.'}));
+    if (semCurva.length) v.appendChild(h('p', {class: 'nota', texto: 'Sem curva de treino: ' + quemFalta(semCurva, function (m) { return !!m.curva; }) + '.'}));
     var apagados = new Set();
     linhas.forEach(function (m) {
       var li = h('li', null, h('span', {class: 'amostra', style: '--c:' + m.cor}), m.rotulo);
@@ -2116,7 +2130,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     var notas = [];
     if (ms.some(function (m) { return m.familia === 'mindeye1'; })) notas.push('O MindEye1 não tem refinamento: a reconstrução final dele (Versatile Diffusion, com img2img a partir da borrada quando há low-level) aparece em Refinadas e em unCLIP.');
     if (E.galTipo === 'borrada') notas.push('Só os modelos com ramo blurry têm a reconstrução borrada.');
-    if (sem.length) notas.push('Sem reconstruções na galeria: ' + sem.map(function (m) { return m.rotulo; }).join(', ') + '.');
+    if (sem.length) notas.push('Sem reconstruções na galeria: ' + quemFalta(sem, function (m) { return !!G.modelos[m.id]; }) + '.');
     if (notas.length) v.appendChild(h('p', {class: 'nota', texto: notas.join(' ')}));
   }
   var lupa = $('#lupa');
