@@ -193,12 +193,6 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 .trilho-modelos > summary::-webkit-details-marker { display: none; }
 .trilho-modelos > summary b { font: 600 18px/1.2 var(--f-serif); }
 .trilho-corpo { display: grid; gap: 14px; padding: 14px 0 16px; }
-.predef { display: flex; flex-wrap: wrap; gap: 6px; }
-.predef button { font: 500 13px/1.2 var(--f-sans); color: var(--ink-2); background: none; border: 1px solid var(--rule-2);
-  border-radius: 3px; padding: 5px 9px; cursor: pointer; text-align: left; }
-.predef button:hover { color: var(--ink); border-color: var(--ink-2); }
-.predef button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.predef-desc { font-size: 13px; color: var(--muted); min-height: 2.6em; line-height: 1.35; }
 .grupo-modelos { display: grid; gap: 1px; }
 .grupo-itens { display: grid; gap: 1px; }
 .grupo-modelos.fechado .grupo-itens { display: none; }
@@ -256,8 +250,10 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
   color: var(--ink); vertical-align: bottom; border-bottom: 1px solid var(--ink); }
 .tm thead tr.fam th { font: 600 12.5px/1.2 var(--f-sans); color: var(--ink-2); text-align: center;
   border-bottom: 1px solid var(--rule-2); padding-bottom: 5px; }
-.tm thead th button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
-.tm thead th button:hover { text-decoration: underline; text-underline-offset: 3px; }
+.tm thead th .ordena { font: 400 12px/1 var(--f-sans); color: var(--muted); background: none; border: 0; border-radius: 2px;
+  padding: 2px 3px; margin-left: 3px; cursor: pointer; }
+.tm thead th .ordena:hover { color: var(--ink); background: var(--wash); }
+.tm thead th .ordena.ativo { color: var(--bg); background: var(--ink); }
 .tm .seta { color: var(--muted); font-weight: 400; margin-left: 2px; }
 .tm th.mod, .tm td.mod { text-align: left; position: sticky; left: 0; background: var(--bg); z-index: 1;
   white-space: normal; min-width: 210px; max-width: 280px; padding-left: 0; }
@@ -393,6 +389,15 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 .sim-classe { display: grid; grid-template-columns: minmax(80px, 30%) minmax(0, 1fr) auto; gap: 8px; align-items: center; }
 .sim-classe .barra { height: 6px; background: var(--wash); overflow: hidden; }
 .sim-classe .barra i { display: block; height: 100%; background: var(--ink); width: var(--p); }
+
+/* nome de metrica: leva da definicao aos resultados e de volta; o destino pisca ao chegar */
+.elo-metrica { color: inherit; text-decoration-style: dotted; text-decoration-color: var(--muted); }
+.elo-metrica:hover { text-decoration-style: solid; text-decoration-color: currentColor; }
+@keyframes alvo { from { background-color: color-mix(in srgb, var(--aviso) 26%, transparent); } to { background-color: transparent; } }
+.painel.alvo, tr.alvo > td { animation: alvo 2.4s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .painel.alvo, tr.alvo > td { animation: none; background-color: color-mix(in srgb, var(--aviso) 14%, transparent); }
+}
 
 /* dica flutuante */
 .dica { position: fixed; z-index: 50; pointer-events: none; max-width: 300px; padding: 8px 10px; border-radius: 4px;

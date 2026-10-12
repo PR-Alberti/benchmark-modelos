@@ -53,6 +53,10 @@ for chave, rot, nome in _LEG:
     _M.append((f"leg:{chave}", rot, f"Legenda · {nome}", "legendas", True, "dec", None,
                "a legenda que o GIT gera do embedding previsto do cérebro, contra as legendas humanas do COCO"))
 METRICAS = [dict(zip(("id", "rotulo", "nome", "grupo", "maior", "fmt", "acaso", "desc"), m)) for m in _M]
+# O nome de cada metrica liga a definicao (Como usar, #def-<slug>) aos resultados dela (Graficos,
+# #res-<slug>) e vice-versa; o slug vai nos dados para o site.js montar os mesmos enderecos.
+for _m in METRICAS:
+    _m["slug"] = re.sub(r"[^a-z0-9]+", "-", _m["id"].lower()).strip("-")
 IDS_METRICAS = {m["id"] for m in METRICAS}
 
 GRUPOS_METRICAS = [
@@ -103,7 +107,8 @@ OCULTOS = {"subj01_ridgeonly_1sess_prior_seed42", "subj01_ridgeonly_1sess_prior_
            "subj01_ridgeonly_1sess_prior_seed2", "subj01_ridgeonly_1sess_noprior_seed42",
            "subj01_ridgeonly_1sess_prior_rseed7"}
 
-# Selecoes prontas da lista de modelos (so entram os modelos que existem)
+# Selecoes prontas (so entram os modelos que existem): a primeira e a selecao inicial da pagina, e os
+# avisos de aba vazia oferecem algumas pelo id (presetBotao no site.js). Nao ha mais botoes na lista.
 P = PUBLICADA
 PRESETS = [
     ("principais", "Principais", "Os modelos de referência de cada família, com 1 e 40 sessões.",
@@ -251,7 +256,8 @@ def html_metricas():
     linhas = []
     for m in METRICAS:
         acaso = "—" if m["acaso"] is None else ("1 em 300" if m["acaso"] < 0.01 else "50%")
-        linhas.append(f"<tr><td>{_e(nomes[m['grupo']])}</td><td><b>{_e(m['nome'])}</b></td>"
+        linhas.append(f'<tr id="def-{m["slug"]}"><td>{_e(nomes[m["grupo"]])}</td><td><a class="elo-metrica" '
+                      f'href="#res-{m["slug"]}" title="Ver os resultados desta métrica"><b>{_e(m["nome"])}</b></a></td>'
                       f'<td class="c">{"↑" if m["maior"] else "↓"}</td><td>{acaso}</td><td>{_e(m["desc"])}</td></tr>')
     return ('<div class="rolagem"><table class="tab"><thead><tr><th>Grupo</th><th>Métrica</th><th class="c">Melhor</th>'
             f'<th>Acaso</th><th>O que mede</th></tr></thead><tbody>{"".join(linhas)}</tbody></table></div>')
@@ -402,8 +408,6 @@ RESULTADOS = """
     <details class="trilho-modelos" id="trilho" open>
       <summary><b>Modelos</b><span class="mudo num" id="contagem"></span></summary>
       <div class="trilho-corpo">
-        <div class="predef" id="predef" role="group" aria-label="Seleções prontas"></div>
-        <p class="predef-desc" id="predef-desc">Seleções prontas: passe o mouse para ver o que cada uma mostra.</p>
         <label class="controle" for="busca">Filtrar <input type="search" id="busca" placeholder="nome do modelo"></label>
         <div id="lista-modelos"></div>
         <div class="trilho-pe">
