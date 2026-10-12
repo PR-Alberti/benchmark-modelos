@@ -393,17 +393,6 @@
       b.addEventListener('click', function () { trocaAba(a[0], true); });
       abas.appendChild(b);
     });
-    var pre = $('#predef'), desc = $('#predef-desc');
-    D.presets.forEach(function (p) {
-      var b = h('button', {type: 'button', 'aria-pressed': 'false', 'data-preset': p.id, texto: p.nome, title: p.desc});
-      b.addEventListener('click', function () {
-        E.sel = new Set(p.modelos);
-        desc.textContent = p.desc;
-        mudouSelecao();
-      });
-      b.addEventListener('pointerenter', function () { desc.textContent = p.desc; });
-      pre.appendChild(b);
-    });
     constroiLista();
     $('#busca').addEventListener('input', function (ev) {
       E.busca = ev.target.value.trim().toLowerCase();
@@ -486,11 +475,6 @@
     });
     var total = MODELOS.filter(temDados).length;
     $('#contagem').textContent = E.sel.size + ' de ' + total;
-    $$('#predef button').forEach(function (b) {
-      var p = D.presets.filter(function (x) { return x.id === b.getAttribute('data-preset'); })[0];
-      var igual = p && p.modelos.length === E.sel.size && p.modelos.every(function (id) { return E.sel.has(id); });
-      b.setAttribute('aria-pressed', String(!!igual));
-    });
   }
   function mudouSelecao() { sincronizaLista(); guarda(); renderAba(); }
   function trocaAba(aba, porClique) {
