@@ -193,12 +193,6 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 .trilho-modelos > summary::-webkit-details-marker { display: none; }
 .trilho-modelos > summary b { font: 600 18px/1.2 var(--f-serif); }
 .trilho-corpo { display: grid; gap: 14px; padding: 14px 0 16px; }
-.predef { display: flex; flex-wrap: wrap; gap: 6px; }
-.predef button { font: 500 13px/1.2 var(--f-sans); color: var(--ink-2); background: none; border: 1px solid var(--rule-2);
-  border-radius: 3px; padding: 5px 9px; cursor: pointer; text-align: left; }
-.predef button:hover { color: var(--ink); border-color: var(--ink-2); }
-.predef button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.predef-desc { font-size: 13px; color: var(--muted); min-height: 2.6em; line-height: 1.35; }
 .grupo-modelos { display: grid; gap: 1px; }
 .grupo-itens { display: grid; gap: 1px; }
 .grupo-modelos.fechado .grupo-itens { display: none; }

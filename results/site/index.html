@@ -200,12 +200,6 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 .trilho-modelos > summary::-webkit-details-marker { display: none; }
 .trilho-modelos > summary b { font: 600 18px/1.2 var(--f-serif); }
 .trilho-corpo { display: grid; gap: 14px; padding: 14px 0 16px; }
-.predef { display: flex; flex-wrap: wrap; gap: 6px; }
-.predef button { font: 500 13px/1.2 var(--f-sans); color: var(--ink-2); background: none; border: 1px solid var(--rule-2);
-  border-radius: 3px; padding: 5px 9px; cursor: pointer; text-align: left; }
-.predef button:hover { color: var(--ink); border-color: var(--ink-2); }
-.predef button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.predef-desc { font-size: 13px; color: var(--muted); min-height: 2.6em; line-height: 1.35; }
 .grupo-modelos { display: grid; gap: 1px; }
 .grupo-itens { display: grid; gap: 1px; }
 .grupo-modelos.fechado .grupo-itens { display: none; }
@@ -883,8 +877,6 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     <details class="trilho-modelos" id="trilho" open>
       <summary><b>Modelos</b><span class="mudo num" id="contagem"></span></summary>
       <div class="trilho-corpo">
-        <div class="predef" id="predef" role="group" aria-label="Seleções prontas"></div>
-        <p class="predef-desc" id="predef-desc">Seleções prontas: passe o mouse para ver o que cada uma mostra.</p>
         <label class="controle" for="busca">Filtrar <input type="search" id="busca" placeholder="nome do modelo"></label>
         <div id="lista-modelos"></div>
         <div class="trilho-pe">
@@ -904,7 +896,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
 </section>
 
 </main>
-<footer class="rodape">Gerado em 12/10/2026 14:46 a partir do commit <span class="mono">aa0eddb</span> por
+<footer class="rodape">Gerado em 12/10/2026 16:05 a partir do commit <span class="mono">b5ee5e4</span> por
 <span class="mono">src/make_site.py</span>. 19 modelos com resultado, 19 avaliados por completo,
 12 experimentos planejados.</footer>
 <dialog class="lupa" id="lupa" aria-label="Imagens ampliadas"><div class="lupa-corpo"></div></dialog>
@@ -1495,17 +1487,6 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
       b.addEventListener('click', function () { trocaAba(a[0], true); });
       abas.appendChild(b);
     });
-    var pre = $('#predef'), desc = $('#predef-desc');
-    D.presets.forEach(function (p) {
-      var b = h('button', {type: 'button', 'aria-pressed': 'false', 'data-preset': p.id, texto: p.nome, title: p.desc});
-      b.addEventListener('click', function () {
-        E.sel = new Set(p.modelos);
-        desc.textContent = p.desc;
-        mudouSelecao();
-      });
-      b.addEventListener('pointerenter', function () { desc.textContent = p.desc; });
-      pre.appendChild(b);
-    });
     constroiLista();
     $('#busca').addEventListener('input', function (ev) {
       E.busca = ev.target.value.trim().toLowerCase();
@@ -1588,11 +1569,6 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     });
     var total = MODELOS.filter(temDados).length;
     $('#contagem').textContent = E.sel.size + ' de ' + total;
-    $$('#predef button').forEach(function (b) {
-      var p = D.presets.filter(function (x) { return x.id === b.getAttribute('data-preset'); })[0];
-      var igual = p && p.modelos.length === E.sel.size && p.modelos.every(function (id) { return E.sel.has(id); });
-      b.setAttribute('aria-pressed', String(!!igual));
-    });
   }
   function mudouSelecao() { sincronizaLista(); guarda(); renderAba(); }
   function trocaAba(aba, porClique) {

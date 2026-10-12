@@ -103,7 +103,8 @@ OCULTOS = {"subj01_ridgeonly_1sess_prior_seed42", "subj01_ridgeonly_1sess_prior_
            "subj01_ridgeonly_1sess_prior_seed2", "subj01_ridgeonly_1sess_noprior_seed42",
            "subj01_ridgeonly_1sess_prior_rseed7"}
 
-# Selecoes prontas da lista de modelos (so entram os modelos que existem)
+# Selecoes prontas (so entram os modelos que existem): a primeira e a selecao inicial da pagina, e os
+# avisos de aba vazia oferecem algumas pelo id (presetBotao no site.js). Nao ha mais botoes na lista.
 P = PUBLICADA
 PRESETS = [
     ("principais", "Principais", "Os modelos de referência de cada família, com 1 e 40 sessões.",
@@ -402,8 +403,6 @@ RESULTADOS = """
     <details class="trilho-modelos" id="trilho" open>
       <summary><b>Modelos</b><span class="mudo num" id="contagem"></span></summary>
       <div class="trilho-corpo">
-        <div class="predef" id="predef" role="group" aria-label="Seleções prontas"></div>
-        <p class="predef-desc" id="predef-desc">Seleções prontas: passe o mouse para ver o que cada uma mostra.</p>
         <label class="controle" for="busca">Filtrar <input type="search" id="busca" placeholder="nome do modelo"></label>
         <div id="lista-modelos"></div>
         <div class="trilho-pe">
