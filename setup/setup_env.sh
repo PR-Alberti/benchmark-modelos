@@ -61,10 +61,12 @@ echo "==> instalando CLIP (OpenAI) e dalle2-pytorch"
 
 if [[ $WITH_EXTRAS -eq 1 ]]; then
     echo "==> instalando extras (metricas do final_evaluations.ipynb)"
+    # pyarrow fica pinado: o datasets 2.16 aceita qualquer versao, e o pip trazia a 26.0.0, que
+    # exige NumPy 2 ("pyarrow requires NumPy 2.0 or newer"); o torch 2.1.0 precisa do NumPy 1.x
     # datasets fica pinado em 2.x: a serie 5.x exige huggingface_hub>=0.25, que
     # quebra o diffusers 0.23.0 (veja a secao de correcoes abaixo)
     "$PIP" install sentence-transformers==2.5.1 evaluate==0.4.1 nltk==3.8.1 \
-        rouge_score==0.1.2 "datasets==2.16.1"
+        rouge_score==0.1.2 "datasets==2.16.1" "pyarrow==15.0.2"
     # o setup.sh original pede umap==0.1.1, que nao existe mais no PyPI;
     # umap-learn fornece o mesmo modulo `umap` que o notebook importa
     "$PIP" install umap-learn
