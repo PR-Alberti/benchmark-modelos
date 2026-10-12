@@ -386,14 +386,13 @@ def dados_pagina(modelos, planejados, galeria, semantica):
 
 FONTES = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
           '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-          '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@'
-          '62..125,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@'
-          '0,400;0,500;0,600;0,700;1,400&display=swap">')
+          '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@'
+          '0,8..60,400..700;1,8..60,400..700&family=Source+Sans+3:ital,wght@0,400..700;1,400..700'
+          '&family=Source+Code+Pro:wght@400;500&display=swap">')
 
 RESULTADOS = """
 <section class="pagina" id="pag-resultados" data-pag="resultados" aria-labelledby="t-resultados">
   <header class="res-cab">
-    <p class="olho">Resultados</p>
     <div class="linha"><h1 id="t-resultados">O benchmark, modelo a modelo</h1></div>
     <p class="nota">Escolha os modelos na lista; todas as abas mostram a mesma seleção. As escolhas ficam guardadas
     neste navegador. Um modelo novo entra aqui sozinho quando o treino ou a avaliação termina
@@ -427,6 +426,7 @@ ABAS = ["resumo", "tabela", "graficos", "dispersao", "treino", "galeria", "frr",
 
 def monta(modelos, planejados, galeria, semantica):
     """Devolve (cabeca, corpo): o <title>, as fontes e o estilo, e o resto da pagina."""
+    todos = modelos                       # os ocultos ainda valem para os tempos citados nos textos
     modelos = [m for m in modelos if m["id"] not in OCULTOS]
     agora = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
     rev = commit()
@@ -440,8 +440,8 @@ def monta(modelos, planejados, galeria, semantica):
         "cartoes_familias": html_cartoes_familias(),
         "cor:frr": _cor_familia("frr"), "cor:mindeye2": _cor_familia("mindeye2"), "cor:mindeye1": _cor_familia("mindeye1"),
     }
-    inicio = preenche((AQUI / "conteudo" / "inicio.html").read_text(), valores, modelos)
-    uso = preenche((AQUI / "conteudo" / "uso.html").read_text(), valores, modelos)
+    inicio = preenche((AQUI / "conteudo" / "inicio.html").read_text(), valores, todos)
+    uso = preenche((AQUI / "conteudo" / "uso.html").read_text(), valores, todos)
     vistas = "".join(f'<div class="vista" id="vista-{a}" data-aba="{a}" role="tabpanel" aria-labelledby="aba-{a}" hidden>'
                      f"</div>" for a in ABAS)
     dados = json.dumps(dados_pagina(modelos, planejados, galeria, semantica), ensure_ascii=False,
@@ -452,7 +452,7 @@ def monta(modelos, planejados, galeria, semantica):
     corpo = f"""<script>document.documentElement.classList.add('js');</script>
 <header class="barra">
   <div class="barra-dentro">
-    <a class="marca" href="#inicio"><b>benchmark-modelos</b><span>NSD · sujeito 1 · fMRI → imagem</span></a>
+    <a class="marca" href="#inicio">benchmark-modelos</a>
     <nav class="paginas" aria-label="Páginas">
       <a href="#inicio" data-pag="inicio" aria-current="page">Início</a>
       <a href="#uso" data-pag="uso">Como usar</a>

@@ -1,6 +1,6 @@
 <div class="leitura">
   <nav class="indice" aria-label="Nesta página">
-    <p class="olho">Nesta página</p>
+    <p class="indice-tit">Nesta página</p>
     <a href="#inicio-projeto">O projeto</a>
     <a href="#inicio-repositorio">O repositório</a>
     <a href="#inicio-maquina">Preparar uma máquina</a>
@@ -9,7 +9,6 @@
   </nav>
   <div class="texto">
     <header class="abertura">
-      <p class="olho">NSD · sujeito 1 · fMRI → imagem</p>
       <h1>Quanto fMRI cada modelo precisa para recuperar o que a pessoa viu</h1>
       <p class="lede">Três modelos de decodificação treinados nas mesmas exibições do Natural Scenes Dataset, testados
         nas mesmas 1.000 imagens e medidos com as mesmas métricas. O repositório também treina qualquer um deles num
@@ -33,7 +32,7 @@
     </header>
 
     <section class="secao" id="inicio-projeto">
-      <header><p class="olho">Contexto</p><h2>O projeto</h2></header>
+      <header><h2>O projeto</h2></header>
       <p>Os modelos leem a resposta do córtex visual a uma imagem (os betas de fMRI de cada exibição) e recuperam o que
         a pessoa viu: o embedding CLIP da imagem e, nos modelos com gerador, uma reconstrução. A comparação vale porque
         todos treinam nas mesmas exibições, são testados nas mesmas 1.000 imagens e passam pelas mesmas métricas.</p>
@@ -46,7 +45,7 @@
     </section>
 
     <section class="secao" id="inicio-repositorio">
-      <header><p class="olho">Código</p><h2>O repositório</h2></header>
+      <header><h2>O repositório</h2></header>
       <p>Tudo está em <a href="{{repo}}">{{repo_curto}}</a>, na branch <code>main</code>. Para baixar:</p>
       <pre><code>git clone {{repo}}.git
 cd benchmark-modelos</code></pre>
@@ -79,7 +78,7 @@ cd benchmark-modelos</code></pre>
     </section>
 
     <section class="secao" id="inicio-maquina">
-      <header><p class="olho">Instalação</p><h2>Preparar uma máquina nova</h2>
+      <header><h2>Preparar uma máquina nova</h2>
         <p>Do computador zerado ao primeiro treino, só com terminal (uma máquina acessada por SSH, sem interface
           gráfica). O guia completo, com os erros conhecidos, está em
           <a href="{{repo}}/blob/main/docs/NOVO_COMPUTADOR.md">docs/NOVO_COMPUTADOR.md</a>.</p></header>
@@ -132,7 +131,7 @@ nohup ~/envs/fmri/bin/python treina.py &lt;nome&gt; &gt; ~/treino.log 2&gt;&amp;
     </section>
 
     <section class="secao" id="inicio-git">
-      <header><p class="olho">Versionamento</p><h2>Fluxo com git</h2>
+      <header><h2>Fluxo com git</h2>
         <p>O trabalho do dia a dia vai direto na <code>main</code>: atualizar a máquina, commitar e enviar.</p></header>
       <pre><code>git pull --rebase              # traz o que o GitHub tem a mais e põe os seus commits por cima
 git add &lt;arquivos&gt;             # escolha o que entra (results/tables, results/site, código)
@@ -148,7 +147,7 @@ git push</code></pre>
     </section>
 
     <section class="secao" id="inicio-site">
-      <header><p class="olho">Esta página</p><h2>Este site</h2></header>
+      <header><h2>Este site</h2></header>
       <p>É o arquivo <code>results/site/index.html</code>, gerado por <code>src/make_site.py</code>. Abre direto do disco,
         sem servidor e sem internet (só as fontes vêm da rede). Os resultados se atualizam sozinhos: ao fim de cada treino
         e de cada avaliação, os scripts regeneram o site, e um modelo novo, treinado pelo <code>treina.py</code>, aparece

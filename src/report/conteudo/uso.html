@@ -1,6 +1,6 @@
 <div class="leitura">
   <nav class="indice" aria-label="Nesta página">
-    <p class="olho">Nesta página</p>
+    <p class="indice-tit">Nesta página</p>
     <a href="#uso-modelos">Os modelos</a>
     <a href="#uso-avaliacao">A avaliação</a>
     <a href="#uso-treino">Treinar</a>
@@ -11,7 +11,6 @@
   </nav>
   <div class="texto">
     <header class="abertura">
-      <p class="olho">Como usar</p>
       <h1>Um treino é um dicionário: modelo, hiperparâmetros e dataset</h1>
       <p class="lede">O <code>src/treina.py</code> lê o dicionário, monta o subconjunto de treino, grava a configuração
         junto do modelo e chama o script de treino certo. O que não estiver no dicionário fica no padrão, e um dataset
@@ -25,7 +24,7 @@
     </header>
 
     <section class="secao" id="uso-modelos">
-      <header><p class="olho">Modelos</p><h2>Os três modelos</h2>
+      <header><h2>Os três modelos</h2>
         <p>Os tempos são os medidos aqui, numa RTX A4500.</p></header>
       <div class="modelos-cards">
         <article class="modelo-card" style="--fam:{{cor:frr}}">
@@ -72,7 +71,7 @@
     </section>
 
     <section class="secao" id="uso-avaliacao">
-      <header><p class="olho">Avaliação</p><h2>Como os modelos são avaliados</h2></header>
+      <header><h2>Como os modelos são avaliados</h2></header>
       <p>O teste é sempre o mesmo: as 1.000 imagens que os 8 sujeitos viram (as <em>shared1000</em>), cada uma com 3
         repetições espalhadas pelas 40 sessões, inclusive para os modelos de 1 sessão. As exibições de teste nunca entram
         no treino. Cada modelo junta as 3 repetições do seu jeito:</p>
@@ -97,7 +96,7 @@
     </section>
 
     <section class="secao" id="uso-treino">
-      <header><p class="olho">Treino</p><h2>Treinar um modelo</h2>
+      <header><h2>Treinar um modelo</h2>
         <p>Os experimentos ficam em <code>src/experimentos.py</code>: <code>BENCHMARK</code> tem os modelos já treinados,
           como dicionários, e <code>EXPERIMENTOS</code> os novos. Pela linha de comando:</p></header>
       <pre><code>cd src
@@ -132,7 +131,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     </section>
 
     <section class="secao" id="uso-dataset">
-      <header><p class="olho">Dataset</p><h2>Escolher o dataset de treino</h2>
+      <header><h2>Escolher o dataset de treino</h2>
         <p>O campo <code>"dataset"</code> recorta as exibições de treino. As escolhas se aplicam nesta ordem:</p></header>
       <ol class="passos">
         <li><h3>Pool</h3><p>as exibições das <code>sessoes</code> primeiras sessões.</p></li>
@@ -169,7 +168,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     </section>
 
     <section class="secao" id="uso-simulador">
-      <header><p class="olho">Interativo</p><h2>Simulador do dataset</h2>
+      <header><h2>Simulador do dataset</h2>
         <p>Monte o campo <code>"dataset"</code> e veja, com os dados reais do sujeito 1, quantas imagens e exibições ficam,
           quantas de cada classe e quantas amostras cada modelo vê por época. É a mesma conta do
           <code>treina.py --so_dataset</code> (conferida contra ela nos testes); só o sorteio de <code>n_imagens</code>
@@ -222,7 +221,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     </section>
 
     <section class="secao" id="uso-hiper">
-      <header><p class="olho">Hiperparâmetros</p><h2>O que cada modelo aceita em <code>"hiper"</code></h2>
+      <header><h2>O que cada modelo aceita em <code>"hiper"</code></h2>
         <p>Os padrões são os do <code>treina.py</code>; uma chave fora destas é recusada.</p></header>
       <h3>FRR</h3>
       {{hiper:frr}}
@@ -233,7 +232,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     </section>
 
     <section class="secao" id="uso-novo">
-      <header><p class="olho">Este site</p><h2>Como um modelo novo entra nos resultados</h2></header>
+      <header><h2>Como um modelo novo entra nos resultados</h2></header>
       <p>O <code>src/make_site.py</code> procura resultados nos lugares padrão, e qualquer modelo com algum deles aparece
         na página de resultados:</p>
       <div class="rolagem"><table class="tab">
