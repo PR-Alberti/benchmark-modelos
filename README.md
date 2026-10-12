@@ -174,7 +174,7 @@ dataset completo das N primeiras sessões; os dicionários estão em `BENCHMARK`
 | MindEye1 | `subj01_me1_1sess` | 1 | padrão + low-level | 30,6 | 23,2 |
 | MindEye1 | `subj01_me1_1sess_semlowlevel` | 1 | padrão, sem low-level | 30,6 | 23,2 |
 | MindEye1 | `subj01_me1_40sess` | 40 | padrão + low-level | 94,5 | 87,6 |
-| MindEye1 | `subj01_me1_40sess_semlowlevel` | 40 | padrão, sem low-level | em andamento | |
+| MindEye1 | `subj01_me1_40sess_semlowlevel` | 40 | padrão, sem low-level | 94,5 | 87,6 |
 | MindEye2 (artigo) | `final_subj01_pretrained_1sess_24bs` | 1 | fine-tune completo, baixado | 93,9 | 77,6 |
 | MindEye2 (artigo) | `final_subj01_pretrained_40sess_24bs` | 40 | fine-tune completo, baixado | 100 | 99,9 |
 
