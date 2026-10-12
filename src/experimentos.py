@@ -136,5 +136,29 @@ for _n, _r in ((3000, 1), (1500, 2), (1000, 3)):
         "dataset": {"sessoes": 40, "n_imagens": _n, "repeticoes": _r, "semente": 0},
     }
 
-TODOS = {**BENCHMARK, **EXPERIMENTOS}
-assert len(TODOS) == len(BENCHMARK) + len(EXPERIMENTOS), "nome repetido entre BENCHMARK e EXPERIMENTOS"
+
+# =============================================================================================
+# Reproducoes dos modelos do benchmark pelo treina.py (docs/REEXECUTAR.md, scripts/run_reexecutar.sh):
+# o mesmo dicionario com outro nome, ja que o treina.py nao sobrescreve um modelo do benchmark. A
+# corrida refeita fica com o que as originais nao registraram: configuracao, commit do codigo,
+# manifesto do dataset, curva e tempo. As de semente 42 do Ridge 1024 ficam de fora (sao a mesma
+# corrida do 1sess_prior e do 1sess), e o MindEye1 tambem (~37 h, e o treino dele nao grava curva).
+# =============================================================================================
+_REPRODUZIR = {
+    "subj01_frr_1sess": "FRR · 1 sessão", "subj01_frr_1sess_global": "FRR fração global · 1 sessão",
+    "subj01_frr_1sess_ext": "FRR grade estendida · 1 sessão", "subj01_frr_40sess": "FRR · 40 sessões",
+    "subj01_frr_40sess_global": "FRR fração global · 40 sessões",
+    "subj01_frr_40sess_ext": "FRR grade estendida · 40 sessões",
+    "subj01_ridgeonly_1sess_prior": "Ridge 1024 + prior · 1 sessão",
+    "subj01_ridgeonly_1sess": "Ridge 1024 sem prior · 1 sessão",
+    "subj01_ridgeonly_1sess_prior_seed1": "Ridge 1024 + prior · 1 sessão · semente 1",
+    "subj01_ridgeonly_1sess_prior_seed2": "Ridge 1024 + prior · 1 sessão · semente 2",
+    "subj01_ridgeonly_1sess_4096blurry": "Ridge 4096 + blurry · 1 sessão",
+    "subj01_ridgeonly_40sess_prior": "Ridge 1024 + prior · 40 sessões",
+    "subj01_ridgeonly_40sess_4096blurry": "Ridge 4096 + blurry · 40 sessões",
+}
+REPRODUCOES = {f"repro_{nome}": {**BENCHMARK[nome], "rotulo": f"{rotulo} · reprodução"}
+               for nome, rotulo in _REPRODUZIR.items()}
+
+TODOS = {**BENCHMARK, **EXPERIMENTOS, **REPRODUCOES}
+assert len(TODOS) == len(BENCHMARK) + len(EXPERIMENTOS) + len(REPRODUCOES), "nome repetido entre os experimentos"
