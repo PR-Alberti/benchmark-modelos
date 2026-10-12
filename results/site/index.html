@@ -207,8 +207,17 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 .predef button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .predef-desc { font-size: 13px; color: var(--muted); min-height: 2.6em; line-height: 1.35; }
 .grupo-modelos { display: grid; gap: 1px; }
-.grupo-cab { display: flex; align-items: center; gap: 8px; font: 600 13.5px/1.3 var(--f-sans); color: var(--ink);
-  padding: 10px 0 4px; cursor: pointer; }
+.grupo-itens { display: grid; gap: 1px; }
+.grupo-modelos.fechado .grupo-itens { display: none; }
+.buscando .grupo-modelos.fechado .grupo-itens { display: grid; }      /* o filtro procura tambem nos recolhidos */
+.grupo-cab { display: flex; align-items: center; gap: 8px; padding: 10px 0 4px 6px; }
+.dobra { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 7px; font: 600 13.5px/1.3 var(--f-sans);
+  color: var(--ink); background: none; border: 0; padding: 2px 0; cursor: pointer; text-align: left; }
+.dobra .mudo { font-weight: 400; font-size: 12.5px; }
+.dobra::after { content: ""; flex: none; align-self: center; margin: -3px 7px 0 auto; width: 6px; height: 6px;
+  border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); }
+.dobra[aria-expanded="false"]::after { transform: rotate(-45deg); margin-top: 0; }
+.dobra:hover::after { border-color: var(--ink); }
 .item-modelo { display: grid; grid-template-columns: auto 12px minmax(0, 1fr); align-items: start; gap: 2px 8px;
   padding: 5px 6px; border-radius: 3px; cursor: pointer; font-size: 14px; line-height: 1.3; }
 .item-modelo:hover { background: var(--wash); }
@@ -873,6 +882,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
         <div class="trilho-pe">
           <button class="botao leve" type="button" id="sel-todos">Marcar os visíveis</button>
           <button class="botao leve" type="button" id="sel-nenhum">Limpar</button>
+          <button class="botao leve" type="button" id="dobra-todos">Recolher grupos</button>
         </div>
       </div>
     </details>
@@ -886,7 +896,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
 </section>
 
 </main>
-<footer class="rodape">Gerado em 12/10/2026 13:41 a partir do commit <span class="mono">89a4df2</span> por
+<footer class="rodape">Gerado em 12/10/2026 14:09 a partir do commit <span class="mono">29780cc</span> por
 <span class="mono">src/make_site.py</span>. 19 modelos com resultado, 19 avaliados por completo,
 12 experimentos planejados.</footer>
 <dialog class="lupa" id="lupa" aria-label="Imagens ampliadas"><div class="lupa-corpo"></div></dialog>
@@ -1217,7 +1227,8 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     curva: salvo.curva || 'teste_bwd', eixoCurva: salvo.eixoCurva || 'epoca',
     galTipo: salvo.galTipo || 'refinada', galLeg: salvo.galLeg !== false, galTam: salvo.galTam || 'm',
     resumoMet: salvo.resumoMet || 'BwdRetrieval', ordem: salvo.ordem || null, ordemDesc: salvo.ordemDesc !== false,
-    fichas: salvo.fichas || 'selecionados', busca: ''
+    fichas: salvo.fichas || 'selecionados', busca: '',
+    fechados: Array.isArray(salvo.fechados) ? salvo.fechados : []
   };
   function guarda() {
     var o = {};
@@ -1490,11 +1501,18 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
     constroiLista();
     $('#busca').addEventListener('input', function (ev) {
       E.busca = ev.target.value.trim().toLowerCase();
+      $('#lista-modelos').classList.toggle('buscando', !!E.busca);
       $$('.item-modelo').forEach(function (it) { it.hidden = E.busca && it.getAttribute('data-busca').indexOf(E.busca) < 0; });
     });
     $('#sel-todos').addEventListener('click', function () {
-      $$('.item-modelo').forEach(function (it) { if (!it.hidden) E.sel.add($('input', it).value); });
+      $$('.item-modelo').forEach(function (it) { if (it.offsetParent) E.sel.add($('input', it).value); });
       mudouSelecao();
+    });
+    $('#dobra-todos').addEventListener('click', function () {
+      var ids = $$('.grupo-modelos').map(function (b) { return b.getAttribute('data-grupo'); });
+      E.fechados = E.fechados.length < ids.length ? ids : [];
+      sincronizaDobras();
+      guarda();
     });
     $('#sel-nenhum').addEventListener('click', function () { E.sel = new Set(); mudouSelecao(); });
     if ('ResizeObserver' in window) {
@@ -1516,7 +1534,16 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
       var ms = MODELOS.filter(function (m) { return (m.grupo === 'experimento' ? 'experimento' : m.familia) === g.id && temDados(m); });
       if (!ms.length) return;
       var cab = h('input', {type: 'checkbox', 'aria-label': 'Todos de ' + g.nome});
-      var bloco = h('div', {class: 'grupo-modelos'}, h('label', {class: 'grupo-cab'}, cab, g.nome, h('span', {class: 'mudo', texto: '(' + ms.length + ')'})));
+      var dobra = h('button', {class: 'dobra', type: 'button', 'aria-controls': 'grupo-' + g.id},
+        h('span', {texto: g.nome}), h('span', {class: 'mudo num'}));
+      var itens = h('div', {class: 'grupo-itens', id: 'grupo-' + g.id});
+      var bloco = h('div', {class: 'grupo-modelos', 'data-grupo': g.id}, h('div', {class: 'grupo-cab'}, cab, dobra), itens);
+      dobra.addEventListener('click', function () {
+        var i = E.fechados.indexOf(g.id);
+        if (i < 0) E.fechados.push(g.id); else E.fechados.splice(i, 1);
+        sincronizaDobras();
+        guarda();
+      });
       cab.addEventListener('change', function () {
         ms.forEach(function (m) { if (cab.checked) E.sel.add(m.id); else E.sel.delete(m.id); });
         mudouSelecao();
@@ -1524,13 +1551,24 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
       ms.forEach(function (m) {
         var cb = h('input', {type: 'checkbox', value: m.id, id: 'sel-' + m.id});
         cb.addEventListener('change', function () { if (cb.checked) E.sel.add(m.id); else E.sel.delete(m.id); mudouSelecao(); });
-        bloco.appendChild(h('label', {class: 'item-modelo', for: 'sel-' + m.id, 'data-busca': (m.rotulo + ' ' + m.id).toLowerCase(), title: m.id},
+        itens.appendChild(h('label', {class: 'item-modelo', for: 'sel-' + m.id, 'data-busca': (m.rotulo + ' ' + m.id).toLowerCase(), title: m.id},
           cb, h('span', {class: 'amostra', style: '--c:' + m.cor}), h('span', {texto: m.rotulo}),
           h('span', {class: 'meta'}, h('span', {class: 'ponto-status st-' + m.status}), m.status_txt)));
       });
       lista.appendChild(bloco);
     });
     sincronizaLista();
+    sincronizaDobras();
+  }
+  function sincronizaDobras() {
+    var blocos = $$('.grupo-modelos');
+    blocos.forEach(function (b) {
+      var fechado = E.fechados.indexOf(b.getAttribute('data-grupo')) >= 0;
+      b.classList.toggle('fechado', fechado);
+      $('.dobra', b).setAttribute('aria-expanded', String(!fechado));
+    });
+    var abertos = blocos.filter(function (b) { return !b.classList.contains('fechado'); }).length;
+    $('#dobra-todos').textContent = abertos ? 'Recolher grupos' : 'Expandir grupos';
   }
   function sincronizaLista() {
     $$('.item-modelo input').forEach(function (cb) { cb.checked = E.sel.has(cb.value); });
@@ -1538,6 +1576,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
       var cbs = $$('.item-modelo input', b), n = cbs.filter(function (c) { return c.checked; }).length;
       var cab = $('.grupo-cab > input', b);
       cab.checked = n === cbs.length; cab.indeterminate = n > 0 && n < cbs.length;
+      $('.dobra .mudo', b).textContent = n + ' de ' + cbs.length;      // recolhido, ainda diz quantos estao marcados
     });
     var total = MODELOS.filter(temDados).length;
     $('#contagem').textContent = E.sel.size + ' de ' + total;
