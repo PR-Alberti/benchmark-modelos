@@ -1,0 +1,117 @@
+{
+ "_params_sig": [
+  6026220294,
+  1791326597716806089
+ ],
+ "concluido": null,
+ "config": {
+  "dataset": {
+   "agregacao": null,
+   "balanceado": false,
+   "classes": null,
+   "maximo_outros": 2,
+   "minimo": 10,
+   "n_imagens": null,
+   "regra": "exclusiva",
+   "repeticoes": null,
+   "semente": 0,
+   "sessoes": 1,
+   "subj": 1
+  },
+  "hiper": {
+   "batch_size": null,
+   "max_lr": 0.0003,
+   "mixup_pct": 0.33,
+   "num_epochs": 240,
+   "paper": false,
+   "save_every": 10,
+   "seed": 42
+  },
+  "modelo": "mindeye1"
+ },
+ "config_descritiva": false,
+ "config_erro": null,
+ "config_fonte": "a de subj01_me1_1sess (src/experimentos.py)",
+ "curva": null,
+ "espaco_clip": "ViT-L/14",
+ "familia": "mindeye1",
+ "fontes": [
+  "results/tables/subj01_me1_1sess_semlowlevel_all_recons.csv"
+ ],
+ "grupo": "benchmark",
+ "id": "subj01_me1_1sess_semlowlevel",
+ "iniciado": null,
+ "legendas": null,
+ "notas": [
+  "O alto nível foi treinado de novo com a mesma receita do MindEye1 de 1 sessão (o retrieval saiu idêntico); a reconstrução usa só o Versatile Diffusion, sem o img2img a partir da imagem borrada do low-level (scripts/run_me1_benchmark.sh com LOWLEVEL=0)."
+ ],
+ "params": {
+  "net": 56055264,
+  "noise_scheduler": 1300,
+  "voxel2clip": 947579904
+ },
+ "publicada": false,
+ "resumo_dataset": {
+  "exibicoes": 688,
+  "imagens_unicas": 536,
+  "repeticoes": {
+   "1": 413,
+   "2": 94,
+   "3": 29
+  },
+  "sessoes_usadas": 1
+ },
+ "retrieval": {
+  "bwd": {
+   "media": 0.2317777822415034
+  },
+  "fonte": "final_evaluations",
+  "fwd": {
+   "media": 0.3060000071922938
+  }
+ },
+ "retrieval_centrado": null,
+ "rotulo": "MindEye1 sem low-level · 1 sessão",
+ "sessoes": 1,
+ "status": "completo",
+ "status_txt": "métricas completas",
+ "tempo_s": 6006.0,
+ "valores": {
+  "refinada": {
+   "AlexNet(2)": 0.7952172172172173,
+   "AlexNet(5)": 0.8688778778778778,
+   "Brain Corr. V1": 0.1836342215538025,
+   "Brain Corr. V2": 0.2116391360759735,
+   "Brain Corr. V3": 0.22104999423027039,
+   "Brain Corr. V4": 0.22856846451759338,
+   "Brain Corr. higher_vis": 0.34214821457862854,
+   "Brain Corr. nsd_general": 0.31110620498657227,
+   "BwdRetrieval": 0.2317777822415034,
+   "CLIP": 0.8142372372372373,
+   "EffNet-B": 0.8198606003613468,
+   "FwdRetrieval": 0.3060000071922938,
+   "InceptionV3": 0.8071041041041042,
+   "PixCorr": 0.13233924268470743,
+   "SSIM": 0.3223569534047806,
+   "SwAV": 0.47079246179939116
+  },
+  "unclip": {
+   "AlexNet(2)": 0.7952172172172173,
+   "AlexNet(5)": 0.8688778778778778,
+   "Brain Corr. V1": 0.1836342215538025,
+   "Brain Corr. V2": 0.2116391360759735,
+   "Brain Corr. V3": 0.22104999423027039,
+   "Brain Corr. V4": 0.22856846451759338,
+   "Brain Corr. higher_vis": 0.34214821457862854,
+   "Brain Corr. nsd_general": 0.31110620498657227,
+   "BwdRetrieval": 0.2317777822415034,
+   "CLIP": 0.8142372372372373,
+   "EffNet-B": 0.8198606003613468,
+   "FwdRetrieval": 0.3060000071922938,
+   "InceptionV3": 0.8071041041041042,
+   "PixCorr": 0.13233924268470743,
+   "SSIM": 0.3223569534047806,
+   "SwAV": 0.47079246179939116
+  }
+ }
+}

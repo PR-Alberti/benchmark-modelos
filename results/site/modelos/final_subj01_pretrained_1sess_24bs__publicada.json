@@ -1,0 +1,88 @@
+{
+ "concluido": null,
+ "config": {
+  "dataset": {
+   "sessoes": 1
+  },
+  "hiper": {
+   "batch_size": 24,
+   "blurry": true,
+   "hidden_dim": 4096,
+   "num_epochs": 150,
+   "prior": true,
+   "treino": "fine-tune completo"
+  },
+  "modelo": "mindeye2"
+ },
+ "config_descritiva": true,
+ "config_erro": null,
+ "config_fonte": "conhecida",
+ "curva": null,
+ "espaco_clip": "ViT-bigG/14",
+ "familia": "artigo",
+ "fontes": [
+  "results/tables/final_subj01_pretrained_1sess_24bs_published_all_enhancedrecons.csv"
+ ],
+ "grupo": "benchmark",
+ "id": "final_subj01_pretrained_1sess_24bs__publicada",
+ "iniciado": null,
+ "legendas": null,
+ "notas": [
+  "Os tensores de reconstrução divulgados pelos autores, avaliados com as mesmas métricas: conferem o pipeline de reconstrução deste repositório."
+ ],
+ "publicada": true,
+ "receita": {
+  "partida": "final_multisubject_subj01",
+  "prior": "fine-tune completo",
+  "treino": "150 épocas · batch 24 · 8×A100"
+ },
+ "resumo_dataset": {
+  "exibicoes": 688,
+  "imagens_unicas": 536,
+  "repeticoes": {
+   "1": 413,
+   "2": 94,
+   "3": 29
+  },
+  "sessoes_usadas": 1
+ },
+ "retrieval": {
+  "bwd": {
+   "media": 0.7761111279328664
+  },
+  "fonte": "final_evaluations",
+  "fwd": {
+   "media": 0.9393333494663239
+  }
+ },
+ "retrieval_centrado": null,
+ "rotulo": "Artigo · reconstruções publicadas · 1 sessão",
+ "sessoes": 1,
+ "status": "completo",
+ "status_txt": "métricas completas",
+ "tempo_s": null,
+ "valores": {
+  "refinada": {
+   "AlexNet(2)": 0.8802472472472472,
+   "AlexNet(5)": 0.9332612612612612,
+   "Brain Corr. V1": 0.31819528341293335,
+   "Brain Corr. V2": 0.33708515763282776,
+   "Brain Corr. V3": 0.34084847569465637,
+   "Brain Corr. V4": 0.3163270354270935,
+   "Brain Corr. higher_vis": 0.34497833251953125,
+   "Brain Corr. nsd_general": 0.346736341714859,
+   "BwdRetrieval": 0.7761111279328664,
+   "CLIP": 0.8074884884884885,
+   "EffNet-B": 0.7982262420172084,
+   "FwdRetrieval": 0.9393333494663239,
+   "InceptionV3": 0.8356676676676676,
+   "PixCorr": 0.2345168343622362,
+   "SSIM": 0.42820069242967396,
+   "SwAV": 0.4586707067973719
+  },
+  "unclip": {
+   "BwdRetrieval": 0.7761111279328664,
+   "FwdRetrieval": 0.9393333494663239
+  }
+ }
+}

@@ -163,4 +163,5 @@ avalia "$m" enhanced
 
 etapa "montando a pagina (com o ruido de referencia)"
 $ENVP/bin/python make_benchmark.py >> "$LOG" 2>&1
-etapa "=== fim: results/benchmark/index.html ==="
+atualiza_site
+etapa "=== fim: results/benchmark/index.html e results/site/index.html ==="

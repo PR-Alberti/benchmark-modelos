@@ -1,0 +1,266 @@
+<div class="leitura">
+  <nav class="indice" aria-label="Nesta página">
+    <p class="olho">Nesta página</p>
+    <a href="#uso-modelos">Os modelos</a>
+    <a href="#uso-avaliacao">A avaliação</a>
+    <a href="#uso-treino">Treinar</a>
+    <a href="#uso-dataset">O dataset de treino</a>
+    <a href="#uso-simulador">Simulador</a>
+    <a href="#uso-hiper">Hiperparâmetros</a>
+    <a href="#uso-novo">Um modelo novo no site</a>
+  </nav>
+  <div class="texto">
+    <header class="abertura">
+      <p class="olho">Como usar</p>
+      <h1>Um treino é um dicionário: modelo, hiperparâmetros e dataset</h1>
+      <p class="lede">O <code>src/treina.py</code> lê o dicionário, monta o subconjunto de treino, grava a configuração
+        junto do modelo e chama o script de treino certo. O que não estiver no dicionário fica no padrão, e um dataset
+        vazio é o do benchmark: as exibições completas das N primeiras sessões.</p>
+      <pre><code>{"modelo": "frr",                         <span class="com"># frr | mindeye2 | mindeye1</span>
+ "hiper": {"seed": 42},                   <span class="com"># o que faltar fica no padrão do modelo</span>
+ "dataset": {"sessoes": 40,               <span class="com"># o pool: as 40 primeiras sessões</span>
+             "classes": {"animal": ["sup_animal"]},
+             "minimo": 10},               <span class="com"># animal ocupa ao menos 10% da tela</span>
+ "rotulo": "FRR · só animais"}            <span class="com"># opcional: o nome que aparece nos resultados</span></code></pre>
+    </header>
+
+    <section class="secao" id="uso-modelos">
+      <header><p class="olho">Modelos</p><h2>Os três modelos</h2>
+        <p>Os tempos são os medidos aqui, numa RTX A4500.</p></header>
+      <div class="modelos-cards">
+        <article class="modelo-card" style="--fam:{{cor:frr}}">
+          <h3>FRR</h3>
+          <dl>
+            <div><dt>Entrada</dt><dd>uma linha por exibição com os 15.724 voxels, ou a média das repetições de cada imagem</dd></div>
+            <div><dt>Alvo</dt><dd>o embedding CLIP ViT-bigG/14 da imagem, achatado: 256 × 1.664 = 425.984 números</dd></div>
+            <div><dt>Treino</dt><dd>forma fechada (Rokem &amp; Kay, 2020): uma decomposição espectral dos voxels; 20 frações
+              de 0,05 a 1, validação cruzada de 5 dobras agrupada por imagem e uma fração por dimensão do alvo</dd></div>
+            <div><dt>Saída</dt><dd>só o embedding: tem retrieval, não tem reconstrução</dd></div>
+            <div><dt>Tempo</dt><dd>{{tempo:subj01_frr_1sess}} com 1 sessão · {{tempo:subj01_frr_40sess}} com 40 (~25 GB de RAM)</dd></div>
+            <div><dt>Código</dt><dd><code>src/run_frr.py</code> · <code>scripts/run_frr.sh</code></dd></div>
+          </dl>
+        </article>
+        <article class="modelo-card" style="--fam:{{cor:mindeye2}}">
+          <h3>MindEye2 ridge-only</h3>
+          <dl>
+            <div><dt>Ponto de partida</dt><dd>o modelo pré-treinado nos outros 7 sujeitos do NSD; backbone, prior e
+              projeções ficam congelados</dd></div>
+            <div><dt>Treino</dt><dd>só a camada ridge do sujeito, a única parte específica da pessoa
+              ({{ridge:subj01_ridgeonly_1sess_4096blurry}} dos parâmetros no 4096 + blurry), com a loss contrastiva e a
+              do diffusion prior</dd></div>
+            <div><dt>Alvo</dt><dd>CLIP ViT-bigG/14; com o ramo blurry, também a imagem borrada</dd></div>
+            <div><dt>Saída</dt><dd>embedding, legenda prevista (GIT) e imagem: o unCLIP do SDXL, refinado por img2img guiado
+              pela legenda</dd></div>
+            <div><dt>Tempo</dt><dd>{{tempo:subj01_ridgeonly_1sess_prior_seed42}} com 1 sessão (150 épocas) ·
+              {{tempo:subj01_ridgeonly_40sess_prior}} com 40 (20 épocas)</dd></div>
+            <div><dt>Código</dt><dd><code>src/train_ridgeonly.py</code> · <code>scripts/run_ridgeonly_prior.sh</code></dd></div>
+          </dl>
+        </article>
+        <article class="modelo-card" style="--fam:{{cor:mindeye1}}">
+          <h3>MindEye1</h3>
+          <dl>
+            <div><dt>Ponto de partida</dt><dd>nenhum: treina tudo do zero nos mesmos dados</dd></div>
+            <div><dt>Treino</dt><dd>MLP + diffusion prior para o CLIP ViT-L/14 (257 × 768); à parte, o low-level, que prevê a
+              imagem borrada pelo VAE; batch 16 e Adam de 8 bits para caber em 20 GB (o artigo usa 32)</dd></div>
+            <div><dt>Amostra</dt><dd>uma imagem com as repetições empilhadas; a cada lote, uma delas (rodízio)</dd></div>
+            <div><dt>Saída</dt><dd>embedding e imagem: o Versatile Diffusion, com img2img a partir da borrada (força 0,85)</dd></div>
+            <div><dt>Tempo</dt><dd>{{tempo:subj01_me1_1sess}} com 1 sessão · {{tempo:subj01_me1_40sess}} com 40, somando o low-level</dd></div>
+            <div><dt>Código</dt><dd><code>mindeye1/src/Train_MindEye.py</code> · <code>scripts/me1_run.sh</code></dd></div>
+          </dl>
+        </article>
+      </div>
+    </section>
+
+    <section class="secao" id="uso-avaliacao">
+      <header><p class="olho">Avaliação</p><h2>Como os modelos são avaliados</h2></header>
+      <p>O teste é sempre o mesmo: as 1.000 imagens que os 8 sujeitos viram (as <em>shared1000</em>), cada uma com 3
+        repetições espalhadas pelas 40 sessões, inclusive para os modelos de 1 sessão. As exibições de teste nunca entram
+        no treino. Cada modelo junta as 3 repetições do seu jeito:</p>
+      <div class="rolagem"><table class="tab">
+        <thead><tr><th>Modelo</th><th>Treino</th><th>Teste</th></tr></thead>
+        <tbody>
+          <tr><td>FRR</td><td>cada exibição é uma amostra</td><td>média dos betas das 3 repetições, depois a previsão</td></tr>
+          <tr><td>MindEye2</td><td>cada exibição é uma amostra</td><td>cada repetição passa pelo modelo; a média é das saídas</td></tr>
+          <tr><td>MindEye1</td><td>uma amostra por imagem, com rodízio das repetições</td><td>média dos betas das 3 repetições</td></tr>
+        </tbody>
+      </table></div>
+      <p>O <b>retrieval</b> é o top-1 entre 300: em cada um de 30 sorteios de 300 imagens de teste (a mesma semente para
+        todos os modelos), cada imagem procura o seu cérebro entre as 300 previsões (Img→cér) e cada previsão procura a sua
+        imagem (Cér→img). O código chama esses sentidos de fwd e bwd; o "Image Retrieval" do artigo é o Cér→img. O acaso é
+        1 em 300. O MindEye1 mede o retrieval no espaço CLIP dele (ViT-L/14), então esse número não é diretamente
+        comparável aos outros.</p>
+      <p>As métricas de imagem comparam a reconstrução com a imagem vista. A <b>unCLIP</b> é a saída do gerador; a
+        <b>refinada</b> passa por um img2img guiado pela legenda prevista e, nos modelos com ramo blurry, entra nas
+        métricas como 75% refinada + 25% borrada, como no artigo. O MindEye1 não tem refinamento: a reconstrução final
+        dele vale para as duas.</p>
+      {{metricas}}
+    </section>
+
+    <section class="secao" id="uso-treino">
+      <header><p class="olho">Treino</p><h2>Treinar um modelo</h2>
+        <p>Os experimentos ficam em <code>src/experimentos.py</code>: <code>BENCHMARK</code> tem os modelos já treinados,
+          como dicionários, e <code>EXPERIMENTOS</code> os novos. Pela linha de comando:</p></header>
+      <pre><code>cd src
+python treina.py --lista                  <span class="com"># os experimentos definidos</span>
+python treina.py &lt;nome&gt; --so_dataset     <span class="com"># monta o dataset e mostra o resumo, sem treinar</span>
+python treina.py &lt;nome&gt; --dry_run        <span class="com"># mostra o comando que rodaria</span>
+python treina.py &lt;nome&gt; [&lt;nome&gt; ...]     <span class="com"># treina, em sequência; o que já terminou é pulado</span>
+python treina.py &lt;nome&gt; --retoma         <span class="com"># MindEye2: continua do last.pth</span></code></pre>
+      <p>Ou com um dicionário qualquer, sem editar o repositório (de dentro de <code>src/</code>, ou no
+        <code>notebooks/treino.ipynb</code>):</p>
+      <pre><code>import treina
+treina.roda("meu_frr_animais", {
+    "modelo": "frr", "hiper": {"seed": 42},
+    "dataset": {"sessoes": 40, "classes": {"animal": ["sup_animal"]}, "minimo": 10},
+}, dry_run=True)                          <span class="com"># dry_run=False para treinar</span></code></pre>
+      <ul>
+        <li>O treino grava em <code>train_logs/&lt;nome&gt;/</code> o manifesto do dataset (<code>dataset.json</code>) e a
+          configuração completa, com o commit do código (<code>experimento.json</code>).</li>
+        <li>O dicionário é a configuração inteira: variáveis exportadas no shell (<code>BATCH_SIZE</code>,
+          <code>RESUME</code>...) não chegam ao treino.</li>
+        <li>Um nome não muda de configuração: com outro dataset ou outros hiperparâmetros, o treino para. Um modelo que já
+          existe também não é sobrescrito: para refazer um do benchmark, use outro nome com o mesmo dicionário.</li>
+        <li>Interrompido, o FRR retoma da última dobra da validação cruzada e o MindEye1 do <code>last.pth</code>; o
+          MindEye2 retoma com <code>--retoma</code>.</li>
+      </ul>
+      <p>O treino do MindEye2 e do MindEye1 dá o embedding; as imagens e as métricas completas vêm da reconstrução e da
+        avaliação, que rodam à parte (com as mesmas variáveis do treino, num dataset controlado):</p>
+      <pre><code>scripts/run_recon.sh &lt;nome&gt; 1024 noblurry      <span class="com"># MindEye2: reconstruções e refinamento</span>
+scripts/run_evals.sh &lt;nome&gt; enhanced            <span class="com"># MindEye2: métricas</span>
+scripts/me1_run.sh lowlevel                     <span class="com"># MindEye1: low-level, recon e métricas</span>
+scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
+    </section>
+
+    <section class="secao" id="uso-dataset">
+      <header><p class="olho">Dataset</p><h2>Escolher o dataset de treino</h2>
+        <p>O campo <code>"dataset"</code> recorta as exibições de treino. As escolhas se aplicam nesta ordem:</p></header>
+      <ol class="passos">
+        <li><h3>Pool</h3><p>as exibições das <code>sessoes</code> primeiras sessões.</p></li>
+        <li><h3>Classes</h3><p>só as imagens com rótulo semântico numa das <code>classes</code>.</p></li>
+        <li><h3>Repetições</h3><p>só as imagens com pelo menos <code>repeticoes</code> exibições no pool.</p></li>
+        <li><h3>Sorteio</h3><p><code>n_imagens</code> imagens, com a <code>semente</code>, no total ou por classe
+          (<code>balanceado</code>).</p></li>
+        <li><h3>Exibições</h3><p>de cada imagem escolhida, <code>repeticoes</code> exibições sorteadas, ou todas.</p></li>
+      </ol>
+      {{campos_dataset}}
+      <h3>Classes semânticas</h3>
+      <p>Para cada imagem, a tabela de frações guarda quanto da tela o NSD mostrou de cada categoria do COCO: as máscaras
+        das anotações são desenhadas no recorte que o NSD exibiu, numa tela de 425 × 425. As colunas são as 80 categorias
+        (<code>cat_dog</code>, <code>cat_car</code>...) e as 12 supercategorias:</p>
+      {{supercategorias}}
+      <ul>
+        <li><b>Regra exclusiva</b> (padrão): <code>classes</code> é <code>{nome: [colunas]}</code>. A imagem é da classe se
+          ela ocupa pelo menos <code>minimo</code>% da tela e cada <em>outra classe listada</em> fica abaixo de
+          <code>maximo_outros</code>%. Uma classe pode somar colunas: <code>{"cao_gato": ["cat_dog", "cat_cat"]}</code>.</li>
+        <li><b>Regra de prioridade</b>: <code>classes</code> é uma lista com <code>"pessoa"</code>, <code>"animal"</code> e
+          <code>"outro"</code>. Pessoa se ocupa 5% ou mais; senão animal, com 2% ou mais; senão "outro", se a supercategoria
+          dominante entre as restantes for veículo, móvel ou exterior.</li>
+      </ul>
+      <p class="aviso-caixa">Com uma classe só na regra exclusiva não há outra para comparar, e o
+        <code>maximo_outros</code> não filtra nada: <code>{"animal": ["sup_animal"]}</code> aceita uma imagem com 15% de
+        animal e 40% de pessoa. Para exigir animal sem pessoa, liste <code>"pessoa": ["sup_person"]</code> também, sabendo
+        que as imagens de pessoa entram no treino.</p>
+      <h3>Como usar as repetições</h3>
+      {{agregacao}}
+      <p>Nos modos por imagem, a época tem uma amostra por imagem, e não por exibição. A época também encolhe junto com o
+        dataset: no MindEye2 ela é 750 × sessões amostras na proporção das exibições mantidas, e no MindEye1 é uma passada
+        pelas amostras. Com o mesmo <code>num_epochs</code>, um subconjunto menor treina menos passos; o simulador abaixo
+        mostra quantos.</p>
+    </section>
+
+    <section class="secao" id="uso-simulador">
+      <header><p class="olho">Interativo</p><h2>Simulador do dataset</h2>
+        <p>Monte o campo <code>"dataset"</code> e veja, com os dados reais do sujeito 1, quantas imagens e exibições ficam,
+          quantas de cada classe e quantas amostras cada modelo vê por época. É a mesma conta do
+          <code>treina.py --so_dataset</code> (conferida contra ela nos testes); só o sorteio de <code>n_imagens</code>
+          fica para o treina.py. O simulador tem as supercategorias; as categorias (<code>cat_*</code>) funcionam no
+          treina.py.</p></header>
+      <div class="sim-caixa" id="simulador">
+        <form class="sim-form" id="sim-form" autocomplete="off">
+          <fieldset><legend>Pool</legend>
+            <div class="sim-linha"><label for="sim-sessoes">Sessões</label>
+              <input type="range" id="sim-sessoes" min="1" max="40" value="40">
+              <b class="num" id="sim-sessoes-v">40</b></div>
+          </fieldset>
+          <fieldset><legend>Classes semânticas</legend>
+            <div class="sim-linha">
+              <label><input type="radio" name="sim-regra" id="sim-regra-exc" value="exclusiva" checked> exclusiva</label>
+              <label><input type="radio" name="sim-regra" id="sim-regra-pri" value="prioridade"> prioridade</label>
+            </div>
+            <div id="sim-exclusiva" style="display:grid;gap:8px">
+              <div class="sup-chips" id="sim-sup" aria-label="Supercategorias"></div>
+              <p class="nota">Nenhuma marcada: sem filtro semântico.</p>
+              <div class="sim-linha">
+                <label for="sim-minimo">mínimo <input type="number" id="sim-minimo" min="0" max="100" step="0.5" value="10"> %</label>
+                <label for="sim-maximo">máximo das outras <input type="number" id="sim-maximo" min="0" max="100" step="0.5" value="2"> %</label>
+              </div>
+            </div>
+            <div id="sim-prioridade" hidden>
+              <div class="sup-chips" id="sim-pri" aria-label="Classes da regra de prioridade"></div>
+            </div>
+          </fieldset>
+          <fieldset><legend>Imagens e repetições</legend>
+            <div class="sim-linha">
+              <label for="sim-rep">repetições
+                <select id="sim-rep"><option value="">todas do pool</option><option value="1">1</option>
+                  <option value="2">2</option><option value="3">3</option></select></label>
+              <label for="sim-nimg">imagens <input type="number" id="sim-nimg" min="1" step="1" placeholder="todas"></label>
+              <label for="sim-bal"><input type="checkbox" id="sim-bal"> por classe</label>
+            </div>
+          </fieldset>
+          <fieldset><legend>Agregação</legend>
+            <div class="sim-linha">
+              <label for="sim-ag">repetições no treino
+                <select id="sim-ag"><option value="">a de cada modelo (None)</option><option value="exibicoes">exibicoes</option>
+                  <option value="media">media</option><option value="sorteio">sorteio</option>
+                  <option value="combinacao">combinacao</option></select></label>
+            </div>
+          </fieldset>
+        </form>
+        <div class="sim-res" id="sim-res" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="secao" id="uso-hiper">
+      <header><p class="olho">Hiperparâmetros</p><h2>O que cada modelo aceita em <code>"hiper"</code></h2>
+        <p>Os padrões são os do <code>treina.py</code>; uma chave fora destas é recusada.</p></header>
+      <h3>FRR</h3>
+      {{hiper:frr}}
+      <h3>MindEye2 ridge-only</h3>
+      {{hiper:mindeye2}}
+      <h3>MindEye1</h3>
+      {{hiper:mindeye1}}
+    </section>
+
+    <section class="secao" id="uso-novo">
+      <header><p class="olho">Este site</p><h2>Como um modelo novo entra nos resultados</h2></header>
+      <p>O <code>src/make_site.py</code> procura resultados nos lugares padrão, e qualquer modelo com algum deles aparece
+        na página de resultados:</p>
+      <div class="rolagem"><table class="tab">
+        <thead><tr><th>Arquivo</th><th>Quem grava</th><th>O que o site mostra</th></tr></thead>
+        <tbody>
+          <tr><td><code>results/tables/&lt;nome&gt;_frr.json</code></td><td><code>run_frr.sh</code></td><td>retrieval, embedding e diagnósticos do FRR</td></tr>
+          <tr><td><code>results/tables/&lt;nome&gt;_all_recons.csv</code> e <code>..._all_enhancedrecons.csv</code></td>
+            <td><code>run_evals.sh</code></td><td>todas as métricas de imagem e de retrieval</td></tr>
+          <tr><td><code>results/evals/&lt;nome&gt;/&lt;nome&gt;_retrieval.json</code></td><td><code>verify_retrieval.py</code></td><td>só o retrieval</td></tr>
+          <tr><td><code>train_logs/&lt;nome&gt;/metrics.csv</code></td><td>treino do MindEye2</td><td>as curvas, e o retrieval da última época enquanto o modelo não é avaliado</td></tr>
+          <tr><td><code>results/evals/&lt;nome&gt;/*recons.pt</code></td><td><code>run_recon.sh</code>, <code>me1_run.sh recon</code></td><td>a galeria</td></tr>
+        </tbody>
+      </table></div>
+      <ul>
+        <li>A configuração vem do <code>experimento.json</code> que o <code>treina.py</code> grava, ou do dicionário em
+          <code>src/experimentos.py</code>. Um modelo treinado fora dos dois aparece, mas marcado como sem configuração
+          registrada. O campo opcional <code>"rotulo"</code> do dicionário dá o nome que aparece aqui; sem ele, o nome é
+          montado da configuração.</li>
+        <li>O site se regenera sozinho ao fim do <code>run_frr.sh</code>, do treino do MindEye2, do
+          <code>run_evals.sh</code> (que o MindEye1 também usa) e do <code>run_benchmark.sh</code>. Na mão:
+          <code>python src/make_site.py</code>.</li>
+        <li>O que foi extraído de cada modelo fica em <code>results/site/modelos/&lt;nome&gt;.json</code>, e a galeria em
+          <code>results/site/galeria/</code>, no git. Numa máquina sem os checkpoints e os tensores, o site continua igual.
+          Para tirar um modelo, apague o registro dele.</li>
+        <li>Os experimentos de <code>src/experimentos.py</code> que ainda não rodaram aparecem em Fichas, como
+          planejados, com o comando para treinar.</li>
+      </ul>
+    </section>
+  </div>
+</div>
