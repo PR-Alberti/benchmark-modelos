@@ -39,8 +39,9 @@ LOGDIR=$TRAIN_LOGS/$MODEL_NAME
 mkdir -p "$LOGDIR"
 
 OUT=$EVALS/$MODEL_NAME/$MODEL_NAME
-# o clipvoxels e o ultimo tensor gravado; o parcial so e apagado depois dele
-if [ -f "${OUT}_all_clipvoxels.pt" ] && [ ! -f "${OUT}_recon_partial.pt" ]; then
+# o clipvoxels e o ultimo tensor gravado; o parcial so e apagado depois dele. Sozinho ele nao basta:
+# o verify_retrieval.py grava o mesmo arquivo sem reconstruir nada
+if [ -f "${OUT}_all_clipvoxels.pt" ] && [ -f "${OUT}_all_recons.pt" ] && [ ! -f "${OUT}_recon_partial.pt" ]; then
     echo "=== recon_inference: $MODEL_NAME ja feito, pulando ==="
 else
     echo "=== recon_inference: $MODEL_NAME (hidden_dim=$HIDDEN_DIM, $BLURRY_MODE) ==="
