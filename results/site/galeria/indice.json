@@ -157,6 +157,32 @@
    "a baseball player is standing in a field.",
    "a large group of people."
   ],
+  "repro_subj01_ridgeonly_1sess_prior_seed2": [
+   "a surfer on a surfboard in the ocean.",
+   "a man sitting down in a chair.",
+   "a baseball player is standing in a field.",
+   "a plate of food with a bunch of food on it.",
+   "a glass door with a window.",
+   "a man standing on a skateboard.",
+   "a group of people sitting on top of a table.",
+   "a group of trees",
+   "a woman standing next to a woman.",
+   "a couple of zebras standing in a field.",
+   "a vase with a flower on it.",
+   "a baseball player is standing in the field.",
+   "a small garden with a fence.",
+   "a large boat on a lake.",
+   "a woman sitting on a bench.",
+   "a group of people standing around each other.",
+   "a parked car with a parked car.",
+   "a group of people riding on top of a horse.",
+   "a man standing next to a horse.",
+   "a truck parked on a road.",
+   "a large body of water.",
+   "a large passenger jet sitting on top of a tarmac.",
+   "a baseball player is holding a bat.",
+   "a large glass window."
+  ],
   "subj01_ridgeonly_1sess": [
    "a large blue and white statue of a man.",
    "a room with a couch and a tv.",
@@ -389,6 +415,22 @@
     "sig": [
      786433528,
      1791881736371783898
+    ]
+   }
+  },
+  "repro_subj01_ridgeonly_1sess_prior_seed2": {
+   "refinada": {
+    "arquivo": "repro_subj01_ridgeonly_1sess_prior_seed2__refinada.webp",
+    "sig": [
+     786433632,
+     1791904103712755779
+    ]
+   },
+   "unclip": {
+    "arquivo": "repro_subj01_ridgeonly_1sess_prior_seed2__unclip.webp",
+    "sig": [
+     786433528,
+     1791901094502950615
     ]
    }
   },
