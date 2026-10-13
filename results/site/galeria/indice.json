@@ -131,6 +131,32 @@
    "a skateboarder is riding on a skateboard.",
    "a room with a view"
   ],
+  "repro_subj01_ridgeonly_1sess_prior_seed1": [
+   "a surfer riding a wave.",
+   "a man sitting on a chair next to a chair.",
+   "a baseball player holding a bat.",
+   "a plate of food with a bunch of food on it.",
+   "a large glass window.",
+   "a person standing on a bench.",
+   "a group of people sitting on top of a bench.",
+   "a small herd of zebras.",
+   "a woman standing next to a woman.",
+   "a couple of zebras standing in a field.",
+   "a vase with a flower on it.",
+   "a baseball player is standing in the field.",
+   "a table with a vase and a vase on it.",
+   "a large tree",
+   "a woman sitting in a chair.",
+   "a group of people standing around each other.",
+   "a parked car with a parked car.",
+   "a man riding a horse on top of a sandy beach.",
+   "a horse and a horse in a field.",
+   "a train is parked on the tracks.",
+   "a boat on a river",
+   "a large passenger jet sitting on top of a tarmac.",
+   "a baseball player is standing in a field.",
+   "a large group of people."
+  ],
   "subj01_ridgeonly_1sess": [
    "a large blue and white statue of a man.",
    "a room with a couch and a tv.",
@@ -347,6 +373,22 @@
     "sig": [
      786433468,
      1791862850283321150
+    ]
+   }
+  },
+  "repro_subj01_ridgeonly_1sess_prior_seed1": {
+   "refinada": {
+    "arquivo": "repro_subj01_ridgeonly_1sess_prior_seed1__refinada.webp",
+    "sig": [
+     786433632,
+     1791884603277546314
+    ]
+   },
+   "unclip": {
+    "arquivo": "repro_subj01_ridgeonly_1sess_prior_seed1__unclip.webp",
+    "sig": [
+     786433528,
+     1791881736371783898
     ]
    }
   },
