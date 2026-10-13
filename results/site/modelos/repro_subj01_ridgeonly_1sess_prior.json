@@ -4,7 +4,7 @@
   1791850466339323252
  ],
  "commit": "cba9e4ac0eb89e07eb1de6aff45ff686d735fcba",
- "concluido": null,
+ "concluido": true,
  "config": {
   "dataset": {
    "agregacao": null,
@@ -1563,6 +1563,7 @@
  "espaco_clip": "ViT-bigG/14",
  "familia": "mindeye2",
  "fontes": [
+  "results/evals/repro_subj01_ridgeonly_1sess_prior/repro_subj01_ridgeonly_1sess_prior_retrieval.json",
   "train_logs/repro_subj01_ridgeonly_1sess_prior/metrics.csv"
  ],
  "grupo": "experimento",
@@ -1588,28 +1589,35 @@
  },
  "retrieval": {
   "bwd": {
-   "media": 0.87667
+   "ic95": [
+    0.8756065151518599,
+    0.8868379611347104
+   ],
+   "media": 0.8812222381432852
   },
-  "epoca": 150,
-  "fonte": "treino",
+  "fonte": "verify_retrieval",
   "fwd": {
-   "media": 0.92
+   "ic95": [
+    0.9251319585688382,
+    0.9330902915748487
+   ],
+   "media": 0.9291111250718435
   }
  },
  "retrieval_centrado": null,
  "rotulo": "Ridge 1024 + prior · 1 sessão · reprodução",
  "sessoes": 1,
- "status": "treino",
- "status_txt": "em treino · época 150",
+ "status": "retrieval",
+ "status_txt": "só retrieval",
  "tempo_s": 6613.297114610672,
  "valores": {
   "refinada": {
-   "BwdRetrieval": 0.87667,
-   "FwdRetrieval": 0.92
+   "BwdRetrieval": 0.8812222381432852,
+   "FwdRetrieval": 0.9291111250718435
   },
   "unclip": {
-   "BwdRetrieval": 0.87667,
-   "FwdRetrieval": 0.92
+   "BwdRetrieval": 0.8812222381432852,
+   "FwdRetrieval": 0.9291111250718435
   }
  }
 }
