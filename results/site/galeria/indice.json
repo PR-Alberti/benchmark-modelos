@@ -105,6 +105,32 @@
    "a tennis player is on the court.",
    "a group of people standing around a building."
   ],
+  "repro_subj01_ridgeonly_1sess": [
+   "a large blue and white horse",
+   "a room with a couch and a chair.",
+   "a man standing in front of a wall.",
+   "a close up of a plate of food",
+   "a picture of a room.",
+   "a woman standing on a grass covered field.",
+   "a man sitting on a chair next to a chair.",
+   "a tree in a field",
+   "a woman standing in a field.",
+   "a large display of animals.",
+   "a small table with a small vase on it.",
+   "a baseball player is standing in a baseball field.",
+   "a large room with a lot of furniture.",
+   "a large tree.",
+   "a man sitting on a bench.",
+   "a large group of birds.",
+   "a truck parked in front of a truck.",
+   "a herd of sheep grazing on a lush green hillside.",
+   "a group of people standing around each other.",
+   "a large truck is parked next to a building.",
+   "a large area with a lot of trees.",
+   "a large building with a lot of windows.",
+   "a skateboarder is riding on a skateboard.",
+   "a room with a view"
+  ],
   "subj01_ridgeonly_1sess": [
    "a large blue and white statue of a man.",
    "a room with a couch and a tv.",
@@ -305,6 +331,22 @@
     "sig": [
      786433503,
      1790687266747423441
+    ]
+   }
+  },
+  "repro_subj01_ridgeonly_1sess": {
+   "refinada": {
+    "arquivo": "repro_subj01_ridgeonly_1sess__refinada.webp",
+    "sig": [
+     786433508,
+     1791865764474418091
+    ]
+   },
+   "unclip": {
+    "arquivo": "repro_subj01_ridgeonly_1sess__unclip.webp",
+    "sig": [
+     786433468,
+     1791862850283321150
     ]
    }
   },
