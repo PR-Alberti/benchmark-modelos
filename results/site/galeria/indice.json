@@ -131,6 +131,32 @@
    "a skateboarder is riding on a skateboard.",
    "a room with a view"
   ],
+  "repro_subj01_ridgeonly_1sess_4096blurry": [
+   "a surfer on a surfboard in the ocean.",
+   "a man sitting down on a bench.",
+   "a tennis player holding a racket.",
+   "a plate of food with a fork.",
+   "a large glass window.",
+   "a man on a skateboard in the water.",
+   "a man sitting down next to a woman.",
+   "a tree in a field",
+   "a man wearing a shirt and tie.",
+   "a large elephant",
+   "a small wooden table.",
+   "a man standing on a field.",
+   "a vase with flowers on it.",
+   "a large building with a lot of windows.",
+   "a man standing next to a man.",
+   "a bunch of food on a table",
+   "a black and white photo of a car.",
+   "a man standing on a beach next to a body of water.",
+   "a couple of people that are standing in the grass.",
+   "a truck parked next to a parked vehicle.",
+   "a large body of water.",
+   "a plane is parked on the runway.",
+   "a man standing on a field.",
+   "a group of people standing around."
+  ],
   "repro_subj01_ridgeonly_1sess_prior_seed1": [
    "a surfer riding a wave.",
    "a man sitting on a chair next to a chair.",
@@ -399,6 +425,29 @@
     "sig": [
      786433468,
      1791862850283321150
+    ]
+   }
+  },
+  "repro_subj01_ridgeonly_1sess_4096blurry": {
+   "borrada": {
+    "arquivo": "repro_subj01_ridgeonly_1sess_4096blurry__borrada.webp",
+    "sig": [
+     786433617,
+     1791923575351735501
+    ]
+   },
+   "refinada": {
+    "arquivo": "repro_subj01_ridgeonly_1sess_4096blurry__refinada.webp",
+    "sig": [
+     786433627,
+     1791926549251939086
+    ]
+   },
+   "unclip": {
+    "arquivo": "repro_subj01_ridgeonly_1sess_4096blurry__unclip.webp",
+    "sig": [
+     786433523,
+     1791923575641738103
     ]
    }
   },
