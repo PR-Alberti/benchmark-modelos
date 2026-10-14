@@ -1,7 +1,7 @@
 {
  "_params_sig": [
   8909277522,
-  1790683820113341759
+  1791837534232119592
  ],
  "concluido": null,
  "config": {
@@ -25,6 +25,7 @@
  "espaco_clip": "ViT-bigG/14",
  "familia": "artigo",
  "fontes": [
+  "results/evals/final_subj01_pretrained_1sess_24bs/final_subj01_pretrained_1sess_24bs_retrieval.json",
   "results/tables/final_subj01_pretrained_1sess_24bs_all_enhancedrecons.csv",
   "results/tables/final_subj01_pretrained_1sess_24bs_all_recons.csv"
  ],
@@ -83,11 +84,19 @@
  },
  "retrieval": {
   "bwd": {
-   "media": 0.7761111279328664
+   "ic95": [
+    0.7734171247178178,
+    0.7912495875662703
+   ],
+   "media": 0.782333356142044
   },
-  "fonte": "final_evaluations",
+  "fonte": "verify_retrieval",
   "fwd": {
-   "media": 0.9393333494663239
+   "ic95": [
+    0.9382137796041299,
+    0.9444529234611065
+   ],
+   "media": 0.9413333515326182
   }
  },
  "retrieval_centrado": null,
