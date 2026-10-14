@@ -209,6 +209,32 @@
    "a baseball player is holding a bat.",
    "a large glass window."
   ],
+  "repro_subj01_ridgeonly_40sess_prior": [
+   "a surfer on a surfboard",
+   "a man holding a cell phone.",
+   "a man standing on top of a lush green field.",
+   "a plate of food with a fork.",
+   "a wall with a window",
+   "a person standing on a skateboard.",
+   "a woman sitting in a chair.",
+   "a group of trees",
+   "a man standing in a field.",
+   "a group of elephants standing around.",
+   "a clock tower with a tower in the background.",
+   "a baseball player is standing on a field.",
+   "a boat is parked on the water.",
+   "a street with a lot of traffic on it",
+   "a man and a woman sitting on a bench.",
+   "a group of people standing around each other.",
+   "a truck is parked on the side of the road.",
+   "a group of people riding on top of a sandy beach.",
+   "a man standing next to a dog.",
+   "a boat on the water with a boat in the background.",
+   "a snow covered field with a bunch of snow on it.",
+   "a plane is parked on the runway.",
+   "a man standing on a tennis court.",
+   "a group of people standing around each other."
+  ],
   "subj01_ridgeonly_1sess": [
    "a large blue and white statue of a man.",
    "a room with a couch and a tv.",
@@ -480,6 +506,22 @@
     "sig": [
      786433528,
      1791901094502950615
+    ]
+   }
+  },
+  "repro_subj01_ridgeonly_40sess_prior": {
+   "refinada": {
+    "arquivo": "repro_subj01_ridgeonly_40sess_prior__refinada.webp",
+    "sig": [
+     786433607,
+     1791968607067627669
+    ]
+   },
+   "unclip": {
+    "arquivo": "repro_subj01_ridgeonly_40sess_prior__unclip.webp",
+    "sig": [
+     786433503,
+     1791965622220867382
     ]
    }
   },
