@@ -127,6 +127,8 @@ def _mindeye1(h):
                         "mixup_pct": h["mixup_pct"], "batch_size": h["batch_size"]})
 
 
+# "seed": o padrao e 42 em todos os modelos e deve ficar assim: uma unica semente, a mesma, em todo
+# experimento (so o ruido do Ridge 1024 + prior foi medido com outras; veja experimentos.py)
 MODELOS = {
     # src/run_frr.py: validacao cruzada de 5 dobras sobre as 20 fracoes de Doerig et al.
     "frr": Modelo(["run_frr.sh"], ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "EXTRA"),

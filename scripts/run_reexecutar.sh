@@ -115,6 +115,8 @@ if quer 1sess; then
     modelo repro_subj01_ridgeonly_1sess 1024 noblurry "$MS1024"
 fi
 
+# Semente: a unica de treino e a 42, a mesma em todos os modelos. Este bloco (1 e 2) e a excecao, feita
+# uma vez para medir o ruido do treino; nao acrescente sementes a outros modelos.
 if quer sementes; then      # ruido do treino: agora com todas as metricas, e nao so o retrieval
     for s in 1 2; do modelo repro_subj01_ridgeonly_1sess_prior_seed$s 1024 noblurry; done
 fi

@@ -17,6 +17,12 @@ Cada experimento:
     "rotulo":  opcional, o nome que o modelo ganha no site (results/site); sem ele, o site monta
                um nome a partir da configuracao
 
+SEMENTE: todo experimento novo usa uma unica semente, sempre a mesma (42, o padrao de "seed" em
+treina.py). Nao se treinam varias sementes por modelo: o benchmark compara configuracoes, e com a
+semente fixa a diferenca entre duas corridas vem so da configuracao. As sementes 1 e 2 abaixo existem
+so para medir o ruido do treino, uma vez, no Ridge 1024 + prior de 1 sessao; nao as repita nem as
+estenda a outros modelos. (A "semente" do dataset e outra coisa: fixa em 0.)
+
 "agregacao" diz como o treino usa as repeticoes de cada imagem (src/mindeye_ridge/agregacao.py):
 "exibicoes" (cada trial uma amostra), "media" (media dos betas das repeticoes), "sorteio" (uma
 repeticao sorteada a cada epoca) ou "combinacao" (combinacao aleatoria das repeticoes, como o baixo
@@ -65,7 +71,8 @@ BENCHMARK = {
         "modelo": "mindeye2",
         "hiper": {"hidden_dim": 4096, "blurry": True, "num_epochs": 20, "frozen_fp16": True, "ckpt_interval": 1},
         "dataset": {"sessoes": 40}},
-    # ruido entre sementes (mesma configuracao do 1sess_prior) e o controle sem prior
+    # ruido entre sementes (mesma configuracao do 1sess_prior) e o controle sem prior.
+    # EXCECAO unica: os outros experimentos usam so a semente 42 (veja SEMENTE no topo do arquivo)
     **{f"subj01_ridgeonly_1sess_prior_seed{s}": {"modelo": "mindeye2", "hiper": {"seed": s}, "dataset": {"sessoes": 1}}
        for s in (42, 1, 2)},
     "subj01_ridgeonly_1sess_noprior_seed42": {
