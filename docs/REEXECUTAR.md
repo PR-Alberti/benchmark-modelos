@@ -1,13 +1,106 @@
 # O que rodar de novo para o benchmark ficar completo
 
-Levantamento de 12/10/2026, feito a partir do que está no git: os registros de cada modelo em
-`results/site/modelos/*.json` (o que o site conseguiu extrair de cada corrida) e o
-[BENCHMARK.md](../BENCHMARK.md). Não foi conferido contra o disco da máquina de treino; onde isso
-importa, está dito.
+Levantamento de 12/10/2026, atualizado em 15/10/2026 depois da reexecução. Parte do que está no git: os
+registros de cada modelo em `results/site/modelos/*.json` (o que o site conseguiu extrair de cada corrida)
+e o [BENCHMARK.md](../BENCHMARK.md).
 
-## O que uma corrida completa registra
+## Situação em 15/10/2026
 
-O pipeline atual guarda cinco coisas de cada modelo. É a régua usada abaixo.
+A reexecução rodou numa RTX A4500 (a máquina de treino original não estava disponível), pelo
+`scripts/run_reexecutar.sh`: 52 h 19 de GPU, de 12/10 às 18h09 a 14/10 às 22h29. Cada modelo foi treinado
+pelo `src/treina.py` com o dicionário do benchmark, com outro nome (`repro_<nome>`), porque o `treina.py`
+não sobrescreve um modelo do benchmark. Cada um ficou com configuração, commit limpo do código, manifesto
+do dataset, curva, tempo, retrieval com intervalo de 95% e, nos ridge-only, reconstrução e métricas. Os
+resultados de cada modelo foram commitados quando ele terminou. Nenhuma tabela do benchmark foi alterada: as
+reproduções aparecem no site, no grupo Experimentos, com o rótulo "· reprodução".
+
+| Modelo (`repro_subj01_…`) | Treino medido | Treino original | Situação |
+|---|---|---|---|
+| `frr_1sess`, `_global`, `_ext` | 1 min cada | 10 s | completo |
+| `frr_40sess`, `_global`, `_ext` | 24, 20 e 25 min | 21 min | completo |
+| `ridgeonly_1sess` (1024 sem prior) | 1 h 00 | 1 h 02 (semente 42) | completo |
+| `ridgeonly_1sess_prior_seed1`, `_seed2` | 1 h 51 e 1 h 54 | 1 h 52 e 1 h 53 | completo |
+| `ridgeonly_1sess_4096blurry` | 2 h 45 | 2 h 41 | completo |
+| `ridgeonly_40sess_prior` | 8 h 03 | 7 h 51 | completo |
+| `ridgeonly_40sess_4096blurry` | 12 h 40 | 12 h 22 | completo |
+| **`ridgeonly_1sess_prior`** (1024 + prior) | 1 h 51 | 1 h 53 (semente 42) | **só treino e retrieval** |
+| `final_subj01_pretrained_1sess_24bs`, `_40sess_24bs` | — (dos autores) | — | retrieval com intervalo |
+
+Medido nesta máquina: reconstrução de 186 a 194 min por modelo, 6 min para cada tabela de métricas (unCLIP e
+refinada) e 3 min para o retrieval.
+
+### Quanto as reproduções se afastam dos originais
+
+| Modelo | Maior diferença nas métricas de imagem |
+|---|---|
+| FRR, as seis variantes | 0 (idêntico, inclusive o R² da validação cruzada) |
+| Ridge 4096 + blurry, 1 sessão | 0 (idêntico, época por época) |
+| Ridge 1024 + prior, 40 sessões | 0,89 p.p. nas porcentagens; 0,0023 nas demais |
+| Ridge 4096 + blurry, 40 sessões | 0,59 p.p.; 0,0064 (PixCorr 0,337 contra 0,339) |
+| Ridge 1024 sem prior, contra o release | 1,24 p.p.; 0,0008 |
+| Sementes 1 e 2, contra o release do 1024 + prior | 1,19 e 0,95 p.p.; 0,0056 e 0,0038 |
+
+O retrieval do 1024 sem prior (78,41% / 72,59%) e o do 1024 + prior (92,91% / 88,12%) saem iguais aos dos
+retreinos de semente 42 feitos antes. As diferenças da tabela são um pouco maiores que o ruído de
+reconstrução medido antes (até 0,6 p.p. nas identificações 2-way). A causa não foi investigada: os originais
+foram treinados em outra máquina e, no caso dos checkpoints do release, com uma versão anterior do código.
+
+## O que ainda falta, em ordem
+
+1. **Reconstrução e métricas do Ridge 1024 + prior de 1 sessão** (`repro_subj01_ridgeonly_1sess_prior`),
+   ~3 h 30 numa A4500. O treino e o retrieval dele já existem. Foi interrompida em 15/10, por volta das 16h30, a pedido,
+   sem gravar nenhuma imagem. A primeira tentativa falhou por um defeito do `run_recon.sh`, já corrigido
+   (`6e7e078`).
+
+   ```bash
+   SO=1sess COMMITA=1 scripts/run_reexecutar.sh
+   ```
+
+   As etapas concluídas são puladas pelos marcadores em `train_logs/<modelo>/.reexec_*`, então só a
+   reconstrução e as métricas rodam. `COMMITA=1` faz um commit dos resultados ao fim; esta máquina não tem
+   `user.email` no git, então exporte `GIT_AUTHOR_EMAIL` e `GIT_COMMITTER_EMAIL` ou configure o e-mail.
+
+2. **Reconstrução com a semente 7**, sobre o item 1, ~3 h 30. Mede quanto as métricas de imagem mudam só por
+   reamostrar a reconstrução (no benchmark: `subj01_ridgeonly_1sess_prior_rseed7`). **Não está no
+   `run_reexecutar.sh`**: foi esquecida ao reescrever o script. O catálogo do site trata essa corrida por id
+   explícito (`report/catalogo.py`: `ROTULOS` e `CONHECIDOS`, que guarda o `"base"` de cada um; `report/site.py`: `OCULTOS`), então um
+   `repro_…_rseed7` precisa de entradas novas lá antes de aparecer com configuração. Os comandos abaixo
+   seguem o `run_benchmark.sh` e **não foram testados**:
+
+   ```bash
+   m=repro_subj01_ridgeonly_1sess_prior_rseed7
+   mkdir -p train_logs/$m
+   ln -sfn ../repro_subj01_ridgeonly_1sess_prior/last.pth train_logs/$m/last.pth
+   SEED=7 scripts/run_recon.sh $m 1024 noblurry
+   scripts/run_evals.sh $m base && scripts/run_evals.sh $m enhanced
+   ```
+
+3. **Atualizar o texto sobre o ruído do treino**, depois do item 1. O BENCHMARK.md, o EXPERIMENTO.md e
+   `report/texts.py` dizem que "o efeito da semente do treino nas métricas de imagem não foi medido". Com as
+   sementes 42 (item 1), 1 e 2 reconstruídas e avaliadas, dá para medir; as sementes 1 e 2 já divergem do
+   release em até 1,19 p.p. na tabela refinada.
+
+4. **Decidir se as reproduções passam a ser as linhas de referência.** Hoje `report/config.py` (`MODELOS`) e o
+   `report/site.py` (`PRESETS`, `PARES`, `OCULTOS`) apontam para os modelos originais. Trocar muda os números
+   das tabelas em até 1,24 p.p. e obriga a revisar as conclusões escritas à mão em `report/texts.py`.
+
+5. **MindEye1: reprodução e curva de treino**, ~37 h de GPU (2 h 53 e 32 h 38 mais o low-level), fora da
+   reexecução por decisão. O `mindeye1/src/Train_MindEye.py` não grava `metrics.csv`, então a aba Treino do
+   site só tem o MindEye2; é preciso mudar o código para gravar a curva no formato que o `report/catalogo.py`
+   lê (`CURVA`) e acrescentar os dois dicionários ao `REPRODUCOES` de `src/experimentos.py`. É o item mais
+   caro e o de menor retorno.
+
+## O que não dá para fazer sem a máquina de treino original
+
+- **Retrieval com intervalo dos cinco ridge-only de referência** (`subj01_ridgeonly_1sess_prior`,
+  `_1sess`, `_1sess_4096blurry`, `_40sess_prior`, `_40sess_4096blurry`): precisa dos checkpoints deles, que
+  não estão aqui. Os registros originais seguem com a média sem intervalo (`final_evaluations`); as
+  reproduções têm o intervalo.
+- **Completar o registro do `subj01_ridgeonly_40sess_4096blurry`** (curva, tempo, parâmetros e galeria):
+  precisa do `train_logs/` e do `results/evals/` desse modelo. O `repro_subj01_ridgeonly_40sess_4096blurry`
+  cobre os quatro.
+
+## A régua: o que uma corrida completa registra
 
 | # | O quê | Onde fica | Quem grava |
 |---|---|---|---|
@@ -17,166 +110,26 @@ O pipeline atual guarda cinco coisas de cada modelo. É a régua usada abaixo.
 | 4 | reconstruções e todas as métricas (unCLIP e refinada, legendas, correlação cerebral) | `results/tables/<nome>_all_*.csv` | `run_recon.sh` e `run_evals.sh` |
 | 5 | tira da galeria | `results/site/galeria/` | `make_site.py`, a partir dos tensores em `results/evals/` |
 
-## Resumo
+Os modelos originais do benchmark não têm os itens 1 e 2 (o `commit` está vazio nos registros deles, e a
+configuração vem do dicionário de `src/experimentos.py`, escrito depois), e os checkpoints do release não têm
+curva nem tempo. Foi isso que a reexecução supriu.
 
-Em ordem de prioridade. Só os dois últimos itens pedem treino.
-
-| # | O que fazer | Modelos | Treina de novo? | Custo numa A4500 |
-|---|---|---|---|---|
-| 1 | reconstruir e avaliar os retreinos com o código atual | `subj01_ridgeonly_1sess_prior_seed42`, `subj01_ridgeonly_1sess_noprior_seed42` | não | ~3 h de inferência cada, mais as métricas |
-| 2 | reconstruir e avaliar as outras sementes | `subj01_ridgeonly_1sess_prior_seed1`, `..._seed2` | não | ~3 h de inferência cada, mais as métricas |
-| 3 | regenerar o site onde estão os arquivos do treino | `subj01_ridgeonly_40sess_4096blurry` | não, se o `metrics.csv` ainda existir | minutos (12 h 22 se precisar treinar) |
-| 4 | medir o retrieval com intervalo de confiança | os cinco ridge-only de referência e os dois do artigo | não | minutos cada, sem difusão |
-| 5 | refazer pelo `treina.py`, para ter configuração e commit registrados | todos; vale a pena começar pelo FRR | sim, com outro nome | FRR: 10 s a 25 min; os outros, o tempo do treino |
-| 6 | gravar a curva de treino do MindEye1 | `subj01_me1_1sess`, `subj01_me1_40sess` | sim, depois de mudar o código | 2 h 53 e 32 h 38 |
-
-O que **não** precisa ser refeito: o FRR (seis variantes, com tempo, intervalo e retrieval centrado),
-o `subj01_ridgeonly_1sess_4096blurry` e o `subj01_ridgeonly_40sess_prior` (curva, tempo e métricas
-completas) e os quatro MindEye1 (métricas e tempo). Nesses só valem os itens 4 a 6.
-
-## 1. Os dois modelos de 1 sessão que vieram do release
-
-`subj01_ridgeonly_1sess_prior` e `subj01_ridgeonly_1sess` são as linhas "Ridge 1024 + prior" e "Ridge
-1024 sem prior" do benchmark, e são os dois checkpoints do release `checkpoints-v1`: foram treinados com
-uma versão anterior do código, e o sem prior com outro script. Por isso não têm curva de treino, o
-tempo do primeiro é uma estimativa (`~1 h 50 (corrida anterior)`) e o do segundo não existe.
-
-O retreino com o código atual já foi feito, com a mesma semente: `subj01_ridgeonly_1sess_prior_seed42`
-(1 h 53) e `subj01_ridgeonly_1sess_noprior_seed42` (1 h 02). Os dois têm curva, tempo e retrieval com
-intervalo, e o retrieval bate com o do release (92,9% / 88,1% contra 92,8% / 88,1%; 78,4% / 72,6%
-contra 78,5% / 72,1%). Falta só o item 4 da régua: eles nunca foram reconstruídos, então não têm
-métricas de imagem, legendas, correlação cerebral nem galeria.
+## Como foi rodado
 
 ```bash
-MS1024=~/mindeyev2/train_logs/multisubject_subj01_1024hid_nolow_300ep/last.pth
-for m in subj01_ridgeonly_1sess_prior_seed42 subj01_ridgeonly_1sess_noprior_seed42; do
-    FROZEN_CKPT=$MS1024 scripts/run_recon.sh $m 1024 noblurry
-    scripts/run_evals.sh $m base
-    scripts/run_evals.sh $m enhanced
-done
+setup/bootstrap.sh                                  # ambiente, dados (~62 GB), pesos e MindEye1
+COMMITA=1 scripts/run_reexecutar.sh                 # a fila inteira (~52 h); SO="frr 1sess" roda só alguns blocos
+python src/treina.py --lista                        # as reproduções aparecem em "reproducoes do benchmark"
 ```
 
-O `FROZEN_CKPT` é obrigatório no sem prior (o checkpoint dele não tem prior) e inofensivo no outro: no
-ridge-only, backbone e prior ficam congelados e são os do ponto de partida.
+Blocos de `SO`: `frr`, `1sess`, `sementes`, `4096`, `artigo`, `40sess`. A fila pode ser interrompida e rodada
+de novo, e a falha de um modelo não para os outros (uma linha por etapa em `results/logs/reexecutar.log`).
 
-Depois disso, a decisão é trocar as linhas de referência do benchmark pelos retreinos. Hoje o
-`report/config.py` (`MODELOS`) e o `report/site.py` (`PRESETS`, `PARES`, `OCULTOS`) apontam para os
-checkpoints do release, e o site esconde os `_seed42`. A semente 7 da reconstrução
-(`subj01_ridgeonly_1sess_prior_rseed7`) também usa o checkpoint do release e teria de ser refeita sobre
-o retreino para a régua de ruído continuar valendo.
+Dois defeitos do setup apareceram numa máquina nova e foram corrigidos: o `pyarrow` 26 exigia NumPy 2 e
+quebrava as métricas de legenda e a reconstrução (agora pinado em 15.0.2 no `setup_env.sh`), e o conda recente
+exige aceitar os termos da Anaconda (contornado criando o Python 3.11 pelo canal conda-forge, sem conda, com o
+`venv` que o `setup_env.sh` já prevê).
 
-## 2. O efeito da semente do treino nas métricas de imagem
-
-As sementes 1 e 2 do Ridge 1024 + prior só têm retrieval. A régua de ruído do benchmark tem, por isso,
-um buraco que o próprio BENCHMARK.md registra: "O efeito da semente do treino nas métricas de imagem
-não foi medido." Hoje dá para dizer que trocar a semente move o retrieval em menos de 0,5 ponto, mas
-não quanto move PixCorr, SSIM ou as identificações 2-way.
-
-```bash
-for s in 1 2; do
-    m=subj01_ridgeonly_1sess_prior_seed$s
-    FROZEN_CKPT=$MS1024 scripts/run_recon.sh $m 1024 noblurry
-    scripts/run_evals.sh $m base
-    scripts/run_evals.sh $m enhanced
-done
-```
-
-Com o item 1, ficam três sementes de treino com todas as métricas.
-
-## 3. Ridge 4096 + blurry de 40 sessões: o treino existe, o registro não
-
-As tabelas deste modelo estão completas e o BENCHMARK.md traz o tempo (12 h 22) e os parâmetros
-treinados (64,4 M de 2.227,3 M). No site, porém, ele aparece sem curva de treino, sem tempo, sem
-parâmetros e sem tira na galeria: o registro `results/site/modelos/subj01_ridgeonly_40sess_4096blurry.json`
-foi extraído numa máquina sem o `train_logs/` e o `results/evals/` dele.
-
-Nada a treinar se esses arquivos ainda estiverem na máquina onde o modelo rodou:
-
-```bash
-ls train_logs/subj01_ridgeonly_40sess_4096blurry/metrics.csv \
-   results/evals/subj01_ridgeonly_40sess_4096blurry/*recons.pt
-python src/make_site.py          # completa o registro e gera a tira da galeria
-git add results/site
-```
-
-Se o `metrics.csv` tiver sido apagado, a curva só volta treinando de novo (item 5, 12 h 22). Se
-faltarem só os tensores, basta reconstruir (`FROZEN_CKPT` do `final_multisubject_subj01`, `4096 blurry`).
-
-## 4. Retrieval sem intervalo de confiança
-
-O `final_evaluations.py` faz os 30 sorteios de 300 mas guarda só a média. Têm intervalo de 95% apenas
-o FRR e os modelos medidos pelo `verify_retrieval.py` (as sementes do item 1 e 2). Os outros aparecem
-no site com o ponto e sem a barra: os cinco ridge-only de referência, os dois modelos do artigo e os
-quatro MindEye1.
-
-Para os sete do MindEye2 basta o `verify_retrieval.py`, que não passa pela difusão. A chamada é a da
-função `retrieval` do `scripts/run_benchmark.sh`, de dentro de `src/`:
-
-```bash
-MS4096=~/mindeyev2/train_logs/final_multisubject_subj01/last.pth
-ret() {   # ret <modelo> <hidden_dim> <--blurry_recon|--no-blurry_recon> [ckpt de partida]
-    ~/envs/fmri/bin/python verify_retrieval.py --model_name=$1 --data_path=$HOME/mindeyev2 \
-        --cache_dir=$HOME/mindeyev2 --subj=1 --hidden_dim=$2 --n_blocks=4 $3 ${4:+--frozen_ckpt=$4} --new_test
-}
-ret subj01_ridgeonly_1sess_prior        1024 --no-blurry_recon
-ret subj01_ridgeonly_1sess              1024 --no-blurry_recon $MS1024
-ret subj01_ridgeonly_40sess_prior       1024 --no-blurry_recon $MS1024
-ret subj01_ridgeonly_1sess_4096blurry   4096 --blurry_recon    $MS4096
-ret subj01_ridgeonly_40sess_4096blurry  4096 --blurry_recon    $MS4096
-ret final_subj01_pretrained_1sess_24bs  4096 --blurry_recon
-ret final_subj01_pretrained_40sess_24bs 4096 --blurry_recon
-```
-
-O site passa a usar o `_retrieval.json` no lugar da média das tabelas assim que ele existe. Estas sete
-chamadas não foram testadas com estes modelos; no benchmark a função só rodou nas sementes do 1024.
-
-O MindEye1 fica de fora: o `scripts/me1_run.sh retrieval` imprime o resultado e não grava o JSON que o
-site lê. Para ele ter a barra é preciso antes fazer o `Retrievals_testset.py` gravar o arquivo.
-
-## 5. Nenhum modelo do benchmark tem configuração e commit registrados
-
-Os 24 registros do site têm `commit` vazio, e a configuração de todos vem do dicionário em
-`src/experimentos.py`, escrito depois. Nenhum foi treinado pelo `treina.py`, que é quem grava o
-`experimento.json` (hiperparâmetros completos, comando, commit) e o `dataset.json` (as exibições usadas).
-Os dicionários foram conferidos (o FRR de 1 sessão refeito pelo `treina.py` dá os mesmos números, e o
-MindEye2 com e sem o manifesto dá as mesmas métricas época a época), mas não há como saber, pelo
-registro, com que versão do código cada modelo foi treinado.
-
-O `treina.py` não treina de novo um nome que já tem modelo. Para refazer, use outro nome com o mesmo
-dicionário (de dentro de `src/`):
-
-```python
-import treina
-from experimentos import BENCHMARK
-for nome in ("subj01_frr_1sess", "subj01_frr_40sess"):
-    treina.roda("v2_" + nome, BENCHMARK[nome])
-```
-
-Onde vale a pena, do mais barato ao mais caro:
-
-| Modelos | Tempo | Vale a pena? |
-|---|---|---|
-| FRR, as seis variantes | 10 s (1 sessão) a 25 min (40 sessões) | sim: custa menos de 1 h 30 no total e fecha o registro do baseline |
-| Ridge 1024 de 1 sessão, com e sem prior | 1 h 53 e 1 h 02 | sim, se o item 1 for feito pelo `treina.py` em vez de aproveitar os `_seed42` |
-| Ridge 4096 + blurry de 1 sessão | 2 h 41 | só se o commit importar: o treino é determinístico e já repetiu época por época |
-| Ridge de 40 sessões (1024 e 4096) | 7 h 51 e 12 h 22 | idem |
-| MindEye1 de 1 e 40 sessões | 2 h 53 e 32 h 38 | só junto com o item 6 |
-
-Um modelo refeito com outro nome entra no site como modelo novo, com reconstrução e avaliação à parte.
-Os dois do artigo não entram nesta conta: foram treinados pelos autores.
-
-## 6. O MindEye1 não tem curva de treino
-
-O `mindeye1/src/Train_MindEye.py` não grava `metrics.csv`, então a aba Treino do site só mostra o
-MindEye2. Para ter a curva é preciso primeiro fazer o treino gravar o arquivo, no formato que o
-`report/catalogo.py` lê (`CURVA`), e depois treinar de novo: 2 h 53 com 1 sessão e 32 h 38 com 40. É o
-item mais caro e o de menor retorno; só compensa se a comparação da dinâmica de treino entre o MindEye1
-e o MindEye2 entrar no trabalho.
-
-## O que ainda não rodou nenhuma vez
-
-Fora deste levantamento ficam os 12 experimentos de dataset controlado de `src/experimentos.py`
-(`EXPERIMENTOS`): não são re-execuções, e sim os próximos a rodar. `python src/treina.py --lista`
-mostra todos, e eles aparecem no site em Fichas, como planejados. Rodados pelo `treina.py`, já saem com
-os cinco itens da régua, menos a reconstrução e a avaliação, que continuam à parte (`run_recon.sh` e
-`run_evals.sh`).
+Os 12 experimentos de dataset controlado de `src/experimentos.py` (`EXPERIMENTOS`) não são re-execuções, e
+sim os próximos a rodar; `python src/treina.py --lista` mostra todos, e eles aparecem em Fichas, no site,
+como planejados.
