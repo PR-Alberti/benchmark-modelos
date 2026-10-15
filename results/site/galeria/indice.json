@@ -209,6 +209,32 @@
    "a baseball player is holding a bat.",
    "a large glass window."
   ],
+  "repro_subj01_ridgeonly_40sess_4096blurry": [
+   "a surfer riding a wave.",
+   "a man is holding a cell phone.",
+   "a boy playing with a frisbee in a park.",
+   "a plate of food with a fork.",
+   "a large wall with a window.",
+   "a person on a surfboard in the water.",
+   "a person sitting down.",
+   "a tree in a field",
+   "a man standing on a tennis court.",
+   "a large tree.",
+   "a clock on a building",
+   "a baseball player standing on a field.",
+   "a table with a vase and a vase.",
+   "a large street with a lot of traffic.",
+   "a group of people standing on top of a building.",
+   "a bunch of different types of food",
+   "a black and white photo of a motorcycle.",
+   "a group of people riding on top of a sandy beach.",
+   "a couple of horses standing next to each other.",
+   "a boat on a body of water",
+   "a snow covered slope with a ski slope.",
+   "a plane is parked on the runway.",
+   "a tennis player is playing on a court.",
+   "a group of people standing around each other."
+  ],
   "repro_subj01_ridgeonly_40sess_prior": [
    "a surfer on a surfboard",
    "a man holding a cell phone.",
@@ -506,6 +532,29 @@
     "sig": [
      786433528,
      1791901094502950615
+    ]
+   }
+  },
+  "repro_subj01_ridgeonly_40sess_4096blurry": {
+   "borrada": {
+    "arquivo": "repro_subj01_ridgeonly_40sess_4096blurry__borrada.webp",
+    "sig": [
+     786433622,
+     1792023922749846575
+    ]
+   },
+   "refinada": {
+    "arquivo": "repro_subj01_ridgeonly_40sess_4096blurry__refinada.webp",
+    "sig": [
+     786433632,
+     1792026932380168691
+    ]
+   },
+   "unclip": {
+    "arquivo": "repro_subj01_ridgeonly_40sess_4096blurry__unclip.webp",
+    "sig": [
+     786433528,
+     1792023923213850697
     ]
    }
   },
