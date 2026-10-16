@@ -47,6 +47,10 @@ foram treinados em outra máquina e, no caso dos checkpoints do release, com uma
 
 ## O que ainda falta, em ordem
 
+**Uma única semente (42) por modelo.** Não se treinam nem se reconstroem outras sementes. As sementes 1 e 2 do
+Ridge 1024 + prior e a reconstrução com a semente 7 (`…_rseed7`, só no benchmark original) são a única
+medida de ruído, feita uma vez; não a repita.
+
 1. **Reconstrução e métricas do Ridge 1024 + prior de 1 sessão** (`repro_subj01_ridgeonly_1sess_prior`),
    ~3 h 30 numa A4500. O treino e o retrieval dele já existem. Foi interrompida em 15/10, por volta das 16h30, a pedido,
    sem gravar nenhuma imagem. A primeira tentativa falhou por um defeito do `run_recon.sh`, já corrigido
@@ -60,31 +64,16 @@ foram treinados em outra máquina e, no caso dos checkpoints do release, com uma
    reconstrução e as métricas rodam. `COMMITA=1` faz um commit dos resultados ao fim; esta máquina não tem
    `user.email` no git, então exporte `GIT_AUTHOR_EMAIL` e `GIT_COMMITTER_EMAIL` ou configure o e-mail.
 
-2. **Reconstrução com a semente 7**, sobre o item 1, ~3 h 30. Mede quanto as métricas de imagem mudam só por
-   reamostrar a reconstrução (no benchmark: `subj01_ridgeonly_1sess_prior_rseed7`). **Não está no
-   `run_reexecutar.sh`**: foi esquecida ao reescrever o script. O catálogo do site trata essa corrida por id
-   explícito (`report/catalogo.py`: `ROTULOS` e `CONHECIDOS`, que guarda o `"base"` de cada um; `report/site.py`: `OCULTOS`), então um
-   `repro_…_rseed7` precisa de entradas novas lá antes de aparecer com configuração. Os comandos abaixo
-   seguem o `run_benchmark.sh` e **não foram testados**:
-
-   ```bash
-   m=repro_subj01_ridgeonly_1sess_prior_rseed7
-   mkdir -p train_logs/$m
-   ln -sfn ../repro_subj01_ridgeonly_1sess_prior/last.pth train_logs/$m/last.pth
-   SEED=7 scripts/run_recon.sh $m 1024 noblurry
-   scripts/run_evals.sh $m base && scripts/run_evals.sh $m enhanced
-   ```
-
-3. **Atualizar o texto sobre o ruído do treino**, depois do item 1. O BENCHMARK.md, o EXPERIMENTO.md e
+2. **Atualizar o texto sobre o ruído do treino**, depois do item 1. O BENCHMARK.md, o EXPERIMENTO.md e
    `report/texts.py` dizem que "o efeito da semente do treino nas métricas de imagem não foi medido". Com as
-   sementes 42 (item 1), 1 e 2 reconstruídas e avaliadas, dá para medir; as sementes 1 e 2 já divergem do
-   release em até 1,19 p.p. na tabela refinada.
+   sementes 42 (item 1), 1 e 2 reconstruídas e avaliadas, há uma medida (as sementes 1 e 2 divergem do
+   release em até 1,19 p.p. na tabela refinada); o texto deve dizer isso e que não se medem mais sementes.
 
-4. **Decidir se as reproduções passam a ser as linhas de referência.** Hoje `report/config.py` (`MODELOS`) e o
+3. **Decidir se as reproduções passam a ser as linhas de referência.** Hoje `report/config.py` (`MODELOS`) e o
    `report/site.py` (`PRESETS`, `PARES`, `OCULTOS`) apontam para os modelos originais. Trocar muda os números
    das tabelas em até 1,24 p.p. e obriga a revisar as conclusões escritas à mão em `report/texts.py`.
 
-5. **MindEye1: reprodução e curva de treino**, ~37 h de GPU (2 h 53 e 32 h 38 mais o low-level), fora da
+4. **MindEye1: reprodução e curva de treino**, ~37 h de GPU (2 h 53 e 32 h 38 mais o low-level), fora da
    reexecução por decisão. O `mindeye1/src/Train_MindEye.py` não grava `metrics.csv`, então a aba Treino do
    site só tem o MindEye2; é preciso mudar o código para gravar a curva no formato que o `report/catalogo.py`
    lê (`CURVA`) e acrescentar os dois dicionários ao `REPRODUCOES` de `src/experimentos.py`. É o item mais
