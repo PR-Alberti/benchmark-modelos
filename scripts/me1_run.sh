@@ -63,7 +63,8 @@ train)
     # ultimo, como nos outros modelos
     $PY Train_MindEye.py --data_path="$DADOS" $BENCH --model_name="$MODEL_NAME" --subj=1 \
         --hidden --clip_variant=ViT-L/14 --n_samples_save=0 --no-wandb_log --save_at_end \
-        --save_last_every="${SAVE_EVERY:-1}" ${DATASET:+--dataset="$DATASET"} $CFG $RESUME "$@" \
+        --save_last_every="${SAVE_EVERY:-1}" --metrics_csv="$TRAIN_LOGS/$MODEL_NAME/metrics.csv" \
+        ${DATASET:+--dataset="$DATASET"} $CFG $RESUME "$@" \
         2>&1 | filtra | tee -a "$SAIDA/train.log" ;;
 lowlevel)
     # subj01, batch 8, 120 epocas, como no artigo; retoma sozinho se houver last.pth

@@ -1,8 +1,9 @@
 {
  "_params_sig": [
   5099132128,
-  1790697679870139746
+  1791914804750236880
  ],
+ "commit": "9e7da92894e7a177ef6acd4d053647197dbb4548",
  "concluido": true,
  "config": {
   "dataset": {
@@ -33,7 +34,7 @@
  },
  "config_descritiva": false,
  "config_erro": null,
- "config_fonte": "src/experimentos.py",
+ "config_fonte": "train_logs/repro_subj01_ridgeonly_1sess_4096blurry/experimento.json",
  "curva": {
   "epocas": [
    1,
@@ -187,7 +188,7 @@
    149,
    150
   ],
-  "segundos": 9630.751743078232,
+  "segundos": 9819.372917890549,
   "series": {
    "lr": [
     0.00014,
@@ -1714,13 +1715,14 @@
  "espaco_clip": "ViT-bigG/14",
  "familia": "mindeye2",
  "fontes": [
-  "results/tables/subj01_ridgeonly_1sess_4096blurry_all_enhancedrecons.csv",
-  "results/tables/subj01_ridgeonly_1sess_4096blurry_all_recons.csv",
-  "train_logs/subj01_ridgeonly_1sess_4096blurry/metrics.csv"
+  "results/evals/repro_subj01_ridgeonly_1sess_4096blurry/repro_subj01_ridgeonly_1sess_4096blurry_retrieval.json",
+  "results/tables/repro_subj01_ridgeonly_1sess_4096blurry_all_enhancedrecons.csv",
+  "results/tables/repro_subj01_ridgeonly_1sess_4096blurry_all_recons.csv",
+  "train_logs/repro_subj01_ridgeonly_1sess_4096blurry/metrics.csv"
  ],
  "grupo": "benchmark",
  "id": "subj01_ridgeonly_1sess_4096blurry",
- "iniciado": null,
+ "iniciado": true,
  "legendas": {
   "CLIP-B_brain_img": 0.6870677471160889,
   "CLIP-B_brain_ref": 0.6783522963523865,
@@ -1754,11 +1756,7 @@
   "ridge": 64409600
  },
  "publicada": false,
- "receita": {
-  "partida": "final_multisubject_subj01",
-  "prior": "com a loss do prior",
-  "treino": "150 épocas · batch 8 · congelados em fp16"
- },
+ "reproducao": "repro_subj01_ridgeonly_1sess_4096blurry",
  "resumo_dataset": {
   "exibicoes": 688,
   "imagens_unicas": 536,
@@ -1771,11 +1769,19 @@
  },
  "retrieval": {
   "bwd": {
-   "media": 0.9201111257076263
+   "ic95": [
+    0.9179507575893384,
+    0.92627149398486
+   ],
+   "media": 0.9221111257870992
   },
-  "fonte": "final_evaluations",
+  "fonte": "verify_retrieval",
   "fwd": {
-   "media": 0.9553333679835002
+   "ic95": [
+    0.9502185605542287,
+    0.9591148314300751
+   ],
+   "media": 0.9546666959921519
   }
  },
  "retrieval_centrado": null,
@@ -1783,7 +1789,7 @@
  "sessoes": 1,
  "status": "completo",
  "status_txt": "métricas completas",
- "tempo_s": 9630.751743078232,
+ "tempo_s": 9819.372917890549,
  "valores": {
   "refinada": {
    "AlexNet(2)": 0.8961421421421422,

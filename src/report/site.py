@@ -432,7 +432,8 @@ ABAS = ["resumo", "tabela", "graficos", "dispersao", "treino", "galeria", "frr",
 def monta(modelos, planejados, galeria, semantica):
     """Devolve (cabeca, corpo): o <title>, as fontes e o estilo, e o resto da pagina."""
     todos = modelos                       # os ocultos ainda valem para os tempos citados nos textos
-    modelos = [m for m in modelos if m["id"] not in OCULTOS]
+    referencias = {m["reproducao"] for m in modelos if m.get("reproducao")}    # lidas no lugar do modelo de referencia
+    modelos = [m for m in modelos if m["id"] not in OCULTOS and m["id"] not in referencias]
     agora = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
     rev = commit()
     avaliados = sum(m["status"] == "completo" for m in modelos)

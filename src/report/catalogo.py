@@ -24,7 +24,7 @@ from pathlib import Path
 
 from mindeye_ridge import paths
 
-from .config import CHAVES_LEGENDA, MODELOS as MODELOS_BENCHMARK
+from .config import CHAVES_LEGENDA, MODELOS as MODELOS_BENCHMARK, fonte as fonte_de
 
 PUBLICADA = "__publicada"      # sufixo das reconstrucoes divulgadas pelos autores do artigo
 
@@ -454,8 +454,11 @@ def extrai(mid, antigo=None, d=None, benchmark=None, experimentos=None, resumos=
     elif familia == "mindeye2" and curva:
         tempo = curva["segundos"]
     elif familia == "mindeye1":
-        etapas = [base] if (base.endswith("_semlowlevel") or exp_json) else \
-            [base, f"subj01_me1_lowlevel_{sessoes}sess"]
+        if base.startswith("repro_"):                    # alto nivel e low-level, com o prefixo
+            etapas = [base, base.replace("subj01_me1_", "subj01_me1_lowlevel_", 1)]
+        else:
+            etapas = [base] if (base.endswith("_semlowlevel") or exp_json) else \
+                [base, f"subj01_me1_lowlevel_{sessoes}sess"]
         tempo = _tempo_me1(etapas, d["logs"] / "me1_benchmark.log")
     r["tempo_s"] = tempo
     if not publicada and familia != "frr":
@@ -570,6 +573,18 @@ def resumo_completo_factory():
     return resumos
 
 
+def como_referencia(mid, repro, r):
+    """O registro da reproducao `repro` com o id e o rotulo do modelo de referencia `mid`.
+
+    Nao se mescla com o registro antigo de `mid`: ele e da corrida original, e o que a reproducao nao
+    mediu nao deve sobrar dele. A corrida original fica no historico do git (docs/REEXECUTAR.md compara).
+    """
+    r = dict(r)
+    r.update(id=mid, grupo="benchmark", reproducao=repro, rotulo=ROTULOS.get(mid, r["rotulo"]),
+             notas=list(NOTAS.get(mid, [])) + list(CONHECIDOS.get(mid, {}).get("notas", [])))
+    return r
+
+
 def atualiza(pasta_registros, d=None, resumos=None):
     """Atualiza os registros em `pasta_registros` e devolve (modelos, planejados).
 
@@ -585,8 +600,14 @@ def atualiza(pasta_registros, d=None, resumos=None):
     modelos = []
     for mid in sorted(ids):
         antigo = _le_json(registrados[mid]) if mid in registrados else None
-        novo = extrai(mid, antigo, d, benchmark, experimentos, resumos)
-        r = mescla(antigo, novo) if antigo else novo
+        repro = fonte_de(mid, d["tables"])
+        if repro != mid:         # modelo de referencia com reproducao: o registro e o dela
+            antigo_repro = _le_json(registrados[repro]) if repro in registrados else None
+            novo = extrai(repro, antigo_repro, d, benchmark, experimentos, resumos)
+            r = como_referencia(mid, repro, mescla(antigo_repro, novo) if antigo_repro else novo)
+        else:
+            novo = extrai(mid, antigo, d, benchmark, experimentos, resumos)
+            r = mescla(antigo, novo) if antigo else novo
         r["status"], r["status_txt"] = status(r)
         r = json.loads(json.dumps(r, sort_keys=True))     # a mesma ordem venha do disco ou da extracao
         if r["status"] == "planejado" and not antigo:

@@ -5,7 +5,7 @@ import json
 import pathlib
 from mindeye_ridge import paths
 
-from .config import ARQ, CHAVES_LEGENDA, DATA, FRR_VARIANTES, MODELOS
+from .config import ARQ, CHAVES_LEGENDA, DATA, FRR_VARIANTES, MODELOS, fonte
 from .fmt import duracao, jpeg, tempo_fmt
 
 
@@ -114,7 +114,7 @@ def coleta(args):
     dados = {"modelos": [], "curvas": [], "galeria": None}
 
     for m in MODELOS:
-        mid = m["id"]
+        pub, mid = m["id"], fonte(m["id"])        # id publico e id de onde saem os arquivos (a reproducao)
         info = dict(m)
         if m.get("frr"):
             info.update(frr_dados=le_frr(mid), tabelas={"enh": None, "base": None}, publicada=None,
@@ -126,7 +126,8 @@ def coleta(args):
             tab = le_tabela(f"{mid}_all_recons")
             info.update(tabelas={"enh": tab, "base": tab}, publicada=None, legendas=None,
                         params=conta_params(mid, paths.REPO / "mindeye1" / "train_logs"))
-            info["tempo"] = tempo_fmt(tempo_me1(mid, m["baixo"]))
+            info["tempo"] = tempo_fmt(tempo_me1(mid, mid.replace("subj01_me1_", "subj01_me1_lowlevel_", 1)
+                                                if mid != pub else m["baixo"]))
             dados["modelos"].append(info)
             continue
         info["tabelas"] = {
@@ -146,7 +147,7 @@ def coleta(args):
 
     # curvas de treino: so as corridas que gravaram metrics.csv. A corrida
     # anterior do 4096 (guardada em metrics/) so ganha grafico proprio se diferir.
-    atual = le_curva(paths.TRAIN_LOGS / "subj01_ridgeonly_1sess_4096blurry/metrics.csv")
+    atual = le_curva(paths.TRAIN_LOGS / fonte("subj01_ridgeonly_1sess_4096blurry") / "metrics.csv")
     antes = le_curva(paths.METRICS / "subj01_ridgeonly_1sess_4096blurry.csv")
     mesma = bool(atual and antes and all(atual[k] == antes[k] for k in ("epocas", "fwd", "bwd")))
     dados["curva_repetida"] = mesma
@@ -156,9 +157,9 @@ def coleta(args):
     if antes and not mesma:
         curvas.append(("Ridge 4096 + blurry", "corrida anterior (repositório)", antes))
     curvas.append(("Ridge 1024 + prior · 40 sessões", "esta corrida",
-                   le_curva(paths.TRAIN_LOGS / "subj01_ridgeonly_40sess_prior/metrics.csv")))
+                   le_curva(paths.TRAIN_LOGS / fonte("subj01_ridgeonly_40sess_prior") / "metrics.csv")))
     curvas.append(("Ridge 4096 + blurry · 40 sessões", "esta corrida",
-                   le_curva(paths.TRAIN_LOGS / "subj01_ridgeonly_40sess_4096blurry/metrics.csv")))
+                   le_curva(paths.TRAIN_LOGS / fonte("subj01_ridgeonly_40sess_4096blurry") / "metrics.csv")))
     for sem, sub in [(42, "retreino com o código atual"), (1, "outra semente"), (2, "outra semente")]:
         curvas.append((f"Ridge 1024 + prior · semente {sem}", sub,
                        le_curva(paths.TRAIN_LOGS / f"subj01_ridgeonly_1sess_prior_seed{sem}/metrics.csv")))
@@ -167,13 +168,20 @@ def coleta(args):
     dados["curvas"] = [{"titulo": t, "sub": sub, "dados": c} for t, sub, c in curvas]
 
     # ruido de referencia: so a semente muda, na config 1024 + prior
-    def retr(m):
-        pj = paths.EVALS / m / f"{m}_retrieval.json"
-        r = json.loads(pj.read_text(encoding="utf-8")) if pj.exists() else None
-        return (r["fwd"]["media"], r["bwd"]["media"]) if r else (None, None)
+    # os retreinos de semente 42 sao a mesma corrida das reproducoes do 1sess_prior e do 1sess
+    mesma42 = {"subj01_ridgeonly_1sess_prior_seed42": "repro_subj01_ridgeonly_1sess_prior",
+               "subj01_ridgeonly_1sess_noprior_seed42": "repro_subj01_ridgeonly_1sess"}
 
-    e1 = le_tabela("subj01_ridgeonly_1sess_prior_all_enhancedrecons") or {}
-    e3 = le_tabela("subj01_ridgeonly_1sess_all_enhancedrecons") or {}
+    def retr(m):
+        for n in (m, mesma42.get(m), f"repro_{m}"):
+            pj = paths.EVALS / str(n) / f"{n}_retrieval.json"
+            if n and pj.exists():
+                r = json.loads(pj.read_text(encoding="utf-8"))
+                return r["fwd"]["media"], r["bwd"]["media"]
+        return None, None
+
+    e1 = le_tabela(f"{fonte('subj01_ridgeonly_1sess_prior')}_all_enhancedrecons") or {}
+    e3 = le_tabela(f"{fonte('subj01_ridgeonly_1sess')}_all_enhancedrecons") or {}
     treino = [("42 · checkpoint do release", e1.get("FwdRetrieval"), e1.get("BwdRetrieval"))]
     for sem, rot in [(42, "42 · retreino com o código atual"), (1, "1"), (2, "2")]:
         treino.append((rot, *retr(f"subj01_ridgeonly_1sess_prior_seed{sem}")))
@@ -187,7 +195,7 @@ def coleta(args):
         "treino": treino,
         "controle": controle,
         "amostragem": {sem: {t: le_tabela(f"{m}_{ARQ[t]}") for t in ("enh", "base")}
-                       for sem, m in [(42, "subj01_ridgeonly_1sess_prior"),
+                       for sem, m in [(42, fonte("subj01_ridgeonly_1sess_prior")),
                                       (7, "subj01_ridgeonly_1sess_prior_rseed7")]},
     }
 
@@ -198,15 +206,15 @@ def coleta(args):
     idx = sorted(rng.choice(len(imagens), size=args.n, replace=False).tolist())
     nsd = ids_nsd()
 
-    dados["frr_variantes"] = [{"id": i, "rotulo": r, "grupo": g, "dados": le_frr(i)}
+    dados["frr_variantes"] = [{"id": i, "rotulo": r, "grupo": g, "dados": le_frr(fonte(i))}
                               for i, r, g in FRR_VARIANTES]
 
     colunas = []
     for m in MODELOS:
-        mid = m["id"]
+        mid = fonte(m["id"])
         if m.get("frr"):
             continue                      # sem reconstrucao, nao tem o que mostrar na galeria
-        col = {"id": mid, "rotulo": m["rotulo"], "img": {}, "legendas": None, "me1": m.get("me1", False)}
+        col = {"id": m["id"], "rotulo": m["rotulo"], "img": {}, "legendas": None, "me1": m.get("me1", False)}
         for tipo, sufixo in ARQ.items():
             p = paths.EVALS / mid / f"{mid}_{sufixo}.pt"
             if p.exists():

@@ -50,6 +50,26 @@ MODELOS = [
 ]
 
 
+def fonte(mid, tabelas=None):
+    """O id de onde saem os resultados do modelo de referencia `mid`.
+
+    Os modelos de referencia (MODELOS e FRR_VARIANTES, fora os do artigo) passam a ser lidos da
+    reproducao `repro_<mid>` (docs/REEXECUTAR.md), que tem configuracao, commit, curva, tempo e retrieval
+    com intervalo, assim que ela tem as tabelas de resultado; antes disso, o proprio `mid`. O id publico
+    nao muda: tabelas, links e textos seguem chamando o modelo por `mid`. `tabelas`: a pasta das tabelas
+    (results/tables por padrao).
+    """
+    tabelas = tabelas or paths.TABLES
+    referencias = {m["id"] for m in MODELOS if not m.get("paper")} | {i for i, _, _ in FRR_VARIANTES}
+    if mid not in referencias:
+        return mid
+    repro = f"repro_{mid}"
+    if (tabelas / f"{repro}_frr.json").exists():
+        return repro
+    tabela = "_all_recons" if any(m["id"] == mid and m.get("me1") for m in MODELOS) else "_all_enhancedrecons"
+    return repro if (tabelas / f"{repro}{tabela}.csv").exists() else mid
+
+
 GRUPOS = {1: "1 sessão · ~1 h de fMRI, 750 exibições",
           40: "40 sessões · ~40 h de fMRI, 30.000 exibições"}
 

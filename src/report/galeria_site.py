@@ -51,7 +51,7 @@ def _tira(tensor, idx, destino, lado=LADO):
 
 def _fontes(m):
     """{tipo: tensor de origem} e o arquivo de legendas previstas de um modelo."""
-    mid = m["id"]
+    mid = m.get("reproducao") or m["id"]       # o modelo de referencia le os tensores da reproducao
     if m.get("publicada"):
         base = mid[:-len(PUBLICADA)]
         return {t: paths.EVALS / base / f"{base}_published_{s}.pt" for t, s in TIPOS.items()
