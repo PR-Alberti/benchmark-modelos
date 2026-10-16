@@ -1,0 +1,621 @@
+<!-- Os slides da apresentacao (report/apresentacao.py troca as chaves entre chaves duplas pelos numeros dos
+     registros dos modelos).
+     Cada slide e um <section class="slide"> dentro de uma .folha; data-titulo vai para o sumario e
+     data-secao agrupa. Os elementos com data-tile, data-grafico, data-voxels e data-vetor sao
+     preenchidos pelo assets/apresentacao.js com os dados da pagina. -->
+
+<div class="folha"><section class="slide capa" id="capa" data-titulo="Capa">
+  <div class="cab">
+    <p class="rotulo">Plano de estágio · benchmark-modelos</p>
+    <h1>Quanto fMRI cada modelo precisa para recuperar o que a pessoa viu</h1>
+    <p class="lede">Três decodificadores treinados nas mesmas exibições do Natural Scenes Dataset, testados nas mesmas
+      1.000 imagens e medidos com as mesmas métricas, e um pipeline que treina qualquer um deles num subconjunto
+      controlado dos dados.</p>
+  </div>
+  <div>
+    <div class="faixa-capa" data-capa="0,3,9,10,11,15,18,22" data-capa-modelo="subj01_ridgeonly_40sess_prior:refinada"></div>
+    <div class="faixa-capa-leg"><span>Em cima, a imagem vista; embaixo, o que o MindEye2 ridge-only reconstrói só a partir do
+      fMRI (40 sessões).</span><span>{{data}}</span></div>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide" id="pergunta" data-titulo="A pergunta" data-secao="Contexto">
+  <div class="cab">
+    <p class="rotulo">Contexto</p>
+    <h2>Quanto fMRI é preciso para decodificar o que a pessoa viu?</h2>
+    <p class="lede">O plano de estágio busca uma lei de escala: quanto dado cada nível de informação exige, e como isso
+      muda com o modelo. O NSD é o banco de provas, e decodificar o embedding CLIP da imagem vista é o substituto para
+      decodificar imagética visual.</p>
+  </div>
+  <div class="corpo eixos">
+    <div class="eixo">
+      <svg class="diag" viewBox="0 0 240 90" role="img" aria-label="Uma barra com 40 sessões, a primeira destacada">
+        <g data-sessoes="40"></g>
+        <text x="0" y="84" class="t-mu">1 sessão</text><text x="240" y="84" class="t-mu" text-anchor="end">40 sessões</text>
+      </svg>
+      <h3>Tempo de scanner</h3>
+      <p>De 1 a 40 sessões de ~1 h. Quanto o desempenho cai com menos dados?</p>
+    </div>
+    <div class="eixo">
+      <svg class="diag" viewBox="0 0 240 90" role="img" aria-label="Seis imagens diferentes contra duas imagens repetidas três vezes">
+        <g data-reps="6x1" transform="translate(0,6)"></g>
+        <g data-reps="2x3" transform="translate(0,48)"></g>
+      </svg>
+      <h3>Imagens × repetições</h3>
+      <p>Com o mesmo tempo de scanner, vale mais ver mais imagens ou repetir as mesmas?</p>
+    </div>
+    <div class="eixo">
+      <div class="trio" data-trio="person:8,animal:8,vehicle:8"></div>
+      <h3>Variedade semântica</h3>
+      <p>Só pessoas, só animais, classes balanceadas: o que o conteúdo do treino muda?</p>
+    </div>
+    <div class="eixo">
+      <svg class="diag" viewBox="0 0 240 90" role="img" aria-label="Três modelos: FRR, MindEye2 e MindEye1">
+        <g class="frr"><rect class="treina" x="0" y="14" width="72" height="44" rx="3"/><text x="36" y="42" text-anchor="middle">FRR</text></g>
+        <g class="me2"><rect class="treina" x="84" y="14" width="72" height="44" rx="3"/><text x="120" y="42" text-anchor="middle">MindEye2</text></g>
+        <g class="me1"><rect class="treina" x="168" y="14" width="72" height="44" rx="3"/><text x="204" y="42" text-anchor="middle">MindEye1</text></g>
+        <text x="0" y="84" class="t-mu">linear</text><text x="120" y="84" class="t-mu" text-anchor="middle">pré-treinado</text>
+        <text x="240" y="84" class="t-mu" text-anchor="end">do zero</text>
+      </svg>
+      <h3>Modelo</h3>
+      <p>Um mapa linear, um modelo pré-treinado em outras pessoas e um treinado do zero.</p>
+    </div>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide" id="tarefa" data-titulo="Do fMRI à imagem" data-secao="Contexto">
+  <div class="cab">
+    <p class="rotulo">Contexto</p>
+    <h2>Do fMRI de volta à imagem</h2>
+    <p class="lede">Os modelos leem a resposta do córtex visual a uma imagem e recuperam o embedding CLIP dela. Os que têm
+      um gerador transformam esse embedding numa imagem.</p>
+  </div>
+  <figure class="corpo">
+    <svg class="diag" viewBox="0 0 1136 320" role="img"
+         aria-label="Imagem vista, betas de fMRI, modelo, embedding CLIP e reconstrução, da esquerda para a direita">
+      <defs><marker id="seta-tarefa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="ponta" d="M0,1 L10,5 L0,9 z"/></marker></defs>
+      <svg data-tile="vista:9" x="0" y="20" width="180" height="180"></svg>
+      <text x="90" y="232" text-anchor="middle" class="t-gr">imagem vista</text>
+      <text x="90" y="254" text-anchor="middle" class="t-mu">3 s na tela, 3 vezes</text>
+
+      <line class="linha" x1="192" y1="110" x2="246" y2="110" marker-end="url(#seta-tarefa)"/>
+      <text x="219" y="96" text-anchor="middle" class="t-mu">fMRI 7T</text>
+      <g data-voxels="12,12,13,2" transform="translate(258,21)"></g>
+      <text x="347" y="232" text-anchor="middle" class="t-gr">betas de 15.724 voxels</text>
+      <text x="347" y="254" text-anchor="middle" class="t-mu">córtex visual (nsdgeneral)</text>
+
+      <line class="linha" x1="450" y1="110" x2="504" y2="110" marker-end="url(#seta-tarefa)"/>
+      <rect class="caixa" x="516" y="55" width="170" height="110" rx="4"/>
+      <text x="601" y="104" text-anchor="middle" class="t-serif" style="font-size:24px">modelo</text>
+      <text x="601" y="130" text-anchor="middle" class="t-mu">FRR · MindEye2 · MindEye1</text>
+      <text x="601" y="232" text-anchor="middle" class="t-gr">aprendido no treino</text>
+      <text x="601" y="254" text-anchor="middle" class="t-mu">pares fMRI → imagem</text>
+
+      <line class="linha" x1="698" y1="110" x2="752" y2="110" marker-end="url(#seta-tarefa)"/>
+      <g data-vetor="18,36" transform="translate(764,21)"></g>
+      <text x="782" y="232" text-anchor="middle" class="t-gr">embedding CLIP</text>
+      <text x="782" y="254" text-anchor="middle" class="t-mu">256 × 1.664 números</text>
+      <path class="linha" d="M782,266 V296 H812" marker-end="url(#seta-tarefa)"/>
+      <text x="822" y="301" class="t-2">retrieval: o embedding acha a sua imagem entre 300?</text>
+
+      <line class="linha" x1="812" y1="110" x2="866" y2="110" marker-end="url(#seta-tarefa)"/>
+      <text x="839" y="96" text-anchor="middle" class="t-mu">gerador</text>
+      <svg data-tile="modelo:subj01_ridgeonly_40sess_prior:refinada:9" x="878" y="20" width="180" height="180"></svg>
+      <text x="968" y="232" text-anchor="middle" class="t-gr">reconstrução</text>
+      <text x="968" y="254" text-anchor="middle" class="t-mu">difusão guiada pelo embedding</text>
+    </svg>
+    <figcaption>O alvo comum é o embedding CLIP: os três modelos são comparados no mesmo espaço, inclusive o que não gera
+      imagem. Exemplo real do teste: a imagem e a reconstrução do MindEye2 ridge-only treinado com 40 sessões.</figcaption>
+  </figure>
+</section></div>
+
+<div class="folha"><section class="slide" id="nsd" data-titulo="Os dados" data-secao="Contexto">
+  <div class="cab">
+    <p class="rotulo">Contexto</p>
+    <h2>Natural Scenes Dataset, sujeito 1</h2>
+    <p class="lede">Cada sessão no scanner mostra 750 imagens do COCO. Cada imagem de treino volta 3 vezes, espaçadas ao
+      longo das 40 sessões; as 1.000 de teste são as mesmas em todas as condições e nunca entram no treino.</p>
+  </div>
+  <div class="corpo duas-34">
+    <dl class="fatos" style="--cols:2">
+      <div><dt>Sessões</dt><dd><b>40</b>750 exibições cada, ~1 h</dd></div>
+      <div><dt>Voxels</dt><dd><b>15.724</b>córtex visual (nsdgeneral)</dd></div>
+      <div><dt>Treino</dt><dd><b>9.000</b>imagens, 27.000 exibições</dd></div>
+      <div><dt>Teste fixo</dt><dd><b>1.000</b>imagens, 3 repetições</dd></div>
+      <div><dt>Alvo</dt><dd><b>CLIP</b>o embedding da imagem vista</dd></div>
+      <div><dt>GPU</dt><dd><b>1 × A4500</b>20 GB, para todos os modelos</dd></div>
+    </dl>
+    <figure>
+      <div class="legenda" data-legenda="sessoes"></div>
+      <div class="grafico" data-grafico="sessoes"></div>
+      <figcaption>Imagens únicas de treino disponíveis com as N primeiras sessões, pelo número de vezes que cada uma
+        foi vista. Com 1 sessão são 536 imagens, quase todas vistas uma vez; cortar por sessão mistura imagens e
+        repetições, e o dataset controlado separa os dois.</figcaption>
+    </figure>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide" id="modelos" data-titulo="Os três modelos" data-secao="Modelos">
+  <div class="cab">
+    <p class="rotulo">Modelos</p>
+    <h2>Três modelos, três jeitos de usar os dados</h2>
+    <p class="lede">Um mapa linear resolvido em forma fechada, um modelo grande pré-treinado em outras pessoas do qual só a
+      entrada se ajusta ao sujeito, e uma rede treinada do zero.</p>
+  </div>
+  <div class="corpo">
+    <table class="tab">
+      <thead><tr><th></th>
+        <th class="fam-frr"><div class="fam-col">FRR</div></th>
+        <th class="fam-me2"><div class="fam-col">MindEye2 ridge-only</div></th>
+        <th class="fam-me1"><div class="fam-col">MindEye1</div></th></tr></thead>
+      <tbody>
+        <tr><th>Ideia</th><td>regressão linear dos voxels para o CLIP, com a regularização escolhida dimensão a
+          dimensão</td><td>reaproveita um modelo pré-treinado em 7 outros sujeitos; só a camada de entrada aprende o
+          sujeito 1</td><td>rede treinada só com o sujeito 1, com um caminho extra para o layout da imagem</td></tr>
+        <tr><th>Saída</th><td>embedding CLIP ViT-bigG</td><td>embedding CLIP ViT-bigG e imagem (SDXL unCLIP)</td>
+          <td>embedding CLIP ViT-L/14 e imagem (Versatile Diffusion)</td></tr>
+        <tr><th>O que treina</th><td class="fam-frr">{{params:frr}}</td><td class="fam-me2">{{params:mindeye2}}</td>
+          <td class="fam-me1">{{params:mindeye1}}</td></tr>
+        <tr><th>Treino, 1 → 40 sessões</th><td class="num">{{tempo:subj01_frr_1sess}} → {{tempo:subj01_frr_40sess}}</td>
+          <td class="num">{{tempo:subj01_ridgeonly_1sess_prior_seed42}} → {{tempo:subj01_ridgeonly_40sess_prior}}</td>
+          <td class="num">{{tempo:subj01_me1_1sess}} → {{tempo:subj01_me1_40sess}}</td></tr>
+        <tr><th>Referência</th><td>Rokem &amp; Kay, 2020; grade de Doerig et al., 2025</td><td>Scotti et al., 2024</td>
+          <td>Scotti et al., 2023</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide" id="frr" data-titulo="FRR" data-secao="Modelos">
+  <div class="cab">
+    <p class="rotulo">Modelos · 1 de 3</p>
+    <h2>FRR: uma regressão ridge para cada dimensão do CLIP</h2>
+    <p class="lede">Cada uma das 425.984 dimensões do embedding é uma regressão linear dos voxels, com a sua própria
+      regularização, escolhida por validação cruzada numa grade de frações γ em vez de valores de α.</p>
+  </div>
+  <div class="corpo duas">
+    <figure>
+      <svg class="diag" viewBox="0 0 640 400" role="img"
+           aria-label="X vezes W igual a Y previsto; para cada coluna de W, a fração gama do tamanho da solução cai de 1 a 0 conforme alfa cresce">
+        <rect class="caixa-wash" x="40" y="40" width="110" height="150" rx="2"/>
+        <text x="95" y="127" text-anchor="middle" class="t-serif" style="font-size:34px">X</text>
+        <text x="95" y="30" text-anchor="middle" class="t-mu">15.724 voxels</text>
+        <text x="28" y="115" text-anchor="middle" class="t-mu" transform="rotate(-90 28 115)">exibições</text>
+        <text x="170" y="124" text-anchor="middle" class="t-serif" style="font-size:26px">·</text>
+        <g class="frr">
+          <rect class="treina" x="190" y="40" width="200" height="95" rx="2"/>
+          <rect class="marca-fam" x="318" y="40" width="9" height="95"/>
+        </g>
+        <text x="262" y="99" text-anchor="middle" class="t-serif" style="font-size:34px">W</text>
+        <text x="290" y="30" text-anchor="middle" class="t-mu">425.984 colunas</text>
+        <text x="412" y="124" text-anchor="middle" class="t-serif" style="font-size:26px">=</text>
+        <rect class="caixa-wash" x="435" y="40" width="200" height="150" rx="2"/>
+        <g class="frr"><rect class="marca-fam" x="563" y="40" width="9" height="150"/></g>
+        <text x="510" y="127" text-anchor="middle" class="t-serif" style="font-size:34px">Ŷ</text>
+        <text x="535" y="30" text-anchor="middle" class="t-mu">embedding previsto</text>
+        <path class="linha-mu" d="M322,139 V208 H306"/>
+        <text x="298" y="213" text-anchor="end" class="t-2">coluna j: a dimensão j do CLIP</text>
+
+        <g transform="translate(0,-20)">
+          <text x="40" y="266" class="t-gr">Em cada coluna, γ = ‖w(α)‖ / ‖w(0)‖</text>
+          <line class="linha-mu" x1="80" y1="400" x2="604" y2="400"/>
+          <line class="linha-mu" x1="80" y1="290" x2="80" y2="400"/>
+          <g data-grade-gama="80,300,400,20"></g>
+          <text x="66" y="305" text-anchor="end" class="t-mu">1</text>
+          <text x="66" y="404" text-anchor="end" class="t-mu">0</text>
+          <text x="56" y="355" text-anchor="end" class="t-2">γ</text>
+          <text x="604" y="418" text-anchor="end" class="t-mu">α, a regularização →</text>
+          <g class="frr"><path class="traco-fam" d="M80.0,300.1 L100.0,300.2 L120.0,300.3 L140.0,300.5 L160.0,300.8 L180.0,301.4 L200.0,302.4 L220.0,304.0 L240.0,306.6 L250.0,308.4 L260.0,310.7 L270.0,313.5 L280.0,316.9 L290.0,320.9 L300.0,325.7 L310.0,331.1 L320.0,337.0 L330.0,343.4 L340.0,350.0 L350.0,356.6 L360.0,363.0 L370.0,368.9 L380.0,374.3 L390.0,379.1 L400.0,383.1 L410.0,386.5 L420.0,389.3 L430.0,391.6 L440.0,393.4 L460.0,396.0 L480.0,397.6 L500.0,398.6 L530.0,399.4 L560.0,399.7 L600.0,399.9"/>
+            <circle class="marca-fam" cx="84" cy="300" r="5"/><circle class="marca-fam" cx="340" cy="350" r="5"/>
+            <circle class="marca-fam" cx="451" cy="395" r="5"/></g>
+          <text x="96" y="290" class="t-2">γ = 1: mínimos quadrados</text>
+          <text x="352" y="346" class="t-2">γ = 0,5</text>
+          <text x="462" y="384" class="t-2">γ = 0,05: o menor da grade</text>
+        </g>
+      </svg>
+      <figcaption>A grade de Doerig et al. testa 20 frações, de 0,05 a 1. Procurar γ em vez de α dá a mesma grade
+        para todas as dimensões, qualquer que seja a escala delas.</figcaption>
+    </figure>
+    <figure>
+      <h3 style="font-size:20px">Fração escolhida, em % das 425.984 dimensões</h3>
+      <div class="legenda" data-legenda="gama"></div>
+      <div class="grafico" data-grafico="gama"></div>
+      <figcaption>Quase tudo fica no menor γ da grade: {{frr:g1}} das dimensões com 1 sessão e {{frr:g40}} com 40. O
+        ótimo do erro quadrático cai abaixo da grade; estender a grade até 0,001 melhora a validação cruzada, mas piora o
+        retrieval no teste. Ajuste: {{tempo:subj01_frr_1sess}} com 1 sessão e {{tempo:subj01_frr_40sess}} com 40.</figcaption>
+    </figure>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide" id="mindeye2" data-titulo="MindEye2 ridge-only" data-secao="Modelos">
+  <div class="cab">
+    <p class="rotulo">Modelos · 2 de 3</p>
+    <h2>MindEye2 ridge-only: só a entrada aprende o sujeito novo</h2>
+    <p class="lede">Cada pessoa tem um número e um arranjo diferente de voxels, então a primeira camada (a ridge) é
+      individual. O resto, pré-treinado nos outros 7 sujeitos do NSD, fica congelado.</p>
+  </div>
+  <figure class="corpo" style="gap:14px">
+    <svg class="diag" viewBox="0 0 1136 326" role="img"
+         aria-label="Oito sujeitos, cada um com a sua ridge, convergem num backbone compartilhado e congelado, seguido do diffusion prior, do embedding CLIP, do unCLIP do SDXL e da reconstrução; só a ridge do sujeito 1 treina">
+      <defs><marker id="seta-me2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="ponta" d="M0,1 L10,5 L0,9 z"/></marker>
+        <g id="cadeado-me2"><path class="cadeado" d="M-5,0 V-4 a5,5 0 0 1 10,0 V0"/><rect class="cadeado-corpo" x="-7.5" y="0" width="15" height="11" rx="2"/></g></defs>
+      <text x="86" y="18" class="t-mu">treinada aqui: 15.724 → 1.024</text>
+      <g class="me2">
+        <text x="0" y="51">sujeito 1</text>
+        <rect class="treina" x="86" y="33" width="96" height="26" rx="3"/><text x="134" y="51" text-anchor="middle">ridge</text>
+        <path class="traco-fam" d="M182,46 C220,46 220,166 248,166" marker-end="url(#seta-me2)"/>
+      </g>
+      <g class="apagado" data-outros-sujeitos="7"></g>
+      <text x="0" y="320" class="t-mu">os outros 7 sujeitos: só no pré-treino</text>
+
+      <rect class="congelada" x="250" y="36" width="160" height="260" rx="4"/>
+      <use href="#cadeado-me2" x="392" y="54"/>
+      <text x="330" y="154" text-anchor="middle" class="t-gr">backbone</text>
+      <text x="330" y="176" text-anchor="middle" class="t-2">compartilhado</text>
+      <text x="330" y="202" text-anchor="middle" class="t-mu">MLP residual</text>
+      <text x="330" y="222" text-anchor="middle" class="t-mu">{{mi:subj01_ridgeonly_1sess_prior:backbone}}</text>
+
+      <line class="linha" x1="410" y1="166" x2="452" y2="166" marker-end="url(#seta-me2)"/>
+      <path class="linha" d="M410,272 H452" marker-end="url(#seta-me2)"/>
+      <text x="462" y="277" class="t-mu">retrieval (cabeça contrastiva)</text>
+      <rect class="congelada" x="462" y="116" width="150" height="100" rx="4"/>
+      <use href="#cadeado-me2" x="596" y="132"/>
+      <text x="537" y="162" text-anchor="middle" class="t-gr">diffusion prior</text>
+      <text x="537" y="186" text-anchor="middle" class="t-mu">{{mi:subj01_ridgeonly_1sess_prior:diffusion_prior}}</text>
+
+      <line class="linha" x1="612" y1="166" x2="652" y2="166" marker-end="url(#seta-me2)"/>
+      <g data-vetor="16,30" transform="translate(662,86)"></g>
+      <text x="677" y="268" text-anchor="middle" class="t-mu">CLIP bigG</text>
+      <line class="linha" x1="702" y1="166" x2="742" y2="166" marker-end="url(#seta-me2)"/>
+      <rect class="congelada" x="752" y="126" width="130" height="80" rx="4"/>
+      <use href="#cadeado-me2" x="866" y="142"/>
+      <text x="817" y="164" text-anchor="middle" class="t-gr">SDXL</text>
+      <text x="817" y="186" text-anchor="middle" class="t-2">unCLIP</text>
+      <line class="linha" x1="882" y1="166" x2="922" y2="166" marker-end="url(#seta-me2)"/>
+      <svg data-tile="modelo:subj01_ridgeonly_40sess_prior:refinada:9" x="932" y="78" width="176" height="176"></svg>
+      <text x="1020" y="276" text-anchor="middle" class="t-gr">reconstrução</text>
+      <text x="1020" y="296" text-anchor="middle" class="t-mu">ridge-only · 40 sessões</text>
+    </svg>
+    <div class="params fam-me2">{{barra:mindeye2}}</div>
+    <figcaption>Tracejado e com cadeado: congelado. O artigo, em vez disso, retreina tudo em 8 × A100; aqui cabe numa
+      GPU de 20 GB. A variante 4096 + blurry usa uma ridge de {{mi:subj01_ridgeonly_1sess_4096blurry:ridge}} num modelo de
+      {{total:subj01_ridgeonly_1sess_4096blurry}}, com o caminho da imagem borrada.</figcaption>
+  </figure>
+</section></div>
+
+<div class="folha"><section class="slide" id="mindeye1" data-titulo="MindEye1" data-secao="Modelos">
+  <div class="cab">
+    <p class="rotulo">Modelos · 3 de 3</p>
+    <h2>MindEye1: dois caminhos, treinados do zero</h2>
+    <p class="lede">Sem pré-treino, todos os pesos aprendem só com o sujeito 1. Um caminho prevê o embedding CLIP (o
+      conteúdo); o outro, uma imagem borrada (o layout), que serve de ponto de partida para o gerador.</p>
+  </div>
+  <figure class="corpo" style="gap:14px">
+    <svg class="diag" viewBox="0 0 1136 330" role="img"
+         aria-label="Os voxels alimentam dois MLPs: o de alto nível leva ao diffusion prior e ao embedding CLIP; o de baixo nível leva a uma imagem borrada; o Versatile Diffusion parte da borrada, guiado pelo embedding">
+      <defs><marker id="seta-me1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="ponta" d="M0,1 L10,5 L0,9 z"/></marker>
+        <filter id="borra-me1"><feGaussianBlur stdDeviation="5"/></filter>
+        <g id="cadeado-me1"><path class="cadeado" d="M-5,0 V-4 a5,5 0 0 1 10,0 V0"/><rect class="cadeado-corpo" x="-7.5" y="0" width="15" height="11" rx="2"/></g></defs>
+      <rect class="caixa-wash" x="0" y="130" width="120" height="80" rx="4"/>
+      <text x="60" y="166" text-anchor="middle" class="t-gr">voxels</text>
+      <text x="60" y="188" text-anchor="middle" class="t-mu">15.724</text>
+      <path class="linha" d="M120,160 C150,160 150,75 178,75" marker-end="url(#seta-me1)"/>
+      <path class="linha" d="M120,180 C150,180 150,265 178,265" marker-end="url(#seta-me1)"/>
+
+      <g class="me1">
+        <rect class="treina" x="180" y="40" width="170" height="70" rx="4"/>
+        <rect class="treina" x="405" y="40" width="150" height="70" rx="4"/>
+        <rect class="treina" x="180" y="230" width="170" height="70" rx="4"/>
+      </g>
+      <text x="265" y="22" text-anchor="middle" class="t-mu">contraste: BiMixCo, depois SoftCLIP</text>
+      <text x="265" y="70" text-anchor="middle" class="t-gr">MLP alto nível</text>
+      <text x="265" y="92" text-anchor="middle" class="t-mu">{{mi:subj01_me1_40sess:voxel2clip}}</text>
+      <line class="linha" x1="350" y1="75" x2="395" y2="75" marker-end="url(#seta-me1)"/>
+      <text x="480" y="70" text-anchor="middle" class="t-gr">diffusion prior</text>
+      <text x="480" y="92" text-anchor="middle" class="t-mu">{{mi:subj01_me1_40sess:net}}</text>
+      <line class="linha" x1="555" y1="75" x2="598" y2="75" marker-end="url(#seta-me1)"/>
+      <g data-vetor="11,30" transform="translate(608,20)"></g>
+      <text x="623" y="148" text-anchor="middle" class="t-mu">CLIP L/14</text>
+      <path class="linha" d="M650,75 C676,75 676,110 698,110" marker-end="url(#seta-me1)"/>
+
+      <text x="265" y="260" text-anchor="middle" class="t-gr">MLP baixo nível</text>
+      <text x="265" y="282" text-anchor="middle" class="t-mu">→ latente do VAE</text>
+      <line class="linha" x1="350" y1="265" x2="395" y2="265" marker-end="url(#seta-me1)"/>
+      <svg data-tile="vista:9" data-filtro="borra-me1" x="405" y="230" width="70" height="70"></svg>
+      <text x="440" y="322" text-anchor="middle" class="t-mu">imagem borrada</text>
+      <line class="linha" x1="475" y1="265" x2="698" y2="265" marker-end="url(#seta-me1)"/>
+      <text x="586" y="254" text-anchor="middle" class="t-mu">img2img, força 0,85</text>
+
+      <rect class="congelada" x="700" y="60" width="170" height="220" rx="4"/>
+      <use href="#cadeado-me1" x="852" y="78"/>
+      <text x="785" y="160" text-anchor="middle" class="t-gr">Versatile</text>
+      <text x="785" y="182" text-anchor="middle" class="t-gr">Diffusion</text>
+      <line class="linha" x1="870" y1="170" x2="915" y2="170" marker-end="url(#seta-me1)"/>
+      <svg data-tile="modelo:subj01_me1_40sess:unclip:9" x="925" y="82" width="176" height="176"></svg>
+      <text x="1013" y="282" text-anchor="middle" class="t-gr">reconstrução</text>
+      <text x="1013" y="302" text-anchor="middle" class="t-mu">MindEye1 · 40 sessões</text>
+    </svg>
+    <div class="params fam-me1">{{barra:mindeye1}}</div>
+    <figcaption>Na GPU de 20 GB, batch 16 com Adam de 8 bits (o artigo usa batch 32). {{tempo:subj01_me1_1sess}} com 1
+      sessão e {{tempo:subj01_me1_40sess}} com 40, somando os dois caminhos.</figcaption>
+  </figure>
+</section></div>
+
+<div class="folha"><section class="slide" id="metricas" data-titulo="Como medir" data-secao="Avaliação">
+  <div class="cab">
+    <p class="rotulo">Avaliação</p>
+    <h2>As mesmas métricas para todos</h2>
+    <p class="lede">A principal é o retrieval: entre 300 imagens de teste, o embedding previsto acha a sua? O acaso é 1
+      em 300 (0,33%). Os modelos com gerador também são medidos na imagem reconstruída.</p>
+  </div>
+  <div class="corpo duas" style="grid-template-columns: 460px minmax(0,1fr)">
+    <figure>
+      <svg class="diag" viewBox="0 0 460 366" role="img" data-matriz
+           aria-label="Matriz de semelhança entre seis previsões do cérebro (linhas) e seis imagens (colunas); a maior de cada linha costuma ser a da diagonal"></svg>
+      <figcaption>Ilustração com 6 das 300 imagens: a previsão 4 fica mais perto da imagem errada.</figcaption>
+    </figure>
+    <ul class="lista metricas-lista">
+      <li><b>Retrieval</b>, top-1 entre 300, média de 30 sorteios. <b>Cér→img</b> (o Image Retrieval do artigo): em cada
+        linha, a imagem mais parecida é a certa? <b>Img→cér</b>: o mesmo, em cada coluna. Acaso: 0,33%.</li>
+      <li><b>Baixo nível</b>: PixCorr, SSIM e as camadas 2 e 5 da AlexNet. A reconstrução se parece pixel a pixel?</li>
+      <li><b>Alto nível</b>: InceptionV3, CLIP, EfficientNet-B1 e SwAV. O conteúdo é o mesmo?</li>
+      <li><b>Correlação cerebral</b>: a resposta que um encoder (GNet) prevê para a reconstrução bate com a medida, de V1
+        ao córtex de alto nível?</li>
+      <li><b>Legendas</b>: o GIT descreve o embedding previsto, e a descrição é comparada com as legendas humanas do
+        COCO.</li>
+      <li class="mudo">O FRR para no embedding: só tem retrieval.</li>
+    </ul>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide" id="retrieval" data-titulo="Retrieval: 1 e 40 sessões" data-secao="Avaliação">
+  <div class="cab">
+    <p class="rotulo">Resultados</p>
+    <h2>Com pouco dado, o pré-treino é o que mais vale</h2>
+    <p class="lede">Com 1 sessão (~1 h de scanner), o ridge-only acerta {{bwd:subj01_ridgeonly_1sess_prior}} das imagens no
+      sentido cérebro → imagem; o MindEye1, treinado do zero, {{bwd:subj01_me1_1sess}}. Com 40 sessões, os modelos com rede
+      se aproximam.</p>
+  </div>
+  <figure class="corpo" style="gap:12px">
+    <div style="display:flex; gap:28px; align-items:center; flex-wrap:wrap">
+      <div class="seg" role="group" aria-label="Sentido do retrieval" data-sentido>
+        <button type="button" data-v="bwd" aria-pressed="true">Cér→img</button>
+        <button type="button" data-v="fwd" aria-pressed="false">Img→cér</button>
+      </div>
+      <div class="legenda"><span><span class="sw sw-oco"></span>1 sessão</span><span><span class="sw sw-cheio"></span>40 sessões</span>
+        <span><svg width="22" height="10" style="vertical-align:0"><line x1="0" y1="5" x2="22" y2="5" stroke="currentColor" stroke-dasharray="3 3" opacity=".7"/></svg> acaso, 0,33%</span></div>
+    </div>
+    <div class="grafico" data-grafico="retrieval"></div>
+    <figcaption>Top-1 entre 300 imagens de teste, média de 30 sorteios; passe o mouse para ver o intervalo de 95%. A
+      cor é a família do modelo; o artigo é o MindEye2 com todos os pesos retreinados.</figcaption>
+  </figure>
+</section></div>
+
+<div class="folha"><section class="slide" id="hubness" data-titulo="FRR e o hubness" data-secao="Avaliação">
+  <div class="cab">
+    <p class="rotulo">Resultados · FRR</p>
+    <h2>Por que o FRR erra no sentido cérebro → imagem</h2>
+    <p class="lede">A ridge encolhe as previsões para a média do treino: todas ficam parecidas entre si (cosseno
+      {{frr:cos1}} com a média, com 1 sessão). Algumas imagens viram "hubs", escolhidas por muitas previsões ao mesmo
+      tempo. Tirar a média do treino desfaz boa parte do efeito.</p>
+  </div>
+  <div class="corpo duas-43">
+    <figure>
+      <div class="legenda" data-legenda="hub"></div>
+      <div class="grafico" data-grafico="hub"></div>
+      <figcaption>Retrieval cérebro → imagem do FRR, como sai do modelo e depois de subtrair das previsões e dos alvos a
+        média do treino.</figcaption>
+    </figure>
+    <div class="texto">
+      <p>Nos modelos contrastivos, os dois sentidos do retrieval diferem de 0 a 16 pontos. No FRR, a diferença passa de
+        50: com 1 sessão, {{fwd:subj01_frr_1sess}} num sentido e {{bwd:subj01_frr_1sess}} no outro.</p>
+      <p>O critério que escolhe γ (o erro quadrático) não é o do retrieval. Ao reduzir dados, esse critério é um grau de
+        liberdade a fixar entre as condições.</p>
+      <p class="nota">O benchmark rotula as colunas pelo sentido (Img→cér, Cér→img): no código do MindEye2, fwd é imagem →
+        cérebro, o oposto do comentário no final_evaluations.py.</p>
+    </div>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide" id="reconstrucoes" data-titulo="Reconstruções" data-secao="Avaliação">
+  <div class="cab">
+    <p class="rotulo">Resultados</p>
+    <h2>O que cada modelo reconstrói</h2>
+  </div>
+  <div class="corpo" style="grid-template-columns: auto minmax(0,1fr); gap: 36px">
+    <div class="galeria" data-galeria="3"></div>
+    <div class="texto" style="align-content:space-between">
+      <div style="display:grid; gap:14px">
+        <p>As mesmas imagens de teste, reconstruídas só a partir do fMRI.</p>
+        <p>Com 40 sessões, o conteúdo sai certo na maioria. Com 1 sessão, a cena geral costuma ficar e os detalhes
+          mudam: na página 4, os elefantes viram zebras no ridge-only.</p>
+        <p class="nota">Refinada: a saída do unCLIP passada de novo pelo SDXL, guiada pela legenda prevista. O MindEye1
+          não tem refinamento.</p>
+      </div>
+      <div class="galeria-nav"><button class="botao" type="button" data-pag="-1" aria-label="Imagens anteriores">‹</button>
+        <span class="num" data-pag-txt></span>
+        <button class="botao" type="button" data-pag="1" aria-label="Próximas imagens">›</button></div>
+    </div>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide" id="custo" data-titulo="Custo e desempenho" data-secao="Avaliação">
+  <div class="cab">
+    <p class="rotulo">Resultados</p>
+    <h2>Custo de treino e desempenho</h2>
+    <p class="lede">O FRR ajusta em segundos; o MindEye1 com 40 sessões leva mais de um dia. O ridge-only fica no meio
+      em custo e acima dos dois em retrieval, com 1 e com 40 sessões.</p>
+  </div>
+  <figure class="corpo" style="gap:10px">
+    <div class="legenda" data-legenda="custo"></div>
+    <div class="grafico" data-grafico="custo"></div>
+    <figcaption>Tempo de treino numa RTX A4500 (escala logarítmica) contra o retrieval cérebro → imagem. O MindEye1 soma
+      os dois caminhos; o Ridge 4096 + blurry de 40 sessões usa o tempo da reprodução, porque o checkpoint original não
+      guardou o seu. O artigo (fine-tune completo em 8 × A100) fica de fora.</figcaption>
+  </figure>
+</section></div>
+
+<div class="folha"><section class="slide" id="reproducao" data-titulo="Reprodução" data-secao="Avaliação">
+  <div class="cab">
+    <p class="rotulo">Resultados</p>
+    <h2>Treinado de novo, dá o mesmo resultado?</h2>
+    <p class="lede">Os modelos do benchmark foram retreinados do zero, cada um pelo seu dicionário em
+      <code>src/experimentos.py</code>, numa outra RTX A4500: {{n_repro}} reproduções, {{repro:horas_treino}} de treino.
+      {{repro:resumo}}</p>
+  </div>
+  <div class="corpo">
+    {{tabela:reproducao}}
+    <p class="nota-tab">Original → reprodução. Diferença nas métricas de imagem: em pontos percentuais nas identificações
+      2-way, e em valor absoluto nas demais (PixCorr, SSIM, correlação cerebral...), nas reconstruções unCLIP e refinadas.
+      Retrieval medido do mesmo jeito nos dois{{repro:nota_fonte}}. As linhas do benchmark continuam sendo as originais; as reproduções aparecem no site com o rótulo "· reprodução".</p>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide" id="dataset" data-titulo="Um treino é um dicionário" data-secao="Controle do dataset">
+  <div class="cab">
+    <p class="rotulo">Controle do dataset</p>
+    <h2>Um treino é um dicionário</h2>
+    <p class="lede">Para responder à pergunta do plano, o treino varia um fator de cada vez. O mesmo dicionário serve aos
+      três modelos, e a mesma semente dá sempre o mesmo subconjunto.</p>
+  </div>
+  <div class="corpo duas" style="grid-template-columns: 560px minmax(0,1fr)">
+    <div style="display:grid; gap:18px; align-content:start">
+<pre><code>treina.roda("frr_5classes", {
+    "modelo": "frr",
+    "dataset": {
+        "sessoes": 40,         <span class="com"># o pool: as N primeiras</span>
+        "classes": CLASSES_5,  <span class="com"># pessoa, animal, ...</span>
+        "minimo": 10,          <span class="com"># % da tela da classe</span>
+        "maximo_outros": 2,    <span class="com"># % das outras classes</span>
+        "n_imagens": 300,      <span class="com"># por classe</span>
+        "balanceado": True,
+        "repeticoes": 1,       <span class="com"># exibições por imagem</span>
+        "agregacao": None,     <span class="com"># como usar as repetições</span>
+    },
+})</code></pre>
+      <p class="nota">Agregação: cada exibição como amostra, a média das repetições, uma repetição sorteada por época ou
+        uma combinação aleatória delas.</p>
+    </div>
+    <figure>
+      <svg class="diag exibicoes" viewBox="0 0 540 250" role="img" data-exibicoes
+           aria-label="Três mil exibições divididas como 3.000 imagens vistas uma vez, 1.500 vistas duas vezes ou 1.000 vistas três vezes"></svg>
+      <figcaption>O mesmo tempo de scanner (3.000 exibições) dividido de três jeitos, cada quadrado uma exibição e cada
+        cor uma imagem: a varredura já definida para o FRR responde se vale mais ver mais imagens ou repetir as
+        mesmas.</figcaption>
+    </figure>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide" id="tela" data-titulo="A fração da tela" data-secao="Controle do dataset">
+  <div class="cab">
+    <p class="rotulo">Controle do dataset · semântica</p>
+    <h2>A classe de uma imagem: quanto da tela ela ocupa</h2>
+    <p class="lede">O NSD não mostra a imagem COCO inteira: recorta um quadrado e o exibe em 425 × 425 pixels. As
+      máscaras COCO de cada objeto são desenhadas nesse recorte, e a fração de uma classe é a da união das suas
+      máscaras.</p>
+  </div>
+  <div class="corpo" style="gap:26px">
+    <div class="recorte" data-recorte></div>
+    <div class="texto" style="grid-template-columns: 1fr 1fr; gap: 40px">
+      <p>A área do COCO (a soma do campo <code>area</code> sobre a imagem inteira) conta objetos que ficaram fora do
+        recorte e conta duas vezes os que se sobrepõem. Na tela, um objeto inteiro ocupa de 1,33 a 1,5 vez mais.</p>
+      <p>No limiar de 5% para pessoa, medir na tela faz 255 imagens passarem a contar e 33 deixarem de contar. A tabela
+        de frações cobre as 10.000 imagens do sujeito 1, com 12 supercategorias e 80 categorias.</p>
+    </div>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide" id="explorador" data-titulo="x% da tela da classe k" data-secao="Controle do dataset" style="padding-bottom:48px">
+  <div class="cab">
+    <p class="rotulo">Controle do dataset · semântica</p>
+    <h2>Como é x% da tela ocupada pela classe k</h2>
+  </div>
+  <div class="corpo explorador" data-explorador>
+    <div class="painel">
+      <div style="display:grid; gap:8px"><h3>Classe k</h3><div class="classes" data-classes></div></div>
+      <div style="display:grid; gap:8px">
+        <h3>Fração da tela x</h3>
+        <div class="leitura-x"><b data-x-valor></b><span data-x-faixa></span></div>
+        <input type="range" min="0" max="11" step="1" value="5" data-x aria-label="Fração da tela">
+        <div class="hist-faixas" data-hist></div>
+        <div class="marcas-x" data-marcas aria-hidden="true"></div>
+      </div>
+      <p class="nota" data-x-conta></p>
+      <label class="chave"><input type="checkbox" checked data-mascara> Escurecer o que não é a classe</label>
+    </div>
+    <div class="grade-ex" data-grade></div>
+    <div class="detalhe" data-detalhe></div>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide" id="regra" data-titulo="Regra exclusiva" data-secao="Controle do dataset">
+  <div class="cab">
+    <p class="rotulo">Controle do dataset · semântica</p>
+    <h2>Regra exclusiva: classes puras, ao custo de quantidade</h2>
+    <p class="lede">A imagem é da classe se a classe ocupa pelo menos o mínimo da tela e cada outra classe listada fica
+      abaixo do máximo. O que não é classe (raquete, prato, televisão) não conta contra a pureza.</p>
+  </div>
+  <div class="corpo regra" data-regra>
+    <div class="painel" style="gap:22px">
+      <div class="controle"><div class="topo"><span>mínimo da classe</span><b data-min-txt></b></div>
+        <input type="range" min="1" max="40" step="1" value="10" data-min aria-label="Mínimo da classe, em % da tela"></div>
+      <div class="controle"><div class="topo"><span>máximo de cada outra</span><b data-max-txt></b></div>
+        <input type="range" min="0" max="20" step="1" value="4" data-max aria-label="Máximo das outras classes, em % da tela"></div>
+      <p style="font-size:17px; line-height:1.5" data-regra-resumo></p>
+      <p class="nota">Imagens de treino das 40 sessões, pela mesma regra do <code>semantica.py</code>. Faixa clara: as
+        imagens com a classe em pelo menos 1% da tela. Miniaturas: exemplos que entram, os mais perto do mínimo.</p>
+    </div>
+    <div class="linhas-classe" data-linhas></div>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide" id="estado" data-titulo="O que está pronto e o que falta" data-secao="Próximos passos">
+  <div class="cab">
+    <p class="rotulo">Próximos passos</p>
+    <h2>O que está pronto e o que falta</h2>
+  </div>
+  <div class="corpo estado">
+    <div><h3>Pronto</h3>
+      <ul class="itens">
+        <li><span>Teste fixo nas 1.000 imagens compartilhadas; treino nas N primeiras sessões, sem nenhuma delas</span></li>
+        <li><span>Os três modelos com 1 e 40 sessões, e as variantes <small>com e sem prior, 4096 + blurry, grades do FRR,
+          com e sem low-level</small></span></li>
+        <li><span>As mesmas métricas para todos, num site que se atualiza ao fim de cada treino
+          <small>{{n_modelos}} modelos com resultado</small></span></li>
+        <li><span>Reexecução do benchmark pelo <code>treina.py</code>, com configuração, commit e curva de cada treino
+          <small>{{n_repro}} reproduções, {{n_repro_completas}} com todas as métricas</small></span></li>
+        <li><span>Dataset controlado: sessões, imagens, repetições, classes e agregação, com semente</span></li>
+        <li><span>Rótulo semântico pela fração da tela, com as regras exclusiva e de prioridade</span></li>
+      </ul></div>
+    <div><h3>Falta</h3>
+      <ul class="itens pendente">
+        <li><span>Rodar os {{n_planejados}} experimentos já definidos em <code>src/experimentos.py</code>
+          <small>imagens × repetições com 3.000 exibições, 5 classes balanceadas, pessoa + animal e os 4 modos de
+          agregação</small></span></li>
+        <li><span>Fechar a reexecução <small>{{repro:pendente}}; medir o efeito da semente do treino nas métricas de
+          imagem; reproduzir o MindEye1</small></span></li>
+        <li><span>Um modelo não linear por sujeito, da literatura</span></li>
+        <li><span>Mais pontos na escala de sessões <small>as condições de 25, 35 e 50 h do plano</small></span></li>
+        <li><span>Reduzir variedade maximizando a distância entre as imagens</span></li>
+        <li><span>Medir o custo computacional do mesmo jeito em todas as famílias</span></li>
+      </ul></div>
+  </div>
+</section></div>
+
+<div class="folha"><section class="slide capa" id="fim" data-titulo="Onde está tudo">
+  <div class="cab" style="gap:18px">
+    <p class="rotulo">benchmark-modelos</p>
+    <h1>Obrigado</h1>
+    <p class="lede">Tudo o que aparece aqui sai do repositório e se atualiza sozinho ao fim de cada treino.</p>
+  </div>
+  <div class="atalhos-fim">
+    <a href="index.html#resultados"><b>Resultados interativos</b><span>tabelas, gráficos, curvas de treino e a galeria,
+      com os modelos que você escolher</span></a>
+    <a href="index.html#uso"><b>Como usar</b><span>os modelos, a avaliação e o simulador do dataset controlado</span></a>
+    <a href="{{repo}}"><b>Repositório</b><span>{{repo_curto}}</span></a>
+    <a href="{{repo}}/blob/main/notebooks/classificacao_semantica.ipynb"><b>Classificação semântica</b><span>o notebook que
+      calibrou as classes</span></a>
+  </div>
+  <p class="nota">Teclas: ← → navegam · D alterna slides e documento · T tema · F tela cheia · imprimir gera um PDF com
+    um slide por página.</p>
+</section></div>

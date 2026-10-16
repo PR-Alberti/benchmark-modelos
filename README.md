@@ -9,8 +9,9 @@ mesmo treino, o mesmo teste (1.000 imagens compartilhadas) e as mesmas métricas
 | **FRR**, ridge fracionária ([Rokem & Kay, 2020](https://doi.org/10.1093/gigascience/giaa133)) | `src/run_frr.py` | embedding CLIP ViT-bigG |
 | **MindEye1** ([Scotti et al., 2023](https://arxiv.org/abs/2305.18274)) | `mindeye1/src/Train_MindEye.py` | embedding CLIP ViT-L/14 + imagem (Versatile Diffusion) |
 
-Site com início, uso e resultados interativos de todos os modelos: [`results/site/index.html`](results/site/index.html)
-(abre direto do disco; regenerado ao fim de cada treino e avaliação).
+Site com início, uso e resultados interativos de todos os modelos: [`results/site/index.html`](results/site/index.html);
+apresentação do trabalho em slides: [`results/site/apresentacao.html`](results/site/apresentacao.html) (os dois abrem
+direto do disco e são regenerados ao fim de cada treino e avaliação).
 
 ## Instalação
 
@@ -94,7 +95,8 @@ MODEL_NAME=<nome> DATASET=train_logs/<nome>/dataset.json NUM_SESSIONS=40 scripts
 # Benchmark
 scripts/run_benchmark.sh                                              # MindEye2 + FRR, tudo
 python src/make_benchmark.py                                          # remonta BENCHMARK.md e a página
-python src/make_site.py                                               # regenera o site (results/site)
+python src/make_site.py                                               # regenera o site e a apresentação (results/site)
+python src/make_site.py --exemplos                                    # refaz os exemplos semânticos da apresentação
 ```
 
 ### Resultado de um modelo
@@ -109,6 +111,7 @@ cd src && python -c "from mindeye_ridge import resultados; print(resultados.retr
 | `results/tables/` | métricas finais |
 | `results/evals/<nome>/` | tensores de embedding e reconstrução |
 | `results/site/index.html` | o site: todos os modelos, com tabelas, gráficos, curvas, galeria e fichas |
+| `results/site/apresentacao.html` | a apresentação: a pergunta, os modelos ilustrados, os resultados e o controle semântico, com exemplos de imagens por classe e % da tela (`results/site/exemplos/`) |
 | `results/site/modelos/<nome>.json` | o registro do modelo no site (o que foi extraído de cada resultado) |
 | [BENCHMARK.md](BENCHMARK.md), `results/benchmark/index.html` | tabelas e página do benchmark |
 

@@ -445,14 +445,14 @@ def monta(modelos, planejados, galeria, semantica):
         "cartoes_familias": html_cartoes_familias(),
         "cor:frr": _cor_familia("frr"), "cor:mindeye2": _cor_familia("mindeye2"), "cor:mindeye1": _cor_familia("mindeye1"),
     }
-    inicio = preenche((AQUI / "conteudo" / "inicio.html").read_text(), valores, todos)
-    uso = preenche((AQUI / "conteudo" / "uso.html").read_text(), valores, todos)
+    inicio = preenche((AQUI / "conteudo" / "inicio.html").read_text(encoding="utf-8"), valores, todos)
+    uso = preenche((AQUI / "conteudo" / "uso.html").read_text(encoding="utf-8"), valores, todos)
     vistas = "".join(f'<div class="vista" id="vista-{a}" data-aba="{a}" role="tabpanel" aria-labelledby="aba-{a}" hidden>'
                      f"</div>" for a in ABAS)
     dados = json.dumps(dados_pagina(modelos, planejados, galeria, semantica), ensure_ascii=False,
                        separators=(",", ":")).replace("</", "<\\/")
-    estilo = (AQUI / "assets" / "site.css").read_text()
-    script = (AQUI / "assets" / "simulador.js").read_text() + "\n" + (AQUI / "assets" / "site.js").read_text()
+    estilo = (AQUI / "assets" / "site.css").read_text(encoding="utf-8")
+    script = (AQUI / "assets" / "simulador.js").read_text(encoding="utf-8") + "\n" + (AQUI / "assets" / "site.js").read_text(encoding="utf-8")
     cabeca = f"<title>benchmark-modelos</title>\n{FONTES}\n<style>{estilo}</style>"
     corpo = f"""<script>document.documentElement.classList.add('js');</script>
 <header class="barra">
@@ -462,6 +462,7 @@ def monta(modelos, planejados, galeria, semantica):
       <a href="#inicio" data-pag="inicio" aria-current="page">Início</a>
       <a href="#uso" data-pag="uso">Como usar</a>
       <a href="#resultados" data-pag="resultados">Resultados</a>
+      <a href="apresentacao.html">Apresentação</a>
     </nav>
     <button class="tema" type="button">Tema escuro</button>
   </div>

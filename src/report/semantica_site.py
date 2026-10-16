@@ -57,6 +57,18 @@ def codifica(imagem, sessao, fracoes):
             "tela": TELA, "dados": base64.b64encode(bytes(buf)).decode()}
 
 
+def decodifica(d):
+    """O inverso de codifica: (sessoes (n, 3), pixels (n, 12)), na ordem crescente de id NSD.
+
+    Como no simulador, a fracao e 100 * pixels / tela; SEM_FRACAO marca imagem fora da tabela.
+    """
+    import numpy as np
+    k = len(d["sup"])
+    b = np.frombuffer(base64.b64decode(d["dados"]), dtype=np.uint8).reshape(d["n"], 3 + 3 * k).astype(np.int64)
+    pixels = b[:, 3::3] | (b[:, 4::3] << 8) | (b[:, 5::3] << 16)
+    return b[:, :3], pixels
+
+
 def atualiza(pasta_site):
     """Os dados do simulador, recalculados se as fontes mudaram; None se nunca houve dados."""
     cache = Path(pasta_site) / "dados" / "semantica.json"
@@ -64,7 +76,7 @@ def atualiza(pasta_site):
     tars = paths.DATA / "wds" / "subj01" / "train"
     sig = [_assinatura(tabela), _assinatura(tars / "0.tar"), _assinatura(tars / "39.tar")]
     try:
-        antigo = json.loads(cache.read_text())
+        antigo = json.loads(cache.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         antigo = None
     if antigo and antigo.get("sig") == sig:
@@ -78,6 +90,6 @@ def atualiza(pasta_site):
     novo = dict(codifica(ex["imagem"], ex["sessao"], fr), sig=sig)
     cache.parent.mkdir(parents=True, exist_ok=True)
     tmp = cache.with_suffix(".tmp")
-    tmp.write_text(json.dumps(novo, ensure_ascii=False))
+    tmp.write_text(json.dumps(novo, ensure_ascii=False), encoding="utf-8")
     os.replace(tmp, cache)
     return novo
