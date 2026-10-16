@@ -64,20 +64,33 @@ medida de ruído, feita uma vez; não a repita.
    reconstrução e as métricas rodam. `COMMITA=1` faz um commit dos resultados ao fim; esta máquina não tem
    `user.email` no git, então exporte `GIT_AUTHOR_EMAIL` e `GIT_COMMITTER_EMAIL` ou configure o e-mail.
 
-2. **Atualizar o texto sobre o ruído do treino**, depois do item 1. O BENCHMARK.md, o EXPERIMENTO.md e
-   `report/texts.py` dizem que "o efeito da semente do treino nas métricas de imagem não foi medido". Com as
-   sementes 42 (item 1), 1 e 2 reconstruídas e avaliadas, há uma medida (as sementes 1 e 2 divergem do
-   release em até 1,19 p.p. na tabela refinada); o texto deve dizer isso e que não se medem mais sementes.
+2. **Passar todos os modelos de referência para as reproduções.** Decidido: as linhas do benchmark
+   (`report/config.py`, `MODELOS`; `report/site.py`, `PRESETS`, `PARES`, `OCULTOS`) passam a ser os `repro_…`,
+   que têm commit, configuração, curva, tempo e retrieval com intervalo. O que falta para cada modelo:
 
-3. **Decidir se as reproduções passam a ser as linhas de referência.** Hoje `report/config.py` (`MODELOS`) e o
-   `report/site.py` (`PRESETS`, `PARES`, `OCULTOS`) apontam para os modelos originais. Trocar muda os números
-   das tabelas em até 1,24 p.p. e obriga a revisar as conclusões escritas à mão em `report/texts.py`.
+   | Modelo de referência | Reprodução | Falta | Tempo (A4500) |
+   |---|---|---|---|
+   | FRR 1 e 40 sessões, e as variantes `_global` e `_ext` | completa, idêntica ao original | só trocar a referência | 0 |
+   | Ridge 1024 sem prior, 1 sessão | completa | só trocar a referência | 0 |
+   | Ridge 4096 + blurry, 1 sessão | completa | só trocar a referência | 0 |
+   | Ridge 1024 + prior, 40 sessões | completa | só trocar a referência | 0 |
+   | Ridge 4096 + blurry, 40 sessões | completa | só trocar a referência | 0 |
+   | **Ridge 1024 + prior, 1 sessão** | treino e retrieval | reconstrução e métricas (item 1) | ~3 h 30 |
+   | **MindEye1, 1 sessão** (e o low-level) | não existe | treino, reconstrução, métricas e a curva | ~5 h |
+   | **MindEye1, 40 sessões** (e o low-level) | não existe | idem | ~32 h |
+   | Artigo, 1 e 40 sessões | só o retrieval com intervalo | nada: os pesos são dos autores e não se retreinam | 0 |
 
-4. **MindEye1: reprodução e curva de treino**, ~37 h de GPU (2 h 53 e 32 h 38 mais o low-level), fora da
-   reexecução por decisão. O `mindeye1/src/Train_MindEye.py` não grava `metrics.csv`, então a aba Treino do
-   site só tem o MindEye2; é preciso mudar o código para gravar a curva no formato que o `report/catalogo.py`
-   lê (`CURVA`) e acrescentar os dois dicionários ao `REPRODUCOES` de `src/experimentos.py`. É o item mais
-   caro e o de menor retorno.
+   Total de GPU que falta: ~3 h 30 (item 1) mais ~37 h do MindEye1 (`scripts/run_me1_benchmark.sh`, que treina,
+   reconstrói e avalia), ou seja, ~40 h 30. Sem o MindEye1, ~3 h 30. Os modelos `…_semlowlevel` do MindEye1
+   (`LOWLEVEL=0`) pedem outro treino do alto nível cada um, que não está nessa soma e não foi medido.
+
+   Trabalho de código, sem GPU: o `Train_MindEye.py` precisa gravar `metrics.csv` no formato que o
+   `report/catalogo.py` lê (`CURVA`); os dois dicionários do MindEye1 entram em `REPRODUCOES` de
+   `src/experimentos.py`; e a troca das referências obriga a reler as conclusões escritas à mão em
+   `report/texts.py`, porque os números mudam até 1,24 p.p. (o FRR e o 4096 de 1 sessão não mudam).
+
+Fora do escopo, por decisão: análise com várias sementes (o texto "o efeito da semente do treino nas
+métricas de imagem não foi medido" fica como está) e a reconstrução com a semente 7.
 
 ## O que não dá para fazer sem a máquina de treino original
 
