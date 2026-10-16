@@ -130,7 +130,7 @@ def _le_tabela(p):
     """Tabela de metricas do final_evaluations.py: {metrica: valor}, ou None."""
     if not p.exists():
         return None
-    with open(p, newline="") as f:
+    with open(p, newline="", encoding="utf-8") as f:
         r = csv.reader(f, delimiter="\t")
         next(r, None)
         return {k: float(v) for k, v in r if k}
@@ -140,13 +140,13 @@ def _le_legendas(p):
     """*_caption_metrics.csv: so a coluna de valores, na ordem de CHAVES_LEGENDA."""
     if not p.exists():
         return None
-    valores = [float(v) for v in p.read_text().split()[1:]]
+    valores = [float(v) for v in p.read_text(encoding="utf-8").split()[1:]]
     return dict(zip(CHAVES_LEGENDA, valores)) if len(valores) == len(CHAVES_LEGENDA) else None
 
 
 def _le_json(p):
     try:
-        return json.loads(p.read_text())
+        return json.loads(p.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
 
@@ -155,7 +155,7 @@ def _le_curva(p):
     """metrics.csv do train_ridgeonly.py: epocas (a partir de 1), series escolhidas e o tempo total."""
     if not p.exists():
         return None
-    with open(p, newline="") as f:
+    with open(p, newline="", encoding="utf-8") as f:
         # um treino em andamento pode estar no meio de uma linha: so as linhas completas
         linhas = [r for r in csv.DictReader(f) if r.get("epoch") and None not in r.values()]
     if not linhas:
@@ -210,7 +210,7 @@ def _tempo_me1(etapas, log):
     if not log.exists():
         return None
     marcas = {}
-    for linha in log.read_text().splitlines():
+    for linha in log.read_text(encoding="utf-8").splitlines():
         r = re.match(r"\[(.{19})\] (\S+): treino .*: (comecando|feito)$", linha)
         if r:
             marcas[(r[2], r[3])] = datetime.datetime.strptime(r[1], "%Y-%m-%d %H:%M:%S")
@@ -511,18 +511,28 @@ def status(r):
     return "planejado", "sem resultados"
 
 
+# de onde veio o retrieval, da pior para a melhor fonte
+FONTE_RETRIEVAL = {"treino": 1, "final_evaluations": 2, "verify_retrieval": 3, "frr": 3}
+
+
 def mescla(antigo, novo):
     """O novo por cima do antigo: o que o novo nao achou (None) fica como estava.
 
-    O retrieval tirado da curva de treino (300 imagens fixas, ultima epoca) nao substitui um
-    retrieval medido de verdade que o registro ja tinha (numa maquina sem os tensores de avaliacao).
+    Numa maquina sem train_logs/ ou sem os tensores de avaliacao, uma fonte pior nao substitui a melhor
+    que o registro ja tinha: o retrieval da curva de treino (300 imagens fixas, ultima epoca) ou o das
+    tabelas (sem intervalo) nao passam por cima do medido com intervalo, e a configuracao do dicionario
+    nao passa por cima da gravada pelo treina.py (nem o rotulo, o commit e o resumo do dataset dela).
     """
     if not isinstance(antigo, dict) or not isinstance(novo, dict):
         return novo if novo is not None else antigo
     novo = dict(novo)
     ra, rn = antigo.get("retrieval") or {}, novo.get("retrieval") or {}
-    if rn.get("fonte") == "treino" and ra and ra.get("fonte") != "treino":
+    if ra and rn and FONTE_RETRIEVAL.get(rn.get("fonte"), 0) < FONTE_RETRIEVAL.get(ra.get("fonte"), 0):
         novo["retrieval"], novo["valores"] = None, None
+    if (str(antigo.get("config_fonte") or "").startswith("train_logs/")
+            and not str(novo.get("config_fonte") or "").startswith("train_logs/")):
+        for k in ("config", "config_fonte", "config_erro", "rotulo", "commit", "resumo_dataset"):
+            novo.pop(k, None)
     out = dict(antigo)
     for k, v in novo.items():
         if v is None:
@@ -539,7 +549,7 @@ def mescla(antigo, novo):
 
 def _grava(p, obj):
     tmp = p.with_suffix(".tmp")
-    tmp.write_text(json.dumps(obj, ensure_ascii=False, indent=1, sort_keys=True))
+    tmp.write_text(json.dumps(obj, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
     os.replace(tmp, p)
 
 

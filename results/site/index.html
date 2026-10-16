@@ -445,6 +445,7 @@ footer.rodape { max-width: 1280px; margin: 0 auto; padding: 22px clamp(16px, 3vw
       <a href="#inicio" data-pag="inicio" aria-current="page">Início</a>
       <a href="#uso" data-pag="uso">Como usar</a>
       <a href="#resultados" data-pag="resultados">Resultados</a>
+      <a href="apresentacao.html">Apresentação</a>
     </nav>
     <button class="tema" type="button">Tema escuro</button>
   </div>
@@ -476,6 +477,8 @@ footer.rodape { max-width: 1280px; margin: 0 auto; padding: 22px clamp(16px, 3vw
       <div class="atalhos">
         <a class="atalho" href="#resumo"><b>Resultados</b><span>Tabelas, gráficos, curvas e galeria, com os modelos
           que você escolher.</span></a>
+        <a class="atalho" href="apresentacao.html"><b>Apresentação</b><span>O trabalho em slides: a pergunta, os três
+          modelos ilustrados, os resultados e o controle semântico, com exemplos de cada classe.</span></a>
         <a class="atalho" href="#uso"><b>Como usar</b><span>Os modelos, a avaliação e como treinar num dataset
           controlado, com um simulador.</span></a>
         <a class="atalho" href="#inicio-maquina"><b>Preparar uma máquina</b><span>Do computador zerado ao primeiro
@@ -600,7 +603,8 @@ git push</code></pre>
 
     <section class="secao" id="inicio-site">
       <header><h2>Este site</h2></header>
-      <p>É o arquivo <code>results/site/index.html</code>, gerado por <code>src/make_site.py</code>. Abre direto do disco,
+      <p>É o arquivo <code>results/site/index.html</code>, gerado por <code>src/make_site.py</code>, que também gera a
+        <a href="apresentacao.html">apresentação</a> (<code>results/site/apresentacao.html</code>). Abre direto do disco,
         sem servidor e sem internet (só as fontes vêm da rede). Os resultados se atualizam sozinhos: ao fim de cada treino
         e de cada avaliação, os scripts regeneram o site, e um modelo novo, treinado pelo <code>treina.py</code>, aparece
         com a configuração completa. O que conta como modelo novo e como tirar um modelo do site está em
@@ -909,7 +913,7 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
 </section>
 
 </main>
-<footer class="rodape">Gerado em 14/10/2026 22:28 a partir do commit <span class="mono">d1b2f24</span> por
+<footer class="rodape">Gerado em 15/10/2026 17:02 a partir do commit <span class="mono">1724c9a</span> por
 <span class="mono">src/make_site.py</span>. 32 modelos com resultado, 31 avaliados por completo,
 12 experimentos planejados.</footer>
 <dialog class="lupa" id="lupa" aria-label="Imagens ampliadas"><div class="lupa-corpo"></div></dialog>

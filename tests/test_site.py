@@ -13,7 +13,7 @@ from unittest import mock
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 import treina                                                     # noqa: E402
 from mindeye_ridge import agregacao, dataset_controlado as dc, paths   # noqa: E402
-from report import catalogo, site                                 # noqa: E402
+from report import apresentacao, catalogo, exemplos_site, galeria_site, semantica_site, site   # noqa: E402
 
 NODE = shutil.which("node")
 ASSETS = Path(paths.SRC) / "report" / "assets"
@@ -116,6 +116,20 @@ class Catalogo(Arvore):
         self.assertEqual(m["so_ret"]["retrieval"]["fonte"], "verify_retrieval")  # a curva nao substitui
         self.assertEqual(m["so_ret"]["valores"]["refinada"]["FwdRetrieval"], 0.7)
 
+    def test_fonte_pior_nao_substitui_a_melhor(self):
+        """Numa maquina sem train_logs/ e sem results/evals/: a tabela nao passa por cima do verify_retrieval, e o
+        dicionario nao passa por cima do experimento.json."""
+        antigo = {"retrieval": {"bwd": {"media": .9, "ic95": [.89, .91]}, "fonte": "verify_retrieval"},
+                  "valores": {"refinada": {"PixCorr": .3}}, "config": {"x": 1}, "rotulo": "do treina.py",
+                  "config_fonte": "train_logs/m/experimento.json", "commit": "abc"}
+        novo = {"retrieval": {"bwd": {"media": .8}, "fonte": "final_evaluations"}, "valores": {"refinada": {"PixCorr": .3}},
+                "config": {"x": 2}, "rotulo": "m", "config_fonte": "src/experimentos.py", "commit": None}
+        r = catalogo.mescla(antigo, novo)
+        self.assertEqual(r["retrieval"]["fonte"], "verify_retrieval")
+        self.assertEqual((r["config"], r["rotulo"], r["commit"]), ({"x": 1}, "do treina.py", "abc"))
+        novo["retrieval"]["fonte"] = "verify_retrieval"                              # mesma fonte: o novo vale
+        self.assertEqual(catalogo.mescla(antigo, novo)["retrieval"]["bwd"]["media"], .8)
+
     def test_registro_apagado_tira_o_modelo(self):
         self.atualiza()
         shutil.rmtree(self.d["evals"] / "so_ret")
@@ -152,7 +166,7 @@ class Descricoes(unittest.TestCase):
         self.assertEqual(len(set(slugs)), len(slugs))                # um endereco por metrica
         self.assertTrue(all(re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", x) for x in slugs), slugs)
         tabela = site.html_metricas()
-        js = (ASSETS / "site.js").read_text()
+        js = (ASSETS / "site.js").read_text(encoding="utf-8")
         for x in slugs:
             self.assertIn(f'<tr id="def-{x}">', tabela)              # destino dos nomes nos resultados
             self.assertIn(f'href="#res-{x}"', tabela)                # e a ida para os resultados
@@ -190,18 +204,154 @@ class Pagina(Arvore):
         with mock.patch.multiple(paths, **alvos):
             make_site.main(["--saida", str(saida), "--quieto", "--sem-galeria"])
             antes = (saida / "index.html").stat().st_mtime_ns
+            antes_apr = (saida / "apresentacao.html").stat().st_mtime_ns
             make_site.main(["--saida", str(saida), "--quieto", "--sem-galeria"])
             self.assertEqual((saida / "index.html").stat().st_mtime_ns, antes)
+            self.assertEqual((saida / "apresentacao.html").stat().st_mtime_ns, antes_apr)
             (self.d["tables"] / "outro_frr.json").write_text(json.dumps(FRR))   # um modelo novo
             make_site.main(["--saida", str(saida), "--quieto", "--sem-galeria"])
-        self.assertIn("outro", (saida / "index.html").read_text())
+        self.assertIn("outro", (saida / "index.html").read_text(encoding="utf-8"))
         self.assertTrue((saida / "modelos" / "outro.json").exists())
+
+
+def _ids_e_dados(html):
+    ids = re.findall(r'\sid="([^"]+)"', html)
+    bloco = re.search(r'<script type="application/json" id="dados">(.*?)</script>', html, re.S)[1]
+    return ids, json.loads(bloco)
+
+
+class Apresentacao(Arvore):
+    def test_monta_com_qualquer_conjunto_de_modelos(self):
+        modelos, planejados = self.atualiza()
+        cabeca, corpo = apresentacao.monta(modelos, planejados, None, None, None)
+        html = site.documento(cabeca, corpo)
+        self.assertNotIn("{{", html)
+        ids, dados = _ids_e_dados(html)
+        self.assertEqual(len(ids), len(set(ids)), "id repetido")    # um slide id="dados" escondia o bloco de dados
+        self.assertEqual(dados["retrieval"], [])                     # nenhum dos pares do benchmark nesta arvore
+        self.assertGreaterEqual(html.count('class="slide'), 15)
+
+    def test_chave_desconhecida_continua_sendo_erro(self):
+        v = apresentacao._Valores({"x": "1"})
+        self.assertEqual(site.preenche("{{x}} {{bwd:sumiu}} {{mi:sumiu:ridge}}", v, []), "1 — —")
+        with self.assertRaises(KeyError):
+            site.preenche("{{nao_existe}}", v, [])
+
+
+class ApresentacaoDoRepositorio(unittest.TestCase):
+    """A apresentacao com o que esta gravado em results/site: os registros, a galeria e os exemplos."""
+
+    @classmethod
+    def setUpClass(cls):
+        raiz = Path(paths.SITE)
+        cls.modelos = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((raiz / "modelos").glob("*.json"))]
+        cls.galeria = galeria_site.atualiza(cls.modelos, raiz, gerar=False, log=lambda *a: None)
+        cls.semantica = json.loads((raiz / "dados" / "semantica.json").read_text(encoding="utf-8"))
+        cls.exemplos = exemplos_site.atualiza(raiz, cls.semantica, gerar=False, log=lambda *a: None)
+        cabeca, corpo = apresentacao.monta(cls.modelos, [], cls.galeria, cls.semantica, cls.exemplos)
+        cls.html = site.documento(cabeca, corpo)
+
+    def test_numeros_preenchidos(self):
+        self.assertNotIn("{{", self.html)
+        ids, dados = _ids_e_dados(self.html)
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertEqual(len(dados["retrieval"]), len(apresentacao.PARES))
+        self.assertTrue(dados["gama"] and dados["hub"] and dados["custo"])
+        for nome, de, para in apresentacao.PARES:            # o slide de retrieval tem as duas pontas
+            linha = next(r for r in dados["retrieval"] if r["nome"] == nome)
+            self.assertIsNotNone(linha["de"]["bwd"], de)
+            self.assertIsNotNone(linha["para"]["bwd"], para)
+
+    def test_reproducao(self):
+        self.assertIn('id="reproducao"', self.html)
+        linhas = {l["id"]: l for l in apresentacao.reproducao({m["id"]: m for m in self.modelos})}
+        self.assertEqual(set(linhas), {r[0] for r in apresentacao.REPRODUCAO})        # todas reproduzidas
+        for mid in ("subj01_frr_1sess", "subj01_frr_40sess", "subj01_ridgeonly_1sess_4096blurry"):
+            self.assertEqual(linhas[mid]["img"], "0 (idêntico)", mid)                    # docs/REEXECUTAR.md
+            self.assertEqual(linhas[mid]["ret"][0], linhas[mid]["ret"][1], mid)
+        self.assertNotIn("p,p", self.html)
+
+    def test_toda_imagem_citada_existe(self):
+        G, E = self.galeria, self.exemplos
+        for spec in set(re.findall(r'data-tile="([^"]+)"', self.html)):
+            p = spec.split(":")
+            with self.subTest(spec=spec):
+                if p[0] == "vista":
+                    self.assertLess(int(p[1]), G["n"])
+                else:
+                    self.assertIn(p[2], G["modelos"].get(p[1], {}))
+        for c in apresentacao.COLUNAS_GALERIA:
+            self.assertIn(c[1], G["modelos"].get(c[0], {}), c[0])
+        self.assertTrue(E and E["recorte"])
+        for s in apresentacao.ORDEM_CLASSES:
+            self.assertIn(s, E["classes"])
+            for chave in ("fotos", "mascaras"):
+                self.assertTrue((Path(paths.SITE) / E["classes"][s][chave]).exists())
+
+    def test_exemplos_em_dia_com_o_semantica_json(self):
+        from PIL import Image
+        ind = json.loads((Path(paths.SITE) / "exemplos" / "indice.json").read_text(encoding="utf-8"))
+        self.assertEqual(ind["params"], exemplos_site._params(self.semantica))
+        fx, col = exemplos_site.faixas(), {s: j for j, s in enumerate(self.semantica["sup"])}
+        for s, c in ind["classes"].items():
+            for e in c["exemplos"]:
+                lo, hi = fx[e["faixa"]]
+                self.assertTrue(lo <= 100 * e["pix"][col[s]] / self.semantica["tela"] <= hi, (s, e["nsd"]))
+            for arq in (c["fotos"], c["mascaras"]):
+                w, h = Image.open(Path(paths.SITE) / "exemplos" / arq).size
+                self.assertEqual((w, h), (len(c["exemplos"]) * ind["lado"], ind["lado"]), arq)
+
+
+class Exemplos(unittest.TestCase):
+    def test_faixas_cobrem_de_ponta_a_ponta(self):
+        fx = exemplos_site.faixas()
+        self.assertEqual((fx[0][0], fx[-1][1]), (exemplos_site.PISO, 100.0))
+        for (_, b), (c, _) in zip(fx, fx[1:]):
+            self.assertEqual(b, c)
+        for p, (lo, hi) in zip(exemplos_site.PARADAS, fx):
+            self.assertTrue(lo <= p < hi)
+
+    def test_sorteio_fica_na_faixa_e_se_repete(self):
+        import numpy as np
+        rng = np.random.default_rng(1)
+        fr = rng.uniform(0, 100, (600, 12)) * (rng.random((600, 12)) < 0.5)
+        a, b = exemplos_site.escolhe(fr), exemplos_site.escolhe(fr)
+        self.assertEqual(a, b)
+        fx = exemplos_site.faixas()
+        for j, s in enumerate(semantica_site.SUPERCATEGORIAS):
+            contagem, linhas = a[s]
+            for i, f in linhas:
+                self.assertTrue(fx[f][0] <= fr[i, j] <= fx[f][1])
+            for f in range(len(fx)):
+                n = sum(1 for _, g in linhas if g == f)
+                self.assertEqual(n, min(exemplos_site.N_POR_FAIXA, contagem[f]))
+
+    def test_camada_da_mascara(self):
+        import numpy as np
+        m = np.zeros((425, 425), bool)
+        m[100:300, 50:200] = True
+        a = np.asarray(exemplos_site.camada_mascara(m, lado=224))
+        self.assertEqual(a.shape, (224, 224, 4))
+        self.assertEqual(a[105, 66, 3], 0)                 # a classe fica sem camada
+        self.assertGreater(a[10, 10, 3], 100)              # o resto escurece
+        self.assertTrue((a[45:53, 66, :3] == 255).all(axis=1).any())   # o contorno, logo acima da classe
+
+    def test_decodifica_desfaz_codifica(self):
+        import numpy as np
+        import pandas as pd
+        cols = [f"sup_{s}" for s in semantica_site.SUPERCATEGORIAS]
+        fr = pd.DataFrame(np.round(np.random.default_rng(0).uniform(0, 100, (3, 12)), 4), index=[5, 9, 70],
+                          columns=cols)
+        d = semantica_site.codifica([5, 5, 9, 70, 70, 70], [0, 3, 1, 2, 4, 39], fr)
+        sess, pix = semantica_site.decodifica(d)
+        self.assertEqual(sess.tolist(), [[0, 3, 255], [1, 255, 255], [2, 4, 39]])
+        self.assertTrue(np.allclose(100 * pix / d["tela"], fr.values, atol=100 / d["tela"]))
 
 
 @unittest.skipUnless(NODE, "sem node")
 class JavaScript(unittest.TestCase):
     def test_sintaxe(self):
-        for arq in ("site.js", "simulador.js"):
+        for arq in ("site.js", "simulador.js", "apresentacao.js"):
             r = subprocess.run([NODE, "--check", str(ASSETS / arq)], capture_output=True, text=True)
             self.assertEqual(r.returncode, 0, r.stderr)
 

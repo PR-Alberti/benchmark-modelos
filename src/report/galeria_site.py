@@ -69,7 +69,7 @@ def atualiza(modelos, pasta_site, gerar=True, log=print):
     pasta.mkdir(parents=True, exist_ok=True)
     arq_indice = pasta / "indice.json"
     try:
-        indice = json.loads(arq_indice.read_text())
+        indice = json.loads(arq_indice.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         indice = {}
     params = {"n": N, "lado": LADO, "semente": SEMENTE}
@@ -129,7 +129,7 @@ def atualiza(modelos, pasta_site, gerar=True, log=print):
 
     if mudou or not arq_indice.exists():
         tmp = arq_indice.with_suffix(".tmp")
-        tmp.write_text(json.dumps(indice, ensure_ascii=False, indent=1, sort_keys=True))
+        tmp.write_text(json.dumps(indice, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
         os.replace(tmp, arq_indice)
 
     # para a pagina: so o que existe em disco

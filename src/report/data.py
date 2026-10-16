@@ -13,7 +13,7 @@ def le_tabela(nome):
     p = paths.TABLES / f"{nome}.csv"
     if not p.exists():
         return None
-    with open(p, newline="") as f:
+    with open(p, newline="", encoding="utf-8") as f:
         r = csv.reader(f, delimiter="\t")
         next(r)
         return {k: float(v) for k, v in r}
@@ -23,21 +23,21 @@ def le_legendas(nome):
     p = paths.TABLES / f"{nome}_caption_metrics.csv"
     if not p.exists():
         return None
-    valores = [float(v) for v in p.read_text().split()[1:]]   # 1a linha: "Value"
+    valores = [float(v) for v in p.read_text(encoding="utf-8").split()[1:]]   # 1a linha: "Value"
     return dict(zip(CHAVES_LEGENDA, valores))
 
 
 def le_frr(mid):
     """JSON do run_frr.py (a copia em tables/, que vai para o git), ou None se ainda nao rodou."""
     p = paths.TABLES / f"{mid}_frr.json"
-    return json.loads(p.read_text()) if p.exists() else None
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
 
 
 def le_curva(p):
     p = pathlib.Path(p)
     if not p.exists():
         return None
-    with open(p, newline="") as f:
+    with open(p, newline="", encoding="utf-8") as f:
         linhas = [r for r in csv.DictReader(f) if r.get("epoch")]
     if not linhas:
         return None
@@ -73,7 +73,7 @@ def tempo_me1(*etapas):
     if not p.exists():
         return None
     marcas = {}
-    for linha in p.read_text().splitlines():
+    for linha in p.read_text(encoding="utf-8").splitlines():
         r = re.match(r"\[(.{19})\] (\S+): treino .*: (comecando|feito)$", linha)
         if r:
             marcas[(r[2], r[3])] = datetime.datetime.strptime(r[1], "%Y-%m-%d %H:%M:%S")
@@ -169,7 +169,7 @@ def coleta(args):
     # ruido de referencia: so a semente muda, na config 1024 + prior
     def retr(m):
         pj = paths.EVALS / m / f"{m}_retrieval.json"
-        r = json.loads(pj.read_text()) if pj.exists() else None
+        r = json.loads(pj.read_text(encoding="utf-8")) if pj.exists() else None
         return (r["fwd"]["media"], r["bwd"]["media"]) if r else (None, None)
 
     e1 = le_tabela("subj01_ridgeonly_1sess_prior_all_enhancedrecons") or {}

@@ -12,8 +12,8 @@ from .texts import FRR_NOTA_HUBNESS, leitura
 
 
 ASSETS = pathlib.Path(__file__).resolve().parent / "assets"
-ESTILO = (ASSETS / "style.css").read_text()
-SCRIPT = (ASSETS / "script.js").read_text()
+ESTILO = (ASSETS / "style.css").read_text(encoding="utf-8")
+SCRIPT = (ASSETS / "script.js").read_text(encoding="utf-8")
 
 
 def celula(v, formato, melhor=False):
