@@ -1,5 +1,6 @@
 {
- "concluido": null,
+ "commit": "4ab113daaee78087eb78624de23c1ade2bdbed66",
+ "concluido": true,
  "config": {
   "dataset": {
    "agregacao": null,
@@ -26,12 +27,12 @@
  },
  "config_descritiva": false,
  "config_erro": null,
- "config_fonte": "src/experimentos.py",
+ "config_fonte": "train_logs/repro_subj01_frr_40sess/experimento.json",
  "curva": null,
  "espaco_clip": "ViT-bigG/14",
  "familia": "frr",
  "fontes": [
-  "results/tables/subj01_frr_40sess_frr.json"
+  "results/tables/repro_subj01_frr_40sess_frr.json"
  ],
  "frr": {
   "config": {
@@ -39,7 +40,19 @@
    "amostras_treino": 27000,
    "bias_step": 0.2,
    "bloco": 8192,
-   "dataset": null,
+   "dataset": {
+    "agregacao": null,
+    "balanceado": false,
+    "classes": null,
+    "maximo_outros": 2,
+    "minimo": 10,
+    "n_imagens": null,
+    "regra": "exclusiva",
+    "repeticoes": null,
+    "semente": 0,
+    "sessoes": 40,
+    "subj": 1
+   },
    "dim_alvo": 425984,
    "dobras": 5,
    "exibicoes_treino": 27000,
@@ -52,13 +65,13 @@
    "voxels": 15724
   },
   "custo": {
-   "embeddings_calculados_nesta_corrida": 0,
+   "embeddings_calculados_nesta_corrida": 8464,
    "gpu": "NVIDIA RTX A4500",
-   "pico_gpu_gib": 3.2330446243286133,
-   "pico_ram_gib": 13.616016387939453,
-   "segundos_ajuste": 1250.3667697906494,
-   "segundos_embedding_alvos": 0.0010061264038085938,
-   "segundos_total": 231.09179496765137
+   "pico_gpu_gib": 3.936354637145996,
+   "pico_ram_gib": 24.873008728027344,
+   "segundos_ajuste": 1183.9886560440063,
+   "segundos_embedding_alvos": 192.8634397983551,
+   "segundos_total": 1437.18115067482
   },
   "cv": {
    "cv_r2_escolhida": 0.015699872648253566,
@@ -131,9 +144,9 @@
    "pares_fracao_alvo_inalcancaveis": 0,
    "por_alvo": true,
    "posto_final": 15724,
-   "segundos_cv": 1078.5162460803986,
-   "segundos_final": 81.15112781524658,
-   "segundos_total": 1159.6673738956451
+   "segundos_cv": 1071.525312423706,
+   "segundos_final": 86.41775107383728,
+   "segundos_total": 1157.9430634975433
   },
   "embedding": {
    "cosseno_centrado_medio": 0.21973928809165955,
@@ -149,15 +162,11 @@
  },
  "grupo": "benchmark",
  "id": "subj01_frr_40sess",
- "iniciado": null,
+ "iniciado": true,
  "legendas": null,
  "notas": [],
  "publicada": false,
- "receita": {
-  "partida": null,
-  "prior": "sem prior, sem rede",
-  "treino": "20 frações · CV 5 dobras · uma fração por dimensão"
- },
+ "reproducao": "repro_subj01_frr_40sess",
  "resumo_dataset": {
   "exibicoes": 27000,
   "imagens_unicas": 9000,
@@ -203,7 +212,7 @@
  "sessoes": 40,
  "status": "completo",
  "status_txt": "retrieval e embedding",
- "tempo_s": 1250.3667697906494,
+ "tempo_s": 1183.9886560440063,
  "valores": {
   "refinada": {
    "BwdRetrieval": 0.37722222904364267,

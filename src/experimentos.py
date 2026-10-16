@@ -149,7 +149,8 @@ for _n, _r in ((3000, 1), (1500, 2), (1000, 3)):
 # o mesmo dicionario com outro nome, ja que o treina.py nao sobrescreve um modelo do benchmark. A
 # corrida refeita fica com o que as originais nao registraram: configuracao, commit do codigo,
 # manifesto do dataset, curva e tempo. As de semente 42 do Ridge 1024 ficam de fora (sao a mesma
-# corrida do 1sess_prior e do 1sess), e o MindEye1 tambem (~37 h, e o treino dele nao grava curva).
+# corrida do 1sess_prior e do 1sess). O MindEye1 e refeito por scripts/run_me1_benchmark.sh com
+# PREFIXO=repro_ (alto nivel pelo treina.py, depois low-level, reconstrucao e metricas).
 # =============================================================================================
 _REPRODUZIR = {
     "subj01_frr_1sess": "FRR · 1 sessão", "subj01_frr_1sess_global": "FRR fração global · 1 sessão",
@@ -163,6 +164,7 @@ _REPRODUZIR = {
     "subj01_ridgeonly_1sess_4096blurry": "Ridge 4096 + blurry · 1 sessão",
     "subj01_ridgeonly_40sess_prior": "Ridge 1024 + prior · 40 sessões",
     "subj01_ridgeonly_40sess_4096blurry": "Ridge 4096 + blurry · 40 sessões",
+    "subj01_me1_1sess": "MindEye1 · 1 sessão", "subj01_me1_40sess": "MindEye1 · 40 sessões",
 }
 REPRODUCOES = {f"repro_{nome}": {**BENCHMARK[nome], "rotulo": f"{rotulo} · reprodução"}
                for nome, rotulo in _REPRODUZIR.items()}

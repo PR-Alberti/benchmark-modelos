@@ -157,6 +157,32 @@
    "a man standing on a field.",
    "a group of people standing around."
   ],
+  "repro_subj01_ridgeonly_1sess_prior": [
+   "a surfer on a surfboard in the ocean.",
+   "a man standing next to a table.",
+   "a man holding a baseball bat.",
+   "a plate of food with a bunch of food on it.",
+   "a picture of a glass window.",
+   "a man standing on a skateboard.",
+   "a group of people sitting around a table.",
+   "a group of trees",
+   "a woman standing on a beach.",
+   "a group of animals standing together.",
+   "a table with a vase and a vase with flowers on it.",
+   "a baseball player is standing in the field.",
+   "a table with a vase and a vase on it.",
+   "a large building with a clock on it.",
+   "a woman sitting in a chair.",
+   "a bunch of different types of food",
+   "a car parked on the side of a road.",
+   "a man riding a horse on top of a sandy beach.",
+   "a horse and a woman on a horse",
+   "a truck is parked on the side of the road.",
+   "a large body of water.",
+   "a large passenger jet sitting on top of a tarmac.",
+   "a baseball player is holding a bat.",
+   "a large group of people."
+  ],
   "repro_subj01_ridgeonly_1sess_prior_seed1": [
    "a surfer riding a wave.",
    "a man sitting on a chair next to a chair.",
@@ -365,6 +391,32 @@
    "a baseball player is holding a bat.",
    "a large room with a lot of furniture."
   ],
+  "subj01_ridgeonly_40sess_4096blurry": [
+   "a surfer riding a wave.",
+   "a man is holding a cell phone.",
+   "a boy playing with a frisbee in a park.",
+   "a plate of food with a fork.",
+   "a large wall with a window.",
+   "a person on a surfboard in the water.",
+   "a person sitting down.",
+   "a tree in a field",
+   "a man standing on a tennis court.",
+   "a large tree.",
+   "a clock on a building",
+   "a baseball player standing on a field.",
+   "a table with a vase and a vase.",
+   "a large street with a lot of traffic.",
+   "a group of people standing on top of a building.",
+   "a bunch of different types of food",
+   "a black and white photo of a motorcycle.",
+   "a group of people riding on top of a sandy beach.",
+   "a couple of horses standing next to each other.",
+   "a boat on a body of water",
+   "a snow covered slope with a ski slope.",
+   "a plane is parked on the runway.",
+   "a tennis player is playing on a court.",
+   "a group of people standing around each other."
+  ],
   "subj01_ridgeonly_40sess_prior": [
    "a surfer on a surfboard in the ocean.",
    "a man holding a cell phone.",
@@ -464,6 +516,15 @@
     ]
    }
   },
+  "repro_subj01_me1_1sess": {
+   "unclip": {
+    "arquivo": "repro_subj01_me1_1sess__unclip.webp",
+    "sig": [
+     786433438,
+     1792180021156944182
+    ]
+   }
+  },
   "repro_subj01_ridgeonly_1sess": {
    "refinada": {
     "arquivo": "repro_subj01_ridgeonly_1sess__refinada.webp",
@@ -500,6 +561,22 @@
     "sig": [
      786433523,
      1791923575641738103
+    ]
+   }
+  },
+  "repro_subj01_ridgeonly_1sess_prior": {
+   "refinada": {
+    "arquivo": "repro_subj01_ridgeonly_1sess_prior__refinada.webp",
+    "sig": [
+     786433538,
+     1792166690482324925
+    ]
+   },
+   "unclip": {
+    "arquivo": "repro_subj01_ridgeonly_1sess_prior__unclip.webp",
+    "sig": [
+     786433498,
+     1792163801260182792
     ]
    }
   },
@@ -578,8 +655,8 @@
    "unclip": {
     "arquivo": "subj01_me1_1sess__unclip.webp",
     "sig": [
-     786433408,
-     1790915163022750629
+     786433438,
+     1792180021156944182
     ]
    }
   },
@@ -614,15 +691,15 @@
    "refinada": {
     "arquivo": "subj01_ridgeonly_1sess__refinada.webp",
     "sig": [
-     786433478,
-     1790737395737124655
+     786433508,
+     1791865764474418091
     ]
    },
    "unclip": {
     "arquivo": "subj01_ridgeonly_1sess__unclip.webp",
     "sig": [
-     786433438,
-     1790734439977890743
+     786433468,
+     1791862850283321150
     ]
    }
   },
@@ -630,22 +707,22 @@
    "borrada": {
     "arquivo": "subj01_ridgeonly_1sess_4096blurry__borrada.webp",
     "sig": [
-     786433523,
-     1790758376714497892
+     786433617,
+     1791923575351735501
     ]
    },
    "refinada": {
     "arquivo": "subj01_ridgeonly_1sess_4096blurry__refinada.webp",
     "sig": [
-     786433533,
-     1790761329393227412
+     786433627,
+     1791926549251939086
     ]
    },
    "unclip": {
     "arquivo": "subj01_ridgeonly_1sess_4096blurry__unclip.webp",
     "sig": [
-     786433493,
-     1790758377060500360
+     786433523,
+     1791923575641738103
     ]
    }
   },
@@ -653,15 +730,15 @@
    "refinada": {
     "arquivo": "subj01_ridgeonly_1sess_prior__refinada.webp",
     "sig": [
-     786433508,
-     1788322774000000000
+     786433538,
+     1792166690482324925
     ]
    },
    "unclip": {
     "arquivo": "subj01_ridgeonly_1sess_prior__unclip.webp",
     "sig": [
-     786433468,
-     1788319666000000000
+     786433498,
+     1792163801260182792
     ]
    }
   },
@@ -681,19 +758,42 @@
     ]
    }
   },
+  "subj01_ridgeonly_40sess_4096blurry": {
+   "borrada": {
+    "arquivo": "subj01_ridgeonly_40sess_4096blurry__borrada.webp",
+    "sig": [
+     786433622,
+     1792023922749846575
+    ]
+   },
+   "refinada": {
+    "arquivo": "subj01_ridgeonly_40sess_4096blurry__refinada.webp",
+    "sig": [
+     786433632,
+     1792026932380168691
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_ridgeonly_40sess_4096blurry__unclip.webp",
+    "sig": [
+     786433528,
+     1792023923213850697
+    ]
+   }
+  },
   "subj01_ridgeonly_40sess_prior": {
    "refinada": {
     "arquivo": "subj01_ridgeonly_40sess_prior__refinada.webp",
     "sig": [
-     786433513,
-     1790773462720533644
+     786433607,
+     1791968607067627669
     ]
    },
    "unclip": {
     "arquivo": "subj01_ridgeonly_40sess_prior__unclip.webp",
     "sig": [
-     786433473,
-     1790770521344566240
+     786433503,
+     1791965622220867382
     ]
    }
   }

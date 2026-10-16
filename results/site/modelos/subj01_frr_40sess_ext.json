@@ -1,5 +1,6 @@
 {
- "concluido": null,
+ "commit": "6a870ae958ab3d0ad743eb0fd02967150aa62a19",
+ "concluido": true,
  "config": {
   "dataset": {
    "agregacao": null,
@@ -26,12 +27,12 @@
  },
  "config_descritiva": false,
  "config_erro": null,
- "config_fonte": "src/experimentos.py",
+ "config_fonte": "train_logs/repro_subj01_frr_40sess_ext/experimento.json",
  "curva": null,
  "espaco_clip": "ViT-bigG/14",
  "familia": "frr",
  "fontes": [
-  "results/tables/subj01_frr_40sess_ext_frr.json"
+  "results/tables/repro_subj01_frr_40sess_ext_frr.json"
  ],
  "frr": {
   "config": {
@@ -39,7 +40,19 @@
    "amostras_treino": 27000,
    "bias_step": 0.2,
    "bloco": 8192,
-   "dataset": null,
+   "dataset": {
+    "agregacao": null,
+    "balanceado": false,
+    "classes": null,
+    "maximo_outros": 2,
+    "minimo": 10,
+    "n_imagens": null,
+    "regra": "exclusiva",
+    "repeticoes": null,
+    "semente": 0,
+    "sessoes": 40,
+    "subj": 1
+   },
    "dim_alvo": 425984,
    "dobras": 5,
    "exibicoes_treino": 27000,
@@ -54,11 +67,11 @@
   "custo": {
    "embeddings_calculados_nesta_corrida": 0,
    "gpu": "NVIDIA RTX A4500",
-   "pico_gpu_gib": 3.2333498001098633,
-   "pico_ram_gib": 13.679584503173828,
-   "segundos_ajuste": 1497.930205821991,
-   "segundos_embedding_alvos": 0.0009906291961669922,
-   "segundos_total": 165.66684007644653
+   "pico_gpu_gib": 3.7120275497436523,
+   "pico_ram_gib": 21.22311782836914,
+   "segundos_ajuste": 1465.3758625984192,
+   "segundos_embedding_alvos": 0.0010027885437011719,
+   "segundos_total": 1521.8151559829712
   },
   "cv": {
    "cv_r2_escolhida": 0.03223840603868322,
@@ -161,9 +174,9 @@
    "pares_fracao_alvo_inalcancaveis": 0,
    "por_alvo": true,
    "posto_final": 15724,
-   "segundos_cv": 1390.4148716926575,
-   "segundos_final": 81.175217628479,
-   "segundos_total": 1471.5900893211365
+   "segundos_cv": 1356.6418781280518,
+   "segundos_final": 82.70393681526184,
+   "segundos_total": 1439.3458149433136
   },
   "embedding": {
    "cosseno_centrado_medio": 0.21601492166519165,
@@ -179,10 +192,11 @@
  },
  "grupo": "benchmark",
  "id": "subj01_frr_40sess_ext",
- "iniciado": null,
+ "iniciado": true,
  "legendas": null,
  "notas": [],
  "publicada": false,
+ "reproducao": "repro_subj01_frr_40sess_ext",
  "resumo_dataset": {
   "exibicoes": 27000,
   "imagens_unicas": 9000,
@@ -228,7 +242,7 @@
  "sessoes": 40,
  "status": "completo",
  "status_txt": "retrieval e embedding",
- "tempo_s": 1497.930205821991,
+ "tempo_s": 1465.3758625984192,
  "valores": {
   "refinada": {
    "BwdRetrieval": 0.21311111748218536,

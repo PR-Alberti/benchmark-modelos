@@ -17,6 +17,7 @@
 
 import os
 import sys
+import time
 import json
 import argparse
 import numpy as np
@@ -150,6 +151,10 @@ parser.add_argument(
 parser.add_argument(
     "--save_at_end",action=argparse.BooleanOptionalAction,default=False,
     help="if True, saves best.ckpt at end of training. if False and ckpt_saving==True, will save best.ckpt whenever epoch shows best validation score",
+)
+parser.add_argument(
+    "--metrics_csv",type=str,default=None,
+    help="benchmark-modelos: grava uma linha por epoca (curva e tempo), no formato do metrics.csv do MindEye2",
 )
 parser.add_argument(
     "--seed",type=int,default=42,
@@ -576,6 +581,13 @@ if resume_from_ckpt:
         checkpoint = torch.load(outdir+'/last_backup.pth', map_location='cpu')
     epoch = checkpoint['epoch'] + 1  # benchmark-modelos: o ckpt guarda a epoca ja concluida
     print("Epoch",epoch)
+    if metrics_csv is not None and os.path.exists(metrics_csv):   # epocas depois do ckpt serao gravadas de novo
+        import csv as _csv
+        with open(metrics_csv, newline='') as _f:
+            _r = _csv.DictReader(_f)
+            _campos, _linhas = _r.fieldnames, [x for x in _r if int(x['epoch']) < epoch]
+        with open(metrics_csv, 'w', newline='') as _f:
+            _w = _csv.DictWriter(_f, fieldnames=_campos); _w.writeheader(); _w.writerows(_linhas)
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
     diffusion_prior.load_state_dict(checkpoint['model_state_dict'])
@@ -620,6 +632,7 @@ print(f"{model_name} starting with epoch {epoch} / {num_epochs}")
 progress_bar = tqdm(range(epoch,num_epochs), ncols=1200, disable=(local_rank!=0))
 
 for epoch in progress_bar:
+    _t_epoca = time.time()
     diffusion_prior.train()
     # benchmark-modelos: os tensores de batch 300 da validacao anterior ainda estao vivos aqui
     # e, numa GPU de 20 GB, fazem a epoca seguinte estourar
@@ -831,6 +844,17 @@ for epoch in progress_bar:
             "val/loss_nce": val_loss_nce_sum / (val_i + 1),
             "val/loss_prior": val_loss_prior_sum / (val_i + 1)}
         progress_bar.set_postfix(**logs)
+        if metrics_csv is not None:
+            # mesmos nomes do train_ridgeonly.py (o site le a curva por eles): val/ vira test/
+            _linha = {"epoch": epoch, "time/epoch_s": time.time() - _t_epoca}
+            _linha.update({k.replace("val/val_", "test/test_").replace("val/", "test/"): float(v) for k, v in logs.items()})
+            import csv as _csv
+            _novo = not os.path.exists(metrics_csv)
+            os.makedirs(os.path.dirname(os.path.abspath(metrics_csv)), exist_ok=True)
+            with open(metrics_csv, 'a', newline='') as _f:
+                _w = _csv.DictWriter(_f, fieldnames=list(_linha.keys()))
+                if _novo: _w.writeheader()
+                _w.writerow(_linha)
 
         # Save model checkpoint and reconstruct
         if (epoch + 1) % save_last_every == 0 or epoch == num_epochs - 1:  # benchmark-modelos
