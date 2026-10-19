@@ -4,7 +4,7 @@ MindEye2, sujeito 1 do NSD. Cinco variações do fine-tune só da camada ridge, 
 
 A versão completa, com a galeria de reconstruções, curvas de treino e seletor refinada/unCLIP, está em [results/benchmark/index.html](results/benchmark/index.html) — um arquivo só, abre offline.
 
-Gerado por `src/make_benchmark.py` em 16/10/2026 16:56 (commit `21937b0`).
+Gerado por `src/make_benchmark.py` em 19/10/2026 12:04 (commit `7e331f1`).
 
 ## Modelos
 
@@ -13,7 +13,7 @@ Gerado por `src/make_benchmark.py` em 16/10/2026 16:56 (commit `21937b0`).
 | FRR · 1 sessão | 1 | — | não | 6,70 bi de coeficientes (forma fechada) | 20 frações · CV 5 dobras · uma fração por dimensão | 10 s |
 | FRR · 40 sessões | 40 | — | não | 6,70 bi de coeficientes (forma fechada) | 20 frações · CV 5 dobras · uma fração por dimensão | 20 min |
 | MindEye1 · 1 sessão | 1 | 4096 | sim | todos, do zero (1.003,6 M) | 240 épocas + 120 do baixo nível · batch 16 · Adam 8 bits | 2 h 43 |
-| MindEye1 · 40 sessões | 40 | 4096 | sim | todos, do zero (1.003,6 M) | 240 épocas + 120 do baixo nível · batch 16 · Adam 8 bits | 32 h 38 |
+| MindEye1 · 40 sessões | 40 | 4096 | sim | todos, do zero (1.003,6 M) | 240 épocas + 120 do baixo nível · batch 16 · Adam 8 bits | 28 h 55 |
 | Ridge 1024 + prior | 1 | 1024 | não | 16,1 M de 729,3 M (2,21%) | 150 épocas · batch 16 | 1 h 50 |
 | Ridge 4096 + blurry | 1 | 4096 | sim | 64,4 M de 2.227,3 M (2,89%) | 150 épocas · batch 8 · congelados em fp16 | 2 h 44 |
 | Ridge 1024 sem prior | 1 | 1024 | não | 16,1 M de 469,5 M (3,43%) | 150 épocas · batch 16 | 1 h 00 |
@@ -49,7 +49,7 @@ Gerado por `src/make_benchmark.py` em 16/10/2026 16:56 (commit `21937b0`).
 | ↳ reconstruções publicadas pelos autores | 0,235 | 0,428 | 88,0% | 93,3% | 83,6% | 80,7% | 0,798 | 0,459 | 93,9% | 77,6% |
 | **40 sessões · ~40 h de fMRI, 30.000 exibições** | | | | | | | | | | |
 | FRR · 40 sessões (só retrieval, sem reconstrução) | — | — | — | — | — | — | — | — | 96,4% | 37,7% |
-| MindEye1 · 40 sessões (sem refinamento: a mesma reconstrução nas duas abas) | **0,382** | 0,347 | 96,5% | 98,0% | 94,6% | 92,9% | 0,631 | 0,356 | 94,5% | 87,6% |
+| MindEye1 · 40 sessões (sem refinamento: a mesma reconstrução nas duas abas) | **0,382** | 0,347 | 96,5% | 98,0% | 94,5% | 92,9% | 0,632 | 0,356 | 94,5% | 87,6% |
 | Ridge 1024 + prior · 40 sessões | 0,277 | 0,384 | 94,8% | 98,4% | 93,8% | 92,1% | 0,644 | 0,362 | 99,9% | 99,4% |
 | Ridge 4096 + blurry · 40 sessões | 0,337 | 0,430 | 95,1% | 98,4% | 94,6% | 92,0% | 0,643 | 0,363 | 99,9% | 99,5% |
 | Paper · 40 sessões (nossa execução) | 0,373 | **0,432** | **97,5%** | **99,2%** | **96,0%** | **93,6%** | **0,606** | **0,331** | **100,0%** | **99,9%** |
@@ -67,7 +67,7 @@ Gerado por `src/make_benchmark.py` em 16/10/2026 16:56 (commit `21937b0`).
 | Paper · 1 sessão (nossa execução) | 0,201 | 0,337 | 86,8% | 93,9% | 84,1% | 82,4% | 0,808 | 0,454 |
 | ↳ reconstruções publicadas pelos autores | — | — | — | — | — | — | — | — |
 | **40 sessões · ~40 h de fMRI, 30.000 exibições** | | | | | | | | |
-| MindEye1 · 40 sessões (sem refinamento: a mesma reconstrução nas duas abas) | **0,382** | **0,347** | 96,5% | 98,0% | 94,6% | 92,9% | 0,631 | 0,356 |
+| MindEye1 · 40 sessões (sem refinamento: a mesma reconstrução nas duas abas) | **0,382** | **0,347** | 96,5% | 98,0% | 94,5% | 92,9% | 0,632 | 0,356 |
 | Ridge 1024 + prior · 40 sessões | 0,271 | 0,332 | 93,7% | 98,5% | 95,3% | 92,0% | 0,670 | 0,382 |
 | Ridge 4096 + blurry · 40 sessões | 0,289 | 0,335 | 94,5% | 98,6% | 95,1% | 92,6% | 0,667 | 0,373 |
 | Paper · 40 sessões (nossa execução) | 0,324 | 0,332 | **96,9%** | **99,4%** | **96,7%** | **95,1%** | **0,610** | **0,332** |
@@ -85,7 +85,7 @@ Gerado por `src/make_benchmark.py` em 16/10/2026 16:56 (commit `21937b0`).
 | Paper · 1 sessão (nossa execução) | 0,350 | 0,320 | **0,339** | **0,344** | 0,316 | 0,347 |
 | ↳ reconstruções publicadas pelos autores | 0,347 | 0,318 | 0,337 | 0,341 | 0,316 | 0,345 |
 | **40 sessões · ~40 h de fMRI, 30.000 exibições** | | | | | | |
-| MindEye1 · 40 sessões (sem refinamento: a mesma reconstrução nas duas abas) | 0,354 | 0,334 | 0,317 | 0,310 | 0,302 | 0,352 |
+| MindEye1 · 40 sessões (sem refinamento: a mesma reconstrução nas duas abas) | 0,354 | 0,333 | 0,317 | 0,311 | 0,302 | 0,353 |
 | Ridge 1024 + prior · 40 sessões | 0,367 | 0,357 | 0,358 | 0,353 | 0,332 | 0,358 |
 | Ridge 4096 + blurry · 40 sessões | 0,360 | 0,347 | 0,348 | 0,343 | 0,325 | 0,356 |
 | Paper · 40 sessões (nossa execução) | **0,380** | **0,395** | **0,388** | **0,372** | **0,340** | **0,365** |

@@ -25,7 +25,7 @@ reproduções aparecem no site, no grupo Experimentos, com o rótulo "· reprodu
 | `ridgeonly_40sess_4096blurry` | 12 h 40 | 12 h 22 | completo |
 | `ridgeonly_1sess_prior` (1024 + prior) | 1 h 51 | 1 h 53 (semente 42) | completo (reconstrução e métricas em 16/10, 3 h 19) |
 | `me1_1sess` (MindEye1) | 2 h 43 (1 h 40 + 1 h 02 do low-level) | 2 h 53 | completo (reconstrução 47 min, métricas 3 min) |
-| **`me1_40sess`** (MindEye1) | em andamento | 32 h 38 | **treino em andamento** (~32 h) |
+| `me1_40sess` (MindEye1) | 28 h 55 (16 h 03 + 12 h 51 do low-level) | 32 h 38 | completo (reconstrução 49 min, métricas 3 min) |
 | `final_subj01_pretrained_1sess_24bs`, `_40sess_24bs` | — (dos autores) | — | retrieval com intervalo |
 
 Medido nesta máquina: reconstrução de 186 a 194 min por modelo, 6 min para cada tabela de métricas (unCLIP e
@@ -38,6 +38,7 @@ refinada) e 3 min para o retrieval.
 | FRR, as seis variantes | 0 (idêntico, inclusive o R² da validação cruzada) |
 | Ridge 4096 + blurry, 1 sessão | 0 (idêntico, época por época) |
 | MindEye1, 1 sessão | 0 (idêntico em todos os dígitos das métricas e do retrieval) |
+| MindEye1, 40 sessões | 0,14 p.p. (Incep); retrieval idêntico; 0,0007 nas demais |
 | Ridge 1024 + prior, 1 sessão, contra o release | 0,7 p.p. (Incep); 0,003 (Eff) |
 | Ridge 1024 + prior, 40 sessões | 0,89 p.p. nas porcentagens; 0,0023 nas demais |
 | Ridge 4096 + blurry, 40 sessões | 0,59 p.p.; 0,0064 (PixCorr 0,337 contra 0,339) |
@@ -55,24 +56,14 @@ foram treinados em outra máquina e, no caso dos checkpoints do release, com uma
 Ridge 1024 + prior e a reconstrução com a semente 7 (`…_rseed7`, só no benchmark original) são a única
 medida de ruído, feita uma vez; não a repita.
 
-**Referências.** Decidido em 16/10: as linhas do benchmark (os ids `subj01_…`) passam a ser lidas das
+**Referências.** Decidido em 16/10 e concluído em 19/10 (todas as linhas de referência vêm das reproduções, menos as do artigo e as `_semlowlevel`): as linhas do benchmark (os ids `subj01_…`) passam a ser lidas das
 reproduções `repro_subj01_…`. O id público não mudou; `report/config.py` (`fonte`) aponta cada um para a
 reprodução assim que ela tem as tabelas de resultado, e as linhas `repro_…` ficam escondidas do site para
 não duplicar. Os registros e as tabelas dos originais seguem no histórico do git. Mudaram, pela reprodução,
 as tabelas do BENCHMARK.md (até 1,24 p.p.) e as conclusões escritas à mão em `report/texts.py`, já revistas
 com os números novos.
 
-1. **MindEye1, 40 sessões** (`repro_subj01_me1_40sess`), ~32 h numa A4500: treino do alto nível (240 épocas),
-   low-level (120), reconstrução e métricas. Até acabar, esta linha segue com os números do original
-   (`subj01_me1_40sess`). Quando terminar, regenerar (`python src/make_benchmark.py`, `python src/make_site.py`),
-   rever o parágrafo do MindEye1 em `report/texts.py` (PixCorr 0,382, retrieval 94,5% / 87,6%) e restaurar
-   no BENCHMARK.md o tempo e os parâmetros dessa linha, que agora vêm da reprodução.
-
-   ```bash
-   PREFIXO=repro_ SESSOES=40 scripts/run_me1_benchmark.sh
-   ```
-
-2. **Variantes `subj01_me1_*_semlowlevel`** (MindEye1 sem o low-level): continuam só com os resultados do
+1. **Variantes `subj01_me1_*_semlowlevel`** (MindEye1 sem o low-level): continuam só com os resultados do
    original. Refazê-las pede outro treino do alto nível cada, que não foi medido nem rodado
    (`PREFIXO=repro_ LOWLEVEL=0 scripts/run_me1_benchmark.sh`; o `treina.py` não tem entrada `repro_…_semlowlevel`
    em `REPRODUCOES`, é preciso acrescentá-la).
@@ -120,3 +111,7 @@ exige aceitar os termos da Anaconda (contornado criando o Python 3.11 pelo canal
 Os 12 experimentos de dataset controlado de `src/experimentos.py` (`EXPERIMENTOS`) não são re-execuções, e
 sim os próximos a rodar; `python src/treina.py --lista` mostra todos, e eles aparecem em Fichas, no site,
 como planejados.
+
+O low-level do MindEye1 de 40 sessões parou na época 90 de 120 (reinício da máquina em 19/10) e foi retomado do
+`last.pth`. O `results/logs/me1_benchmark.log` (fora do git) ganhou uma linha de início ajustada para o tempo
+contar só o treino ativo (12 h 51); sem ela o site mostraria 3 h 22.
