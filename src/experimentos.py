@@ -168,6 +168,11 @@ _REPRODUZIR = {
 }
 REPRODUCOES = {f"repro_{nome}": {**BENCHMARK[nome], "rotulo": f"{rotulo} · reprodução"}
                for nome, rotulo in _REPRODUZIR.items()}
+# MindEye1 sem o low-level: o mesmo treino do alto nivel, so a reconstrucao muda
+# (PREFIXO=repro_ LOWLEVEL=0 scripts/run_me1_benchmark.sh)
+for _n in (1, 40):
+    REPRODUCOES[f"repro_subj01_me1_{_n}sess_semlowlevel"] = {
+        **BENCHMARK[f"subj01_me1_{_n}sess"], "rotulo": f"MindEye1 sem low-level · {_n} {'sessão' if _n == 1 else 'sessões'} · reprodução"}
 
 TODOS = {**BENCHMARK, **EXPERIMENTOS, **REPRODUCOES}
 assert len(TODOS) == len(BENCHMARK) + len(EXPERIMENTOS) + len(REPRODUCOES), "nome repetido entre os experimentos"
