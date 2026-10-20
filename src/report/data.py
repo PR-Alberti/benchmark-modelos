@@ -117,8 +117,10 @@ def coleta(args):
         pub, mid = m["id"], fonte(m["id"])        # id publico e id de onde saem os arquivos (a reproducao)
         info = dict(m)
         if m.get("frr"):
-            info.update(frr_dados=le_frr(mid), tabelas={"enh": None, "base": None}, publicada=None,
-                        legendas=None, params=None)
+            # reconstrucao opcional (treina.py --reconstrucao): o embedding do FRR direto no unCLIP
+            info.update(frr_dados=le_frr(mid), publicada=None, params=None,
+                        tabelas={"enh": le_tabela(f"{mid}_all_enhancedrecons"), "base": le_tabela(f"{mid}_all_recons")},
+                        legendas=le_legendas(f"{mid}_all_enhancedrecons") or le_legendas(f"{mid}_all_recons"))
             info["tempo"] = duracao(info["frr_dados"]["custo"]["segundos_ajuste"]) if info["frr_dados"] else None
             dados["modelos"].append(info)
             continue
@@ -212,7 +214,7 @@ def coleta(args):
     colunas = []
     for m in MODELOS:
         mid = fonte(m["id"])
-        if m.get("frr"):
+        if m.get("frr") and not (paths.EVALS / mid / f"{mid}_all_recons.pt").exists():
             continue                      # sem reconstrucao, nao tem o que mostrar na galeria
         col = {"id": m["id"], "rotulo": m["rotulo"], "img": {}, "legendas": None, "me1": m.get("me1", False)}
         for tipo, sufixo in ARQ.items():
