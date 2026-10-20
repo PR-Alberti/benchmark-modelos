@@ -59,7 +59,7 @@ def tabela_legendas(dados):
     teto = next((m["legendas"] for m in dados["modelos"] if m["legendas"]), None)
     for g, titulo in GRUPOS.items():
         corpo.append(f'<tr class="grupo"><th colspan="{len(LEGENDAS) + 1}">{esc(titulo)}</th></tr>')
-        ms = [m for m in dados["modelos"] if m["grupo"] == g and not m.get("frr")]
+        ms = [m for m in dados["modelos"] if m["grupo"] == g and (not m.get("frr") or m["legendas"])]
         vals = {k: [m["legendas"][f"{k}_brain_ref"] for m in ms if m["legendas"]] for k, _ in LEGENDAS}
         for m in ms:
             tds = [f'<td class="modelo">{esc(m["rotulo"])}</td>']
@@ -448,10 +448,12 @@ def pagina(dados, args):
       <p class="nota">Regressão ridge fracionária (Rokem &amp; Kay, 2020) dos 15.724 voxels direto para
       o embedding CLIP achatado (256 × 1.664 = 425.984 números), seguindo Doerig et al. (2025): 20
       frações de 0,05 a 1, validação cruzada de 5 dobras agrupada por imagem e uma fração escolhida
-      para cada dimensão do alvo. É o modelo linear por sujeito do plano de estágio: sem rede, sem
-      prior e sem reconstrução, então só o retrieval é comparável com os outros modelos. Cosseno,
-      Pearson e cosseno centrado medem o quanto do embedding verdadeiro a regressão recupera, imagem
-      a imagem.</p></header>
+      para cada dimensão do alvo. É o modelo linear por sujeito do plano de estágio: sem rede e sem
+      prior. Cosseno, Pearson e cosseno centrado medem o quanto do embedding verdadeiro a regressão
+      recupera, imagem a imagem. A reconstrução é opcional (<code>src/treina.py --reconstrucao
+      unclip|refino</code>): o embedding previsto vai direto para o unCLIP e, no refino, para o SDXL
+      guiado pela legenda que o GIT tira dele; nenhuma dessas redes viu fMRI, então o que vem do
+      cérebro é só o FRR. Sem ela, só o retrieval se compara com os outros modelos.</p></header>
     {tabela_frr(dados)}
     <p class="nota">{FRR_NOTA_HUBNESS}</p>
     {graficos_frr(dados)}

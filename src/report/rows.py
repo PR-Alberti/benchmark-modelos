@@ -19,10 +19,15 @@ def linhas_de(dados, grupo):
         if m["grupo"] != grupo:
             continue
         if m.get("frr"):
+            # o retrieval e o do run_frr.py; as metricas de imagem, se houver reconstrucao, as do unCLIP
             r = m["frr_dados"]["retrieval"] if m["frr_dados"] else None
-            tab = {"FwdRetrieval": r["fwd"]["media"], "BwdRetrieval": r["bwd"]["media"]} if r else None
-            linhas.append({"rotulo": m["rotulo"], "sub": "só retrieval, sem reconstrução", "pub": False,
-                           "enh": tab, "base": tab, "id": m["id"]})
+            ret = {"FwdRetrieval": r["fwd"]["media"], "BwdRetrieval": r["bwd"]["media"]} if r else {}
+            enh, base = (m["tabelas"] or {}).get("enh"), (m["tabelas"] or {}).get("base")
+            sub = ("embedding do FRR direto no unCLIP" + ("" if enh else ", sem refinamento")) if base else \
+                "só retrieval, sem reconstrução"
+            linhas.append({"rotulo": m["rotulo"], "sub": sub, "pub": False,
+                           "enh": ({**enh, **ret} if enh else dict(ret)) or None,
+                           "base": ({**base, **ret} if base else dict(ret)) or None, "id": m["id"]})
             continue
         if m.get("me1"):
             linhas.append({"rotulo": m["rotulo"], "sub": "sem refinamento: a mesma reconstrução nas duas abas",

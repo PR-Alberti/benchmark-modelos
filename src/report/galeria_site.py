@@ -103,8 +103,8 @@ def atualiza(modelos, pasta_site, gerar=True, log=print):
                 mudou = True
 
         for m in modelos:
-            if m["familia"] == "frr":
-                continue
+            if m["familia"] == "frr" and not _fontes(m)[0]["unclip"].exists():
+                continue                                    # reconstrucao e opcional no FRR
             fontes, legendas = _fontes(m)
             atual = indice["modelos"].setdefault(m["id"], {})
             for tipo, src in fontes.items():

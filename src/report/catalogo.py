@@ -402,7 +402,7 @@ def extrai(mid, antigo=None, d=None, benchmark=None, experimentos=None, resumos=
     if familia == "mindeye1" and valores["unclip"] and not valores["refinada"]:
         valores["refinada"] = dict(valores["unclip"])     # sem refinamento: a reconstrucao final e a mesma
     legendas = None
-    if familia in ("mindeye2", "artigo") and not publicada:
+    if familia in ("mindeye2", "artigo", "frr") and not publicada:
         for suf in ("_all_enhancedrecons", "_all_recons"):
             p = d["tables"] / f"{base}{suf}_caption_metrics.csv"
             legendas = _le_legendas(p)
@@ -497,10 +497,10 @@ def status(r):
     """completo | retrieval | treino | planejado, e o texto para o site."""
     v = r.get("valores") or {}
     imagem = any(t and any(k not in ("FwdRetrieval", "BwdRetrieval") for k in t) for t in v.values())
-    if r["familia"] == "frr" and r.get("retrieval"):
-        return "completo", "retrieval e embedding"
     if imagem:
         return "completo", "métricas completas"
+    if r["familia"] == "frr" and r.get("retrieval"):
+        return "completo", "retrieval e embedding"
     if r.get("retrieval") and r["retrieval"].get("fonte") != "treino":
         return "retrieval", "só retrieval"
     if r.get("curva"):

@@ -56,7 +56,13 @@ python treina.py <nome> --so_dataset      # monta e resume o dataset
 python treina.py <nome> --dry_run         # mostra o comando
 python treina.py <nome> [<nome> ...]      # treina
 python treina.py <nome> --retoma          # MindEye2: continua do last.pth
+python treina.py <nome> --reconstrucao unclip|refino   # FRR: depois do treino, reconstrói (padrão: none)
 ```
+
+No FRR, `--reconstrucao` passa o embedding previsto pelo próprio modelo direto para o unCLIP
+(`unclip`) e, com `refino`, também pelo refinamento SDXL guiado pela legenda que o GIT tira do mesmo
+embedding; as métricas saem das duas. Nada vem do MindEye2 treinado: unCLIP, conversor bigG→ViT-L,
+GIT e SDXL foram treinados só com imagens e texto. Com o treino já concluído, só a reconstrução roda.
 
 ```python
 import treina                               # de dentro de src/
@@ -82,6 +88,7 @@ scripts/run_evals.sh <nome> enhanced                                  # métrica
 # FRR
 scripts/run_frr.sh                                                    # 1 sessão
 NUM_SESSIONS=40 scripts/run_frr.sh                                    # 40 sessões
+scripts/run_recon_embeddings.sh <nome> unclip|refino                  # reconstrução a partir do embedding + métricas
 
 # MindEye1
 scripts/run_me1_benchmark.sh                                          # 1 e 40 sessões, treino → métricas
