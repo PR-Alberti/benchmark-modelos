@@ -7,6 +7,9 @@
 #   setup/bootstrap.sh --check      so diagnostica: o que ja existe, o que falta
 #   setup/bootstrap.sh --ckpts      + os checkpoints ridge-only ja treinados (release do GitHub)
 #   setup/bootstrap.sh --minimo     so o ridge-only de 1 sessao: ambiente + dados (~30 GB)
+#   setup/bootstrap.sh --multisujeito   + betas e tars dos sujeitos 2-8 (~12 GB), o pre-treino do
+#                                   FRR multi-sujeito (modelo frr_ms); os alvos CLIP deles (~50 GB) sao
+#                                   calculados no primeiro treino
 #
 # Opcoes: --env-path DIR (padrao ~/envs/fmri), --data-path DIR (padrao ~/mindeyev2).
 # Cada etapa e idempotente: pode interromper e rodar de novo que ele continua
@@ -28,6 +31,7 @@ SESSOES=()          # vazio = todas as 40
 MINIMO=0
 CHECK_ONLY=0
 WANT_CKPTS=0
+MULTISUJEITO=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -35,9 +39,10 @@ while [[ $# -gt 0 ]]; do
         --all)    shift ;;   # era a opcao para "tudo"; hoje tudo e o padrao
         --minimo) MINIMO=1; STAGES=(finetune); SESSOES=(--num-sessions 1); shift ;;
         --ckpts)  WANT_CKPTS=1; shift ;;
+        --multisujeito) MULTISUJEITO=1; shift ;;
         --env-path)  ENV_PATH="$2"; shift 2 ;;
         --data-path) DATA_PATH="$2"; shift 2 ;;
-        -h|--help)   sed -n '3,15p' "$0"; exit 0 ;;
+        -h|--help)   sed -n '3,17p' "$0"; exit 0 ;;
         *) echo "argumento desconhecido: $1" >&2; exit 1 ;;
     esac
 done
@@ -127,6 +132,18 @@ else
         ok "dados no lugar"
     else
         erro "download falhou - pode rodar de novo, ele continua de onde parou"; exit 1
+    fi
+fi
+
+# FRR multi-sujeito: os outros 7 sujeitos do NSD, todas as sessoes (so betas e tars; as imagens sao as mesmas)
+if [[ $MULTISUJEITO -eq 1 ]]; then
+    titulo "3b. Sujeitos 2-8 (pre-treino do FRR multi-sujeito)"
+    if [[ $CHECK_ONLY -eq 1 ]]; then
+        "$PY" setup/download_data.py --stage train --subj 2 3 4 5 6 7 8 --data-path "$DATA_PATH" --dry-run 2>&1 | sed 's/^/  /'
+    elif "$PY" setup/download_data.py --stage train --subj 2 3 4 5 6 7 8 --data-path "$DATA_PATH" 2>&1 | sed 's/^/  /'; then
+        ok "sujeitos 2-8 no lugar"
+    else
+        erro "download dos sujeitos 2-8 falhou - pode rodar de novo"; exit 1
     fi
 fi
 

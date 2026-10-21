@@ -143,6 +143,26 @@ for _n, _r in ((3000, 1), (1500, 2), (1000, 3)):
         "dataset": {"sessoes": 40, "n_imagens": _n, "repeticoes": _r, "semente": 0},
     }
 
+# FRR multi-sujeito (src/run_frr_ms.py): espaco compartilhado de k = 1.024 dimensoes, peso igual por
+# sujeito, ajuste fino so da ridge do subj01. O modelo C pre-treina a leitura nos sujeitos 2-8 (um pre-
+# treino so, para as duas quantidades de dados); o B, o controle de posto reduzido, a aprende so com o
+# proprio subj01. C contra B mede o efeito dos outros sujeitos; B contra o FRR, o do gargalo de k (o FRR
+# de 20 sessoes entra para essa comparacao ter par nas tres quantidades de dados).
+EXPERIMENTOS["subj01_frr_20sess"] = {"modelo": "frr", "hiper": {}, "dataset": {"sessoes": 20}}
+for _s in (1, 20, 40):
+    EXPERIMENTOS[f"subj01_frr_multisujeito_{_s}sess"] = {
+        "modelo": "frr_ms",
+        "hiper": {"k": 1024, "pesos": "sujeito", "seed": 42},
+        "dataset": {"sessoes": _s},
+        "rotulo": f"FRR multi-sujeito · {_s} {'sessão' if _s == 1 else 'sessões'}",
+    }
+    EXPERIMENTOS[f"subj01_frr_postoreduzido_{_s}sess"] = {
+        "modelo": "frr_ms",
+        "hiper": {"k": 1024, "pretreino": "proprio", "seed": 42},
+        "dataset": {"sessoes": _s},
+        "rotulo": f"FRR posto reduzido (controle) · {_s} {'sessão' if _s == 1 else 'sessões'}",
+    }
+
 
 # =============================================================================================
 # Reproducoes dos modelos do benchmark pelo treina.py (docs/REEXECUTAR.md, scripts/run_reexecutar.sh):

@@ -1,0 +1,309 @@
+{
+ "commit": "240b71c90b5279b46db2411fb0bacfdd14d5fe38+alteracoes",
+ "concluido": true,
+ "config": {
+  "dataset": {
+   "agregacao": null,
+   "balanceado": false,
+   "classes": null,
+   "maximo_outros": 2,
+   "minimo": 10,
+   "n_imagens": null,
+   "regra": "exclusiva",
+   "repeticoes": null,
+   "semente": 0,
+   "sessoes": 20,
+   "subj": 1
+  },
+  "hiper": {
+   "chunk": 8192,
+   "folds": 5,
+   "fracs": null,
+   "grid": "doerig",
+   "iteracoes": 10,
+   "k": 1024,
+   "pesos": "sujeito",
+   "pretreino": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "seed": 42,
+   "tolerancia": 0.001,
+   "validacao": 0.1
+  },
+  "modelo": "frr_ms"
+ },
+ "config_descritiva": false,
+ "config_erro": null,
+ "config_fonte": "train_logs/subj01_frr_multisujeito_20sess/experimento.json",
+ "curva": null,
+ "espaco_clip": "ViT-bigG/14",
+ "familia": "frr",
+ "fontes": [
+  "results/tables/subj01_frr_multisujeito_20sess_all_enhancedrecons.csv",
+  "results/tables/subj01_frr_multisujeito_20sess_all_recons.csv",
+  "results/tables/subj01_frr_multisujeito_20sess_frr.json"
+ ],
+ "frr": {
+  "config": {
+   "agregacao": "exibicoes",
+   "amostras_treino": 13509,
+   "bloco": 8192,
+   "dataset": {
+    "agregacao": null,
+    "balanceado": false,
+    "classes": null,
+    "maximo_outros": 2,
+    "minimo": 10,
+    "n_imagens": null,
+    "regra": "exclusiva",
+    "repeticoes": null,
+    "semente": 0,
+    "sessoes": 20,
+    "subj": 1
+   },
+   "dim_alvo": 425984,
+   "dobras": 5,
+   "exibicoes_treino": 13509,
+   "grade": "doerig",
+   "imagens_teste": 1000,
+   "imagens_treino": 6708,
+   "k": 1024,
+   "k_efetivo": 1024,
+   "modelo": "frr_ms",
+   "pesos": "sujeito",
+   "pretreino": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "semente": 42,
+   "sessoes": 20,
+   "sujeito": 1,
+   "variante": "multi-sujeito",
+   "voxels": 15724
+  },
+  "custo": {
+   "embeddings_calculados_nesta_corrida": 0,
+   "gpu": "NVIDIA RTX A4500",
+   "pico_gpu_gib": 1.4228906631469727,
+   "pico_ram_gib": 16.771865844726562,
+   "segundos_ajuste": 234.96277904510498,
+   "segundos_embedding_alvos": 0.0005481243133544922,
+   "segundos_pretreino": 1091.6672558784485,
+   "segundos_total": 305.7895448207855
+  },
+  "cv": {
+   "cv_r2_escolhida": 0.15356478888599423,
+   "cv_r2_por_fracao": [
+    0.14631201587907816,
+    0.11548921517611466,
+    0.04985165534217173,
+    -0.03824609167062021,
+    -0.1444964522986787,
+    -0.2669621420648447,
+    -0.4055532800203281,
+    -0.5596172854957024,
+    -0.7291124377359299,
+    -0.9145679979247938,
+    -1.1160630873303425,
+    -1.3355381451452981,
+    -1.5717164139600883,
+    -1.8275646794742566,
+    -2.1023093926379213,
+    -2.397389860707432,
+    -2.7133941334708624,
+    -3.0506999276355273,
+    -3.4096775189580146,
+    -3.789348773849958
+   ],
+   "fracs": [
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9,
+    0.95,
+    1.0
+   ],
+   "histograma_fracoes": [
+    990,
+    32,
+    2,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "pares_fracao_alvo_inalcancaveis": 0,
+   "por_alvo": true,
+   "posto_final": 13508,
+   "segundos_cv": 167.25881695747375,
+   "segundos_final": 59.50782370567322,
+   "segundos_total": 226.76664066314697
+  },
+  "embedding": {
+   "cosseno_centrado_medio": 0.23099632561206818,
+   "cosseno_medio": 0.5358182787895203,
+   "pearson_mediana": 0.5207303762435913,
+   "pearson_medio": 0.5213201642036438
+  },
+  "hubness": {
+   "cos_alvo_media_treino": 0.496150404214859,
+   "cos_previsao_media_treino": 0.9326393008232117
+  },
+  "parametros_lineares": 452308992
+ },
+ "grupo": "experimento",
+ "id": "subj01_frr_multisujeito_20sess",
+ "iniciado": true,
+ "legendas": {
+  "CLIP-B_brain_img": 0.6277058124542236,
+  "CLIP-B_brain_ref": 0.629760205745697,
+  "CLIP-B_img_ref": 0.8392383456230164,
+  "CLIP-B_relative": 0.7479470372200012,
+  "CLIP-L_brain_img": 0.5130888223648071,
+  "CLIP-L_brain_ref": 0.4993821978569031,
+  "CLIP-L_img_ref": 0.7765910625457764,
+  "CLIP-L_relative": 0.6606937050819397,
+  "Meteor_brain_img": 0.19332199380720308,
+  "Meteor_brain_ref": 0.15691283397031636,
+  "Meteor_img_ref": 0.4196759954156638,
+  "Meteor_relative": 0.4606458218219731,
+  "Rouge1_brain_img": 0.2999130632613163,
+  "Rouge1_brain_ref": 0.254247863263085,
+  "Rouge1_img_ref": 0.5066996914549835,
+  "Rouge1_relative": 0.5918950974691117,
+  "RougeL_brain_img": 0.28274960433686375,
+  "RougeL_brain_ref": 0.2358434381564607,
+  "RougeL_img_ref": 0.46368458943691104,
+  "RougeL_relative": 0.6097886597443943,
+  "Sentence_brain_img": 0.2539185583591461,
+  "Sentence_brain_ref": 0.2445460855960846,
+  "Sentence_img_ref": 0.7190179228782654,
+  "Sentence_relative": 0.35314634442329407
+ },
+ "notas": [],
+ "publicada": false,
+ "resumo_dataset": {
+  "exibicoes": 13509,
+  "imagens_unicas": 6708,
+  "repeticoes": {
+   "1": 2194,
+   "2": 2227,
+   "3": 2287
+  },
+  "sessoes_usadas": 20
+ },
+ "retrieval": {
+  "bwd": {
+   "ic95": [
+    0.4876084832450388,
+    0.5163915546635153
+   ],
+   "media": 0.502000018954277
+  },
+  "fonte": "frr",
+  "fwd": {
+   "ic95": [
+    0.9356538700948328,
+    0.9461239409555823
+   ],
+   "media": 0.9408889055252075
+  }
+ },
+ "retrieval_centrado": {
+  "bwd": {
+   "ic95": [
+    0.8457604606599327,
+    0.8600173513441567
+   ],
+   "media": 0.8528889060020447
+  },
+  "fwd": {
+   "ic95": [
+    0.9360368132665728,
+    0.946407667788369
+   ],
+   "media": 0.9412222405274709
+  }
+ },
+ "rotulo": "FRR multi-sujeito · 20 sessões",
+ "sessoes": 20,
+ "status": "completo",
+ "status_txt": "métricas completas",
+ "tempo_s": 234.96277904510498,
+ "valores": {
+  "refinada": {
+   "AlexNet(2)": 0.6507017017017017,
+   "AlexNet(5)": 0.6863903903903903,
+   "Brain Corr. V1": 0.11537835747003555,
+   "Brain Corr. V2": 0.11145225167274475,
+   "Brain Corr. V3": 0.1182134672999382,
+   "Brain Corr. V4": 0.11363094300031662,
+   "Brain Corr. higher_vis": 0.06539610028266907,
+   "Brain Corr. nsd_general": 0.07655221223831177,
+   "BwdRetrieval": 0.4995555659135183,
+   "CLIP": 0.6406156156156156,
+   "EffNet-B": 0.9203200019106758,
+   "FwdRetrieval": 0.9407777965068818,
+   "InceptionV3": 0.6684064064064065,
+   "PixCorr": 0.29553822593344,
+   "SSIM": 0.477523209186453,
+   "SwAV": 0.5678462926612812
+  },
+  "unclip": {
+   "AlexNet(2)": 0.6645415415415415,
+   "AlexNet(5)": 0.6587477477477478,
+   "Brain Corr. V1": 0.14517870545387268,
+   "Brain Corr. V2": 0.12864606082439423,
+   "Brain Corr. V3": 0.1277150809764862,
+   "Brain Corr. V4": 0.11290185898542404,
+   "Brain Corr. higher_vis": 0.050751425325870514,
+   "Brain Corr. nsd_general": 0.0767037495970726,
+   "BwdRetrieval": 0.4995555659135183,
+   "CLIP": 0.6134784784784785,
+   "EffNet-B": 0.9436825062151588,
+   "FwdRetrieval": 0.9407777965068818,
+   "InceptionV3": 0.6260900900900902,
+   "PixCorr": 0.32201712448502645,
+   "SSIM": 0.45665194592947855,
+   "SwAV": 0.5858993551432845
+  }
+ }
+}

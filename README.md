@@ -7,6 +7,7 @@ mesmo treino, o mesmo teste (1.000 imagens compartilhadas) e as mesmas métricas
 |---|---|---|
 | **MindEye2** ridge-only ([Scotti et al., 2024](https://arxiv.org/abs/2403.11207)) | `src/train_ridgeonly.py` | embedding CLIP ViT-bigG + imagem (SDXL unCLIP) |
 | **FRR**, ridge fracionária ([Rokem & Kay, 2020](https://doi.org/10.1093/gigascience/giaa133)) | `src/run_frr.py` | embedding CLIP ViT-bigG |
+| **FRR multi-sujeito**: espaço compartilhado linear, pré-treino nos sujeitos 2–8 ([docs/FRR_MULTISUJEITO.md](docs/FRR_MULTISUJEITO.md)) | `src/run_frr_ms.py` | embedding CLIP ViT-bigG |
 | **MindEye1** ([Scotti et al., 2023](https://arxiv.org/abs/2305.18274)) | `mindeye1/src/Train_MindEye.py` | embedding CLIP ViT-L/14 + imagem (Versatile Diffusion) |
 
 Site com início, uso e resultados interativos de todos os modelos: [`results/site/index.html`](results/site/index.html);
@@ -88,6 +89,7 @@ scripts/run_evals.sh <nome> enhanced                                  # métrica
 # FRR
 scripts/run_frr.sh                                                    # 1 sessão
 NUM_SESSIONS=40 scripts/run_frr.sh                                    # 40 sessões
+NUM_SESSIONS=1 MODEL_NAME=<nome> scripts/run_frr_ms.sh                # FRR multi-sujeito (sujeitos 2-8: bootstrap.sh --multisujeito)
 scripts/run_recon_embeddings.sh <nome> unclip|refino                  # reconstrução a partir do embedding + métricas
 
 # MindEye1
@@ -212,7 +214,7 @@ repetições nos quatro modos de agregação, e 3.000 × 1, 1.500 × 2, 1.000 ×
 | `results/` | tabelas, site e página (no git); tensores e logs (fora) |
 | `train_logs/` | checkpoints (fora do git) |
 | `tests/` | testes |
-| `docs/` | [NOVO_COMPUTADOR](docs/NOVO_COMPUTADOR.md), [SETUP](docs/SETUP.md), [MINDEYE1](docs/MINDEYE1.md), [EXPERIMENTO](docs/EXPERIMENTO.md), [ESTAGIO](docs/ESTAGIO.md), [REEXECUTAR](docs/REEXECUTAR.md) |
+| `docs/` | [NOVO_COMPUTADOR](docs/NOVO_COMPUTADOR.md), [SETUP](docs/SETUP.md), [MINDEYE1](docs/MINDEYE1.md), [EXPERIMENTO](docs/EXPERIMENTO.md), [ESTAGIO](docs/ESTAGIO.md), [REEXECUTAR](docs/REEXECUTAR.md), [FRR_MULTISUJEITO](docs/FRR_MULTISUJEITO.md) |
 
 ## Licença
 

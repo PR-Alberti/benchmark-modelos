@@ -152,6 +152,23 @@ HIPER_DESC = {
         "seed": "semente da divisão em dobras",
         "chunk": "dimensões do alvo por bloco; só muda a memória usada",
     },
+    "frr_ms": {
+        "k": "dimensão do espaço compartilhado entre os sujeitos (o gargalo voxels → k → CLIP); 1024, como o "
+             "hidden_dim do MindEye2 de 1024",
+        "pretreino": "sujeitos que aprendem a leitura compartilhada (2 a 8), ou \"proprio\": só o próprio subj01, "
+                     "o controle de posto reduzido",
+        "pesos": '"sujeito": peso igual por sujeito no pré-treino, como os lotes do MindEye2; "exibicao": cada '
+                 "exibição pesa o mesmo",
+        "iteracoes": "máximo de iterações dos mínimos quadrados alternados do pré-treino",
+        "tolerancia": "ganho relativo mínimo da perda de validação para seguir iterando",
+        "validacao": "fração das imagens de cada sujeito do pré-treino que fica de fora, para escolher as frações "
+                     "e parar as iterações",
+        "folds": "dobras da validação cruzada do ajuste fino no subj01, agrupada por imagem",
+        "grid": "as frações testadas, como no FRR",
+        "fracs": "lista de frações em ordem crescente; quando dada, substitui a grade",
+        "seed": "semente da divisão de validação, das dobras e do início (SVD aleatorizado)",
+        "chunk": "dimensões do alvo por bloco; só muda a memória usada",
+    },
     "mindeye2": {
         "hidden_dim": "1024 (parte de multisubject_subj01_1024hid_nolow_300ep) ou 4096 (parte de final_multisubject_subj01)",
         "num_epochs": "épocas; pelo menos 2 (o OneCycleLR usa pct_start = 2/num_epochs)",
