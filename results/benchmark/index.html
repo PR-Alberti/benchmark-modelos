@@ -301,18 +301,13 @@ footer { font-size: 13px; color: var(--ink-2); border-top: 1px solid var(--rule)
       mede ruído, então esta seção troca só a semente, na configuração 1024 + prior. Diferenças
       entre modelos menores que estas estão dentro do ruído.</p></header>
     <h3>Semente do treino · retrieval top-1 entre 300</h3>
-    <div class="rolagem"><table><thead><tr><th>Semente do treino</th><th>Img→cér<span class="seta">↑</span></th><th>Cér→img<span class="seta">↑</span></th></tr></thead><tbody><tr><td class="modelo">42 · checkpoint do release</td><td>92,8%</td><td>88,1%</td></tr><tr><td class="modelo">42 · retreino com o código atual</td><td>92,9%</td><td>88,1%</td></tr><tr><td class="modelo">1</td><td>93,1%</td><td>87,8%</td></tr><tr><td class="modelo">2</td><td>93,2%</td><td>88,1%</td></tr><tr class="teto"><td class="modelo">maior diferença entre sementes</td><td>0,2 p.p.</td><td>0,3 p.p.</td></tr></tbody></table></div>
-    <p class="nota">O retreino com a semente 42 não repete o checkpoint do release bit a bit: desde
-    aquele treino, a única mudança no caminho do 1024 foi guardar as imagens da época em fp16 (o
-    conserto de memória do treino de 40 sessões), o que arredonda de outro jeito os alvos CLIP já
-    na primeira iteração. O resultado final fica no mesmo lugar.</p>
+    <div class="rolagem"><table><thead><tr><th>Semente do treino</th><th>Img→cér<span class="seta">↑</span></th><th>Cér→img<span class="seta">↑</span></th></tr></thead><tbody><tr><td class="modelo">42</td><td>92,9%</td><td>88,1%</td></tr><tr><td class="modelo">1</td><td>93,1%</td><td>87,8%</td></tr><tr><td class="modelo">2</td><td>93,2%</td><td>88,1%</td></tr><tr class="teto"><td class="modelo">maior diferença entre sementes</td><td>0,2 p.p.</td><td>0,3 p.p.</td></tr></tbody></table></div>
     <h3>Semente da reconstrução · o mesmo modelo 1024 + prior amostrado duas vezes</h3>
     <div class="rolagem"><table><thead><tr class="familia"><th></th><th colspan="3">unCLIP</th><th colspan="3">Refinadas</th></tr><tr><th>Métrica</th><th>semente 42</th><th>semente 7</th><th>diferença</th><th>semente 42</th><th>semente 7</th><th>diferença</th></tr></thead><tbody><tr><td class="modelo">PixCorr<span class="seta">↑</span></td><td>0,176</td><td>0,169</td><td>0,006</td><td>0,181</td><td>0,175</td><td>0,006</td></tr><tr><td class="modelo">SSIM<span class="seta">↑</span></td><td>0,285</td><td>0,283</td><td>0,002</td><td>0,346</td><td>0,344</td><td>0,002</td></tr><tr><td class="modelo">Alex(2)<span class="seta">↑</span></td><td>82,8%</td><td>83,0%</td><td>0,2 p.p.</td><td>85,4%</td><td>84,9%</td><td>0,5 p.p.</td></tr><tr><td class="modelo">Alex(5)<span class="seta">↑</span></td><td>92,4%</td><td>93,0%</td><td>0,6 p.p.</td><td>92,5%</td><td>92,6%</td><td>0,1 p.p.</td></tr><tr><td class="modelo">Incep<span class="seta">↑</span></td><td>85,5%</td><td>85,2%</td><td>0,3 p.p.</td><td>83,6%</td><td>84,0%</td><td>0,3 p.p.</td></tr><tr><td class="modelo">CLIP<span class="seta">↑</span></td><td>81,3%</td><td>81,4%</td><td>0,1 p.p.</td><td>82,6%</td><td>83,1%</td><td>0,5 p.p.</td></tr><tr><td class="modelo">Eff<span class="seta">↓</span></td><td>0,816</td><td>0,814</td><td>0,002</td><td>0,802</td><td>0,800</td><td>0,003</td></tr><tr><td class="modelo">SwAV<span class="seta">↓</span></td><td>0,473</td><td>0,472</td><td>0,001</td><td>0,460</td><td>0,459</td><td>0,001</td></tr><tr><td class="modelo">Corr. nsdgeneral<span class="seta">↑</span></td><td>0,350</td><td>0,350</td><td>0,000</td><td>0,347</td><td>0,348</td><td>0,001</td></tr></tbody></table></div>
     <h3>Com e sem prior · o mesmo script e a mesma semente</h3>
-    <p class="nota">Os dois checkpoints de 1024 do release vieram de scripts e versões de código
-    diferentes. O retreino muda só <code>--use_prior</code>, para isolar o efeito da loss do prior
-    no treino da ridge.</p>
-    <div class="rolagem"><table><thead><tr><th>Ridge 1024</th><th>Img→cér<span class="seta">↑</span></th><th>Cér→img<span class="seta">↑</span></th></tr></thead><tbody><tr><td class="modelo">com prior · checkpoint do release</td><td>92,8%</td><td>88,1%</td></tr><tr><td class="modelo">sem prior · checkpoint do release</td><td>78,5%</td><td>72,1%</td></tr><tr><td class="modelo">com prior · retreino, semente 42</td><td>92,9%</td><td>88,1%</td></tr><tr><td class="modelo">sem prior · retreino, semente 42</td><td>78,4%</td><td>72,6%</td></tr></tbody></table></div>
+    <p class="nota">O mesmo script e a mesma semente; muda só <code>--use_prior</code>, para isolar o efeito
+    da loss do prior no treino da ridge.</p>
+    <div class="rolagem"><table><thead><tr><th>Ridge 1024</th><th>Img→cér<span class="seta">↑</span></th><th>Cér→img<span class="seta">↑</span></th></tr></thead><tbody><tr><td class="modelo">com prior · semente 42</td><td>92,9%</td><td>88,1%</td></tr><tr><td class="modelo">sem prior · semente 42</td><td>78,4%</td><td>72,6%</td></tr></tbody></table></div>
   </section>
 
   <section class="secao" id="treino">
@@ -320,8 +315,7 @@ footer { font-size: 13px; color: var(--ink-2); border-top: 1px solid var(--rule)
       <p class="nota">Top-1 entre 300 no teste, medido ao fim de cada época pelo próprio treino
       sempre nas mesmas 300 primeiras imagens de teste. O número das tabelas é a média de 30
       sorteios de 300 entre as 1.000, por isso difere um pouco.
-      Só as corridas que gravaram <code>metrics.csv</code>: os checkpoints do release vieram de
-      corridas anteriores, sem esse registro; as sementes do 1024 + prior mostram a mesma
+      Só as corridas que gravaram <code>metrics.csv</code>; as sementes do 1024 + prior mostram a mesma
       configuração.</p></header>
     <ul class="legenda-series">
       <li><span class="chave" style="border-color:var(--s1)"></span>Img→cér: dada a imagem, achar o seu cérebro</li>
@@ -414,10 +408,6 @@ footer { font-size: 13px; color: var(--ink-2); border-top: 1px solid var(--rule)
             corridas do 4096 + blurry descrita no docs/EXPERIMENTO.md não era ruído: com o mesmo código,
             a corrida se repete exatamente, e entre aquelas duas o código mudou (o conserto do
             ColorJitter em fp16 entrou pouco antes da segunda).</li>
-          <li>As métricas do 1024 + prior foram recalculadas sobre os tensores do release. As das
-            reconstruções unCLIP saíram idênticas às da tabela antiga do repositório; as das
-            refinadas diferem um pouco (PixCorr 0,181 contra 0,182; Incep 83,6% contra 84,3%),
-            sinal de que a tabela antiga veio de uma geração anterior das refinadas.</li>
         </ul>
       </div>
     </div>

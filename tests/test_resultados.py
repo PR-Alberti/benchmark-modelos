@@ -18,14 +18,14 @@ class Versionados(unittest.TestCase):
     """Os resultados do benchmark que estao no git."""
 
     def test_frr(self):
-        r = resultados.retrieval("subj01_frr_1sess")
-        esperado = json.loads((paths.TABLES / "subj01_frr_1sess_frr.json").read_text())["retrieval"]
+        r = resultados.retrieval("repro_subj01_frr_1sess")
+        esperado = json.loads((paths.TABLES / "repro_subj01_frr_1sess_frr.json").read_text())["retrieval"]
         self.assertEqual((r["fwd"], r["bwd"]), (esperado["fwd"]["media"], esperado["bwd"]["media"]))
         self.assertIn("FRR", r["fonte"])
 
     def test_metricas_das_reconstrucoes(self):
         with mock.patch.object(resultados.paths, "EVALS", Path("/nao/existe")):
-            r = resultados.retrieval("subj01_me1_1sess")
+            r = resultados.retrieval("repro_subj01_me1_1sess")
         self.assertAlmostEqual(r["fwd"], 0.306, places=3)
         self.assertIn("final_evaluations", r["fonte"])
 

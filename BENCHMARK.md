@@ -123,17 +123,14 @@ O treino é determinístico com a mesma semente, então a régua troca só a sem
 
 | Semente do treino | Img→cér ↑ | Cér→img ↑ |
 |---|---:|---:|
-| 42 · checkpoint do release | 92,8% | 88,1% |
-| 42 · retreino com o código atual | 92,9% | 88,1% |
+| 42 | 92,9% | 88,1% |
 | 1 | 93,1% | 87,8% |
 | 2 | 93,2% | 88,1% |
 
 | Com e sem prior (1024) | Img→cér ↑ | Cér→img ↑ |
 |---|---:|---:|
-| com prior · checkpoint do release | 92,8% | 88,1% |
-| sem prior · checkpoint do release | 78,3% | 72,1% |
-| com prior · retreino, semente 42 | 92,9% | 88,1% |
-| sem prior · retreino, semente 42 | 78,4% | 72,6% |
+| com prior · semente 42 | 92,9% | 88,1% |
+| sem prior · semente 42 | 78,4% | 72,6% |
 
 | Semente da reconstrução (refinadas) | 42 | 7 |
 |---|---:|---:|
