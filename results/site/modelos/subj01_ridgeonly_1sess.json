@@ -1294,7 +1294,7 @@
   "Sentence_relative": 0.3927529454231262
  },
  "notas": [
-  "Checkpoint do release checkpoints-v1, treinado com uma versão anterior do código e outro script; o controle com o código atual é o sem prior de semente 42."
+  "Retreino com o código atual (semente 42), o mesmo script do Ridge 1024 + prior, só sem a loss do prior. Substitui o checkpoint do release checkpoints-v1, treinado com uma versão anterior do código e outro script; os dois diferem em até 1,24 ponto percentual nas métricas de imagem (docs/REEXECUTAR.md)."
  ],
  "params": {
   "backbone": 453360280,
