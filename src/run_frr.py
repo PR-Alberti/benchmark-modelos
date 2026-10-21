@@ -38,7 +38,7 @@ import numpy as np
 import torch
 
 from mindeye_ridge import agregacao, dataset_controlado, embedding_metrics, frr, nsd_data, paths, utils
-from mindeye_ridge.clip_targets import ClipTargets, embeddings_avaliacao, SEQ, DIM
+from mindeye_ridge.clip_targets import ClipTargets, embeddings_avaliacao, SEQ, DIM, D_ALVO
 
 
 def parse_args():
@@ -155,38 +155,17 @@ def main():
     torch.cuda.empty_cache()
 
     # ------------------------------------------------------------ avaliacao
-    # alvo de avaliacao: imagem em fp32, como nas avaliacoes dos outros modelos (ver clip_targets.py)
-    Y_teste = embeddings_avaliacao(all_images, device)
-    res = embedding_metrics.retrieval_top1(prev, Y_teste, args.seed, device)
-    for chave, nome in (("fwd", "fwd (imagem->cerebro)"),
-                        ("bwd", "bwd (cerebro->imagem)")):
-        r = res[chave]
-        print(f"RESULTADO {args.model_name} | {nome}: {r['media']:.4f}  "
-              f"IC95% [{r['ic95'][0]:.4f}, {r['ic95'][1]:.4f}]", flush=True)
-    with open(f"{saida}/{args.model_name}_retrieval.json", "w") as f:
-        json.dump(res, f, indent=1)
-
-    # diagnostico de hubness: o mesmo retrieval depois de tirar a media de treino (previsao e alvo)
-    media_treino = alvos.media_ponderada(groups)
-    res_centrado = embedding_metrics.retrieval_top1(prev, Y_teste, args.seed, device, centro=media_treino)
-    print(f"centrado pela media de treino: fwd {res_centrado['fwd']['media']:.4f}  "
-          f"bwd {res_centrado['bwd']['media']:.4f}", flush=True)
-
-    cos, pearson = embedding_metrics.similaridades(prev, Y_teste, device)
-    cos_c, _ = embedding_metrics.similaridades(prev, Y_teste, device, centro=media_treino)
-    print(f"cosseno medio {cos.mean():.4f}   Pearson medio {pearson.mean():.4f}   "
-          f"cosseno centrado {cos_c.mean():.4f}", flush=True)
-
+    aval = avalia(args.model_name, prev, all_images, alvos.media_ponderada(groups), args.seed, device, saida)
     relatorio = {
         "modelo": args.model_name,
         "config": {"sujeito": args.subj, "sessoes": args.num_sessions, "exibicoes_treino": n_exib,
                    "dataset": dataset_controlado.carrega(args.dataset)["config"] if args.dataset else None,
                    "agregacao": modo, "amostras_treino": int(len(X)),
                    "imagens_treino": n_imagens, "imagens_teste": len(ids_teste), "voxels": n_voxels,
-                   "dim_alvo": int(Y_teste.shape[1]), "dobras": args.folds, "semente": args.seed,
+                   "dim_alvo": aval.pop("dim_alvo"), "dobras": args.folds, "semente": args.seed,
                    "grade": "personalizada" if args.fracs else ("estendida" if args.grid == "extended" else "doerig"),
                    "bias_step": args.bias_step, "bloco": args.chunk},
-        "parametros_lineares": n_voxels * int(Y_teste.shape[1]),
+        "parametros_lineares": n_voxels * D_ALVO,
         "custo": {"segundos_ajuste": seg_ajuste, "segundos_embedding_alvos": seg_embedding,
                   "embeddings_calculados_nesta_corrida": int(n_novos),
                   "pico_gpu_gib": pico_gpu,
@@ -194,6 +173,36 @@ def main():
                   "pico_ram_gib": pico_ram,
                   "segundos_total": time.time() - t_inicio},
         "cv": cv,
+        **aval,
+    }
+    grava_relatorio(args.model_name, saida, relatorio)
+
+
+def avalia(nome, prev, all_images, media_treino, seed, device, saida):
+    """A avaliacao de um modelo que preve o embedding (o FRR e o FRR multi-sujeito): retrieval como o
+    verify_retrieval.py (grava <nome>_retrieval.json), o mesmo depois de tirar a media de treino (o
+    diagnostico de hubness) e as similaridades com o embedding verdadeiro. Devolve os campos do relatorio."""
+    # alvo de avaliacao: imagem em fp32, como nas avaliacoes dos outros modelos (ver clip_targets.py)
+    Y_teste = embeddings_avaliacao(all_images, device)
+    res = embedding_metrics.retrieval_top1(prev, Y_teste, seed, device)
+    for chave, rotulo in (("fwd", "fwd (imagem->cerebro)"),
+                          ("bwd", "bwd (cerebro->imagem)")):
+        r = res[chave]
+        print(f"RESULTADO {nome} | {rotulo}: {r['media']:.4f}  "
+              f"IC95% [{r['ic95'][0]:.4f}, {r['ic95'][1]:.4f}]", flush=True)
+    with open(f"{saida}/{nome}_retrieval.json", "w") as f:
+        json.dump(res, f, indent=1)
+
+    res_centrado = embedding_metrics.retrieval_top1(prev, Y_teste, seed, device, centro=media_treino)
+    print(f"centrado pela media de treino: fwd {res_centrado['fwd']['media']:.4f}  "
+          f"bwd {res_centrado['bwd']['media']:.4f}", flush=True)
+
+    cos, pearson = embedding_metrics.similaridades(prev, Y_teste, device)
+    cos_c, _ = embedding_metrics.similaridades(prev, Y_teste, device, centro=media_treino)
+    print(f"cosseno medio {cos.mean():.4f}   Pearson medio {pearson.mean():.4f}   "
+          f"cosseno centrado {cos_c.mean():.4f}", flush=True)
+    return {
+        "dim_alvo": int(Y_teste.shape[1]),
         "retrieval": res,
         "retrieval_centrado": res_centrado,
         "hubness": {"cos_previsao_media_treino": float(embedding_metrics.cosseno_com_vetor(prev, media_treino, device).mean()),
@@ -202,10 +211,14 @@ def main():
                       "cosseno_centrado_medio": float(cos_c.mean()),
                       "pearson_mediana": float(np.median(pearson))},
     }
-    for destino in (f"{saida}/{args.model_name}_frr.json", f"{paths.TABLES}/{args.model_name}_frr.json"):
+
+
+def grava_relatorio(nome, saida, relatorio):
+    """<nome>_frr.json na pasta do modelo e a copia em results/tables/ (a que entra no git e no site)."""
+    for destino in (f"{saida}/{nome}_frr.json", f"{paths.TABLES}/{nome}_frr.json"):
         with open(destino, "w") as f:
             json.dump(relatorio, f, indent=1)
-    print(f"gravado: {saida}/{args.model_name}_frr.json e {paths.TABLES}/{args.model_name}_frr.json", flush=True)
+    print(f"gravado: {saida}/{nome}_frr.json e {paths.TABLES}/{nome}_frr.json", flush=True)
 
 
 if __name__ == "__main__":

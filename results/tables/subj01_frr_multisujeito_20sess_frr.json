@@ -1,0 +1,400 @@
+{
+ "modelo": "subj01_frr_multisujeito_20sess",
+ "config": {
+  "modelo": "frr_ms",
+  "variante": "multi-sujeito",
+  "sujeito": 1,
+  "sessoes": 20,
+  "exibicoes_treino": 13509,
+  "dataset": {
+   "sessoes": 20,
+   "n_imagens": null,
+   "repeticoes": null,
+   "classes": null,
+   "regra": "exclusiva",
+   "minimo": 10,
+   "maximo_outros": 2,
+   "balanceado": false,
+   "semente": 0,
+   "agregacao": null,
+   "subj": 1
+  },
+  "agregacao": "exibicoes",
+  "amostras_treino": 13509,
+  "imagens_treino": 6708,
+  "imagens_teste": 1000,
+  "voxels": 15724,
+  "dim_alvo": 425984,
+  "k": 1024,
+  "k_efetivo": 1024,
+  "pretreino": [
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8
+  ],
+  "pesos": "sujeito",
+  "dobras": 5,
+  "semente": 42,
+  "grade": "doerig",
+  "bloco": 8192
+ },
+ "parametros_lineares": 452308992,
+ "parametros_ajustados_sujeito": 16101376,
+ "custo": {
+  "segundos_ajuste": 234.96277904510498,
+  "segundos_pretreino": 1091.6672558784485,
+  "segundos_embedding_alvos": 0.0005481243133544922,
+  "embeddings_calculados_nesta_corrida": 0,
+  "pico_gpu_gib": 1.4228906631469727,
+  "gpu": "NVIDIA RTX A4500",
+  "pico_ram_gib": 16.771865844726562,
+  "segundos_total": 305.7895448207855
+ },
+ "cv": {
+  "fracs": [
+   0.05,
+   0.1,
+   0.15,
+   0.2,
+   0.25,
+   0.3,
+   0.35,
+   0.4,
+   0.45,
+   0.5,
+   0.55,
+   0.6,
+   0.65,
+   0.7,
+   0.75,
+   0.8,
+   0.85,
+   0.9,
+   0.95,
+   1.0
+  ],
+  "cv_r2_por_fracao": [
+   0.14631201587907816,
+   0.11548921517611466,
+   0.04985165534217173,
+   -0.03824609167062021,
+   -0.1444964522986787,
+   -0.2669621420648447,
+   -0.4055532800203281,
+   -0.5596172854957024,
+   -0.7291124377359299,
+   -0.9145679979247938,
+   -1.1160630873303425,
+   -1.3355381451452981,
+   -1.5717164139600883,
+   -1.8275646794742566,
+   -2.1023093926379213,
+   -2.397389860707432,
+   -2.7133941334708624,
+   -3.0506999276355273,
+   -3.4096775189580146,
+   -3.789348773849958
+  ],
+  "cv_r2_escolhida": 0.15356478888599423,
+  "histograma_fracoes": [
+   990,
+   32,
+   2,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "por_alvo": true,
+  "posto_final": 13508,
+  "pares_fracao_alvo_inalcancaveis": 0,
+  "segundos_cv": 167.25881695747375,
+  "segundos_final": 59.50782370567322,
+  "segundos_total": 226.76664066314697
+ },
+ "pretreino": {
+  "config": {
+   "k": 1024,
+   "fracs": [
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.39999999999999997,
+    0.44999999999999996,
+    0.49999999999999994,
+    0.5499999999999999,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.7999999999999999,
+    0.85,
+    0.9,
+    0.95,
+    1.0
+   ],
+   "pesos": "sujeito",
+   "iteracoes": 10,
+   "tolerancia": 0.001,
+   "validacao": 0.1,
+   "seed": 42,
+   "chunk": 8192,
+   "rtol": 1e-10
+  },
+  "sujeitos": [
+   {
+    "nome": "subj02",
+    "voxels": 14278,
+    "posto": 14278,
+    "exibicoes_treino": 24300,
+    "exibicoes_validacao": 2700,
+    "imagens_treino": 8100,
+    "imagens_validacao": 900
+   },
+   {
+    "nome": "subj03",
+    "voxels": 15226,
+    "posto": 15226,
+    "exibicoes_treino": 19453,
+    "exibicoes_validacao": 2176,
+    "imagens_treino": 7633,
+    "imagens_validacao": 848
+   },
+   {
+    "nome": "subj04",
+    "voxels": 13153,
+    "posto": 13153,
+    "exibicoes_treino": 18314,
+    "exibicoes_validacao": 1998,
+    "imagens_treino": 7472,
+    "imagens_validacao": 830
+   },
+   {
+    "nome": "subj05",
+    "voxels": 13039,
+    "posto": 13039,
+    "exibicoes_treino": 24300,
+    "exibicoes_validacao": 2700,
+    "imagens_treino": 8100,
+    "imagens_validacao": 900
+   },
+   {
+    "nome": "subj06",
+    "voxels": 17907,
+    "posto": 17907,
+    "exibicoes_treino": 19461,
+    "exibicoes_validacao": 2168,
+    "imagens_treino": 7633,
+    "imagens_validacao": 848
+   },
+   {
+    "nome": "subj07",
+    "voxels": 12682,
+    "posto": 12682,
+    "exibicoes_treino": 24300,
+    "exibicoes_validacao": 2700,
+    "imagens_treino": 8100,
+    "imagens_validacao": 900
+   },
+   {
+    "nome": "subj08",
+    "voxels": 14386,
+    "posto": 14386,
+    "exibicoes_treino": 18265,
+    "exibicoes_validacao": 2047,
+    "imagens_treino": 7472,
+    "imagens_validacao": 830
+   }
+  ],
+  "historico": [
+   {
+    "iteracao": 1,
+    "perda_validacao": 0.9644870209558377,
+    "r2_validacao": 0.035512979044162285,
+    "r2_passo_R": [
+     0.14198630793274236,
+     0.10170717340486157,
+     0.11099753930771461,
+     0.13585479454158023,
+     0.07518160502206517,
+     0.11544634915544971,
+     0.07292475063558479
+    ],
+    "k_efetivo": 1024,
+    "histograma_fracoes_W": [
+     10732,
+     284047,
+     127031,
+     3502,
+     536,
+     95,
+     22,
+     15,
+     4,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "segundos": 150.56927275657654
+   },
+   {
+    "iteracao": 2,
+    "perda_validacao": 0.9643459001496275,
+    "r2_validacao": 0.03565409985037249,
+    "r2_passo_R": [
+     0.15739014958206177,
+     0.112410006648617,
+     0.1227257942381722,
+     0.14948254717818188,
+     0.08292021921689263,
+     0.127825745486561,
+     0.08011607080688876
+    ],
+    "k_efetivo": 1024,
+    "histograma_fracoes_W": [
+     10451,
+     280555,
+     131408,
+     3174,
+     308,
+     59,
+     21,
+     8,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "segundos": 147.59708333015442
+   }
+  ],
+  "melhor_iteracao": 2,
+  "r2_validacao": 0.03565409985037249,
+  "k_efetivo": 1024,
+  "segundos": 1091.6672558784485,
+  "diretorio": "/home/al.pedro.alberti/benchmark-modelos/train_logs/_pretreino_frr_ms/2ef0dd8c47",
+  "dados": [
+   {
+    "sujeito": 2,
+    "sessoes": 40,
+    "exibicoes": 27000,
+    "imagens": 9000
+   },
+   {
+    "sujeito": 3,
+    "sessoes": 32,
+    "exibicoes": 21629,
+    "imagens": 8481
+   },
+   {
+    "sujeito": 4,
+    "sessoes": 30,
+    "exibicoes": 20312,
+    "imagens": 8302
+   },
+   {
+    "sujeito": 5,
+    "sessoes": 40,
+    "exibicoes": 27000,
+    "imagens": 9000
+   },
+   {
+    "sujeito": 6,
+    "sessoes": 32,
+    "exibicoes": 21629,
+    "imagens": 8481
+   },
+   {
+    "sujeito": 7,
+    "sessoes": 40,
+    "exibicoes": 27000,
+    "imagens": 9000
+   },
+   {
+    "sujeito": 8,
+    "sessoes": 30,
+    "exibicoes": 20312,
+    "imagens": 8302
+   }
+  ]
+ },
+ "retrieval": {
+  "fwd": {
+   "media": 0.9408889055252075,
+   "ic95": [
+    0.9356538700948328,
+    0.9461239409555823
+   ]
+  },
+  "bwd": {
+   "media": 0.502000018954277,
+   "ic95": [
+    0.4876084832450388,
+    0.5163915546635153
+   ]
+  }
+ },
+ "retrieval_centrado": {
+  "fwd": {
+   "media": 0.9412222405274709,
+   "ic95": [
+    0.9360368132665728,
+    0.946407667788369
+   ]
+  },
+  "bwd": {
+   "media": 0.8528889060020447,
+   "ic95": [
+    0.8457604606599327,
+    0.8600173513441567
+   ]
+  }
+ },
+ "hubness": {
+  "cos_previsao_media_treino": 0.9326393008232117,
+  "cos_alvo_media_treino": 0.496150404214859
+ },
+ "embedding": {
+  "cosseno_medio": 0.5358182787895203,
+  "pearson_medio": 0.5213201642036438,
+  "cosseno_centrado_medio": 0.23099632561206818,
+  "pearson_mediana": 0.5207303762435913
+ }
+}

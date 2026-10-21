@@ -79,6 +79,13 @@ MindEye1 não entra):
 ~/envs/fmri/bin/python setup/prefetch_weights.py      # o Versatile Diffusion (23 GB) só serve ao MindEye1
 ```
 
+Para o FRR multi-sujeito ([FRR_MULTISUJEITO.md](FRR_MULTISUJEITO.md)), mais os sujeitos 2–8 (12,1 GB de betas e
+tars); os alvos CLIP deles (~50 GB) são calculados na primeira corrida:
+
+```bash
+setup/bootstrap.sh --multisujeito          # ou: setup/download_data.py --stage train --subj 2 3 4 5 6 7 8
+```
+
 Se `XDG_CACHE_HOME` apontar para uma partição pequena, exporte antes `HF_HOME=~/.cache/huggingface` e
 `TORCH_HOME=~/.cache/torch`: o HuggingFace e o `torch.hub` gravam lá os temporários dos downloads, e um
 disco cheio derruba o download com `No space left on device`, mesmo com espaço em `~`.
@@ -90,7 +97,7 @@ em `~/envs/fmri` (`MINDEYE_ENV`). Exporte as mesmas variáveis em todos os coman
 Confira no fim:
 
 ```bash
-~/envs/fmri/bin/python -m unittest discover -s tests      # 134 testes, ~15 s; "OK (skipped=3)"
+~/envs/fmri/bin/python -m unittest discover -s tests      # 176 testes, ~30 s; "OK (skipped=4)"
 setup/bootstrap.sh --check                                # o resumo diz o que ainda falta
 ```
 
