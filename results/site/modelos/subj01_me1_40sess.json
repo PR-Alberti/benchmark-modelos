@@ -2458,8 +2458,8 @@
    ]
   }
  },
- "espaco_clip": "ViT-bigG/14",
- "familia": "mindeye2",
+ "espaco_clip": "ViT-L/14",
+ "familia": "mindeye1",
  "fontes": [
   "results/tables/repro_subj01_me1_40sess_all_recons.csv",
   "train_logs/repro_subj01_me1_40sess/metrics.csv"
@@ -2526,8 +2526,22 @@
  "tempo_s": 104116.0,
  "valores": {
   "refinada": {
+   "AlexNet(2)": 0.9647907907907908,
+   "AlexNet(5)": 0.9796626626626627,
+   "Brain Corr. V1": 0.3331167697906494,
+   "Brain Corr. V2": 0.31691622734069824,
+   "Brain Corr. V3": 0.3107466995716095,
+   "Brain Corr. V4": 0.30156177282333374,
+   "Brain Corr. higher_vis": 0.35293158888816833,
+   "Brain Corr. nsd_general": 0.3543941080570221,
    "BwdRetrieval": 0.8758889059225718,
-   "FwdRetrieval": 0.9450000286102295
+   "CLIP": 0.9292442442442443,
+   "EffNet-B": 0.6320245301155288,
+   "FwdRetrieval": 0.9450000286102295,
+   "InceptionV3": 0.944995995995996,
+   "PixCorr": 0.3823008327935312,
+   "SSIM": 0.3468092932828328,
+   "SwAV": 0.3558662027832885
   },
   "unclip": {
    "AlexNet(2)": 0.9647907907907908,

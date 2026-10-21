@@ -38,6 +38,7 @@ STAGE_FILES = {
     "finetune": [
         "coco_images_224_float16.hdf5",
         MULTISUBJECT_CKPT,                        # 2.9 GB - pre-treino nos outros 7 sujeitos
+        "evals/all_images.pt",                    # 0.6 GB - imagens do teste: o FRR e o verify_retrieval avaliam com elas
     ],
     "blurry": [                                   # apenas se usar --blurry_recon
         "sd_image_var_autoenc.pth",               # 0.3 GB

@@ -60,6 +60,16 @@ class FrrNaPagina(unittest.TestCase):
         self.assertEqual(set(f["enh"]), {"FwdRetrieval", "BwdRetrieval"})
         self.assertEqual(f["enh"], f["base"])               # retrieval nao depende da reconstrucao
 
+    def test_frr_com_reconstrucao_soma_as_metricas_de_imagem(self):
+        d = dados_fake()
+        frr = next(m for m in d["modelos"] if m["id"] == "subj01_frr_1sess")
+        frr["tabelas"] = {"enh": None, "base": {"PixCorr": 0.05, "FwdRetrieval": 0.1}}   # so unCLIP
+        f = {l["rotulo"]: l for l in rows.linhas_de(d, 1)}["FRR · 1 sessão"]
+        self.assertEqual(f["base"]["PixCorr"], 0.05)
+        self.assertEqual(f["base"]["FwdRetrieval"], 0.5)     # o retrieval e o do run_frr.py
+        self.assertEqual(set(f["enh"]), {"FwdRetrieval", "BwdRetrieval"})   # sem refinamento
+        self.assertIn("sem refinamento", f["sub"])
+
     def test_frr_sem_resultado_nao_vira_linha_de_modelo_comum(self):
         d = dados_fake(frr1=False)
         self.assertTrue(all(not l["enh"] for l in rows.linhas_de(d, 1) if l["rotulo"].startswith("FRR")))

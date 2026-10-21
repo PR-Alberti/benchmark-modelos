@@ -1,5 +1,5 @@
 {
- "commit": "f1a8ed87e967288c81a9ea51a9a8b1674f866eb4",
+ "commit": "7e331f1a50fa09657e56df89c26a9738d307815c+alteracoes",
  "concluido": true,
  "config": {
   "dataset": {
@@ -32,6 +32,8 @@
  "espaco_clip": "ViT-bigG/14",
  "familia": "frr",
  "fontes": [
+  "results/tables/repro_subj01_frr_1sess_all_enhancedrecons.csv",
+  "results/tables/repro_subj01_frr_1sess_all_recons.csv",
   "results/tables/repro_subj01_frr_1sess_frr.json"
  ],
  "frr": {
@@ -65,13 +67,13 @@
    "voxels": 15724
   },
   "custo": {
-   "embeddings_calculados_nesta_corrida": 0,
+   "embeddings_calculados_nesta_corrida": 536,
    "gpu": "NVIDIA RTX A4500",
-   "pico_gpu_gib": 0.6026468276977539,
-   "pico_ram_gib": 3.182453155517578,
-   "segundos_ajuste": 9.814927577972412,
-   "segundos_embedding_alvos": 8.296966552734375e-05,
-   "segundos_total": 56.41969299316406
+   "pico_gpu_gib": 3.936354637145996,
+   "pico_ram_gib": 6.621349334716797,
+   "segundos_ajuste": 10.171622514724731,
+   "segundos_embedding_alvos": 242.78920888900757,
+   "segundos_total": 300.73685932159424
   },
   "cv": {
    "cv_r2_escolhida": 0.007160237766169475,
@@ -144,9 +146,9 @@
    "pares_fracao_alvo_inalcancaveis": 0,
    "por_alvo": true,
    "posto_final": 687,
-   "segundos_cv": 8.270594596862793,
-   "segundos_final": 0.12563610076904297,
-   "segundos_total": 8.396230697631836
+   "segundos_cv": 8.557374238967896,
+   "segundos_final": 0.12749671936035156,
+   "segundos_total": 8.684870958328247
   },
   "embedding": {
    "cosseno_centrado_medio": 0.11729031056165695,
@@ -163,7 +165,32 @@
  "grupo": "benchmark",
  "id": "subj01_frr_1sess",
  "iniciado": true,
- "legendas": null,
+ "legendas": {
+  "CLIP-B_brain_img": 0.5876638889312744,
+  "CLIP-B_brain_ref": 0.5926143527030945,
+  "CLIP-B_img_ref": 0.8392383456230164,
+  "CLIP-B_relative": 0.7002347707748413,
+  "CLIP-L_brain_img": 0.45291900634765625,
+  "CLIP-L_brain_ref": 0.4423758387565613,
+  "CLIP-L_img_ref": 0.7765910625457764,
+  "CLIP-L_relative": 0.583214282989502,
+  "Meteor_brain_img": 0.17930796424188172,
+  "Meteor_brain_ref": 0.1503635804043732,
+  "Meteor_img_ref": 0.4196759954156638,
+  "Meteor_relative": 0.42725332447067405,
+  "Rouge1_brain_img": 0.2970898926044806,
+  "Rouge1_brain_ref": 0.24952033237746266,
+  "Rouge1_img_ref": 0.5066996914549835,
+  "Rouge1_relative": 0.586323413285273,
+  "RougeL_brain_img": 0.2863819116757688,
+  "RougeL_brain_ref": 0.23884303209107655,
+  "RougeL_img_ref": 0.46368458943691104,
+  "RougeL_relative": 0.6176222333020494,
+  "Sentence_brain_img": 0.15673010051250458,
+  "Sentence_brain_ref": 0.15349765121936798,
+  "Sentence_img_ref": 0.7190179228782654,
+  "Sentence_relative": 0.21797801554203033
+ },
  "notas": [],
  "publicada": false,
  "reproducao": "repro_subj01_frr_1sess",
@@ -213,16 +240,44 @@
  "rotulo": "FRR · 1 sessão",
  "sessoes": 1,
  "status": "completo",
- "status_txt": "retrieval e embedding",
- "tempo_s": 9.814927577972412,
+ "status_txt": "métricas completas",
+ "tempo_s": 10.171622514724731,
  "valores": {
   "refinada": {
-   "BwdRetrieval": 0.03144444525241852,
-   "FwdRetrieval": 0.5501111209392547
+   "AlexNet(2)": 0.5194544544544544,
+   "AlexNet(5)": 0.5212442442442442,
+   "Brain Corr. V1": 0.03030649945139885,
+   "Brain Corr. V2": 0.02545265480875969,
+   "Brain Corr. V3": 0.034304097294807434,
+   "Brain Corr. V4": 0.04569616541266441,
+   "Brain Corr. higher_vis": 0.01913551054894924,
+   "Brain Corr. nsd_general": 0.016140015795826912,
+   "BwdRetrieval": 0.0283333339728415,
+   "CLIP": 0.516059059059059,
+   "EffNet-B": 0.9722756241565153,
+   "FwdRetrieval": 0.5521111210187276,
+   "InceptionV3": 0.5255775775775776,
+   "PixCorr": 0.0790633001718893,
+   "SSIM": 0.47379836007113363,
+   "SwAV": 0.6146634263560884
   },
   "unclip": {
-   "BwdRetrieval": 0.03144444525241852,
-   "FwdRetrieval": 0.5501111209392547
+   "AlexNet(2)": 0.5344834834834834,
+   "AlexNet(5)": 0.52398998998999,
+   "Brain Corr. V1": 0.06715776026248932,
+   "Brain Corr. V2": 0.047156985849142075,
+   "Brain Corr. V3": 0.049309756606817245,
+   "Brain Corr. V4": 0.058763373643159866,
+   "Brain Corr. higher_vis": 0.029380159452557564,
+   "Brain Corr. nsd_general": 0.036917153745889664,
+   "BwdRetrieval": 0.0283333339728415,
+   "CLIP": 0.5063243243243243,
+   "EffNet-B": 0.9822105595449219,
+   "FwdRetrieval": 0.5521111210187276,
+   "InceptionV3": 0.5120880880880881,
+   "PixCorr": 0.10265424665068355,
+   "SSIM": 0.44551974263029614,
+   "SwAV": 0.6312183131723375
   }
  }
 }

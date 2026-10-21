@@ -1,5 +1,5 @@
 {
- "commit": "4ab113daaee78087eb78624de23c1ade2bdbed66",
+ "commit": "7e331f1a50fa09657e56df89c26a9738d307815c+alteracoes",
  "concluido": true,
  "config": {
   "dataset": {
@@ -32,6 +32,8 @@
  "espaco_clip": "ViT-bigG/14",
  "familia": "frr",
  "fontes": [
+  "results/tables/repro_subj01_frr_40sess_all_enhancedrecons.csv",
+  "results/tables/repro_subj01_frr_40sess_all_recons.csv",
   "results/tables/repro_subj01_frr_40sess_frr.json"
  ],
  "frr": {
@@ -68,10 +70,10 @@
    "embeddings_calculados_nesta_corrida": 8464,
    "gpu": "NVIDIA RTX A4500",
    "pico_gpu_gib": 3.936354637145996,
-   "pico_ram_gib": 24.873008728027344,
-   "segundos_ajuste": 1183.9886560440063,
-   "segundos_embedding_alvos": 192.8634397983551,
-   "segundos_total": 1437.18115067482
+   "pico_ram_gib": 24.899250030517578,
+   "segundos_ajuste": 1235.1788108348846,
+   "segundos_embedding_alvos": 197.07395100593567,
+   "segundos_total": 1498.2267355918884
   },
   "cv": {
    "cv_r2_escolhida": 0.015699872648253566,
@@ -144,9 +146,9 @@
    "pares_fracao_alvo_inalcancaveis": 0,
    "por_alvo": true,
    "posto_final": 15724,
-   "segundos_cv": 1071.525312423706,
-   "segundos_final": 86.41775107383728,
-   "segundos_total": 1157.9430634975433
+   "segundos_cv": 1122.7998116016388,
+   "segundos_final": 84.23853278160095,
+   "segundos_total": 1207.0383443832397
   },
   "embedding": {
    "cosseno_centrado_medio": 0.21973928809165955,
@@ -163,7 +165,32 @@
  "grupo": "benchmark",
  "id": "subj01_frr_40sess",
  "iniciado": true,
- "legendas": null,
+ "legendas": {
+  "CLIP-B_brain_img": 0.6219367384910583,
+  "CLIP-B_brain_ref": 0.6242386698722839,
+  "CLIP-B_img_ref": 0.8392383456230164,
+  "CLIP-B_relative": 0.7410728335380554,
+  "CLIP-L_brain_img": 0.5040872097015381,
+  "CLIP-L_brain_ref": 0.4912498891353607,
+  "CLIP-L_img_ref": 0.7765910625457764,
+  "CLIP-L_relative": 0.649102509021759,
+  "Meteor_brain_img": 0.1942015345925583,
+  "Meteor_brain_ref": 0.15752543116945522,
+  "Meteor_img_ref": 0.4196759954156638,
+  "Meteor_relative": 0.46274158330216947,
+  "Rouge1_brain_img": 0.3030987482569118,
+  "Rouge1_brain_ref": 0.2551326188977601,
+  "Rouge1_img_ref": 0.5066996914549835,
+  "Rouge1_relative": 0.5981822238465678,
+  "RougeL_brain_img": 0.2849438585161883,
+  "RougeL_brain_ref": 0.23779320399172305,
+  "RougeL_img_ref": 0.46368458943691104,
+  "RougeL_relative": 0.6145208726091549,
+  "Sentence_brain_img": 0.2376522421836853,
+  "Sentence_brain_ref": 0.23011845350265503,
+  "Sentence_img_ref": 0.7190179228782654,
+  "Sentence_relative": 0.33052340149879456
+ },
  "notas": [],
  "publicada": false,
  "reproducao": "repro_subj01_frr_40sess",
@@ -211,16 +238,44 @@
  "rotulo": "FRR · 40 sessões",
  "sessoes": 40,
  "status": "completo",
- "status_txt": "retrieval e embedding",
- "tempo_s": 1183.9886560440063,
+ "status_txt": "métricas completas",
+ "tempo_s": 1235.1788108348846,
  "valores": {
   "refinada": {
-   "BwdRetrieval": 0.37722222904364267,
-   "FwdRetrieval": 0.9637778123219808
+   "AlexNet(2)": 0.6077157157157157,
+   "AlexNet(5)": 0.6373163163163162,
+   "Brain Corr. V1": 0.10204247385263443,
+   "Brain Corr. V2": 0.09652216732501984,
+   "Brain Corr. V3": 0.10033488273620605,
+   "Brain Corr. V4": 0.0951198861002922,
+   "Brain Corr. higher_vis": 0.056340206414461136,
+   "Brain Corr. nsd_general": 0.06490851193666458,
+   "BwdRetrieval": 0.3817777862151464,
+   "CLIP": 0.6120790790790791,
+   "EffNet-B": 0.9393783411366432,
+   "FwdRetrieval": 0.9597778101762136,
+   "InceptionV3": 0.6329179179179178,
+   "PixCorr": 0.24812316864136108,
+   "SSIM": 0.4751905582132673,
+   "SwAV": 0.5859916219878003
   },
   "unclip": {
-   "BwdRetrieval": 0.37722222904364267,
-   "FwdRetrieval": 0.9637778123219808
+   "AlexNet(2)": 0.6242702702702703,
+   "AlexNet(5)": 0.6025685685685686,
+   "Brain Corr. V1": 0.12559093534946442,
+   "Brain Corr. V2": 0.10438443720340729,
+   "Brain Corr. V3": 0.10251165926456451,
+   "Brain Corr. V4": 0.09454375505447388,
+   "Brain Corr. higher_vis": 0.04035066440701485,
+   "Brain Corr. nsd_general": 0.06268824636936188,
+   "BwdRetrieval": 0.3817777862151464,
+   "CLIP": 0.5652692692692692,
+   "EffNet-B": 0.9625250078600629,
+   "FwdRetrieval": 0.9597778101762136,
+   "InceptionV3": 0.5718048048048048,
+   "PixCorr": 0.27784841668634697,
+   "SSIM": 0.451478961709377,
+   "SwAV": 0.6053676532294662
   }
  }
 }
