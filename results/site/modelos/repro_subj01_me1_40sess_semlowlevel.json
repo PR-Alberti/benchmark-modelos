@@ -3,7 +3,7 @@
   6028506310,
   1792571056994519672
  ],
- "commit": "3ee6074f304e76624c375383ad6198f5ee79db0c+alteracoes",
+ "commit": "0228ae4a33a30d86618713aaf5cbd9e02e4b83a4+alteracoes",
  "concluido": true,
  "config": {
   "dataset": {
@@ -2497,7 +2497,7 @@
  "sessoes": 40,
  "status": "completo",
  "status_txt": "métricas completas",
- "tempo_s": null,
+ "tempo_s": 57015.0,
  "valores": {
   "refinada": {
    "AlexNet(2)": 0.8996206206206206,
