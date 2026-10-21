@@ -109,11 +109,14 @@ CONHECIDOS = {
 
 NOTAS = {
     "subj01_ridgeonly_1sess_prior": [
-        "Checkpoint do release checkpoints-v1, treinado com uma versão anterior do código; o retreino "
-        "com o código atual é o de semente 42."],
+        "Retreino com o código atual (semente 42). Substitui o checkpoint do release checkpoints-v1, "
+        "treinado com uma versão anterior do código; os dois diferem em até 0,7 ponto percentual nas "
+        "métricas de imagem (docs/REEXECUTAR.md)."],
     "subj01_ridgeonly_1sess": [
-        "Checkpoint do release checkpoints-v1, treinado com uma versão anterior do código e outro script; "
-        "o controle com o código atual é o sem prior de semente 42."],
+        "Retreino com o código atual (semente 42), o mesmo script do Ridge 1024 + prior, só sem a loss "
+        "do prior. Substitui o checkpoint do release checkpoints-v1, treinado com uma versão anterior do "
+        "código e outro script; os dois diferem em até 1,24 ponto percentual nas métricas de imagem "
+        "(docs/REEXECUTAR.md)."],
     "subj01_ridgeonly_1sess_prior_seed42": [
         "Retreino do Ridge 1024 + prior com o código atual. Junto das sementes 1 e 2, mede o ruído do treino."],
     "subj01_ridgeonly_1sess_noprior_seed42": [
@@ -457,7 +460,8 @@ def extrai(mid, antigo=None, d=None, benchmark=None, experimentos=None, resumos=
         tempo = curva["segundos"]
     elif familia == "mindeye1":
         if base.startswith("repro_"):                    # alto nivel e low-level, com o prefixo
-            etapas = [base, base.replace("subj01_me1_", "subj01_me1_lowlevel_", 1)]
+            etapas = [base] if base.endswith("_semlowlevel") else \
+                [base, base.replace("subj01_me1_", "subj01_me1_lowlevel_", 1)]
         else:
             etapas = [base] if (base.endswith("_semlowlevel") or exp_json) else \
                 [base, f"subj01_me1_lowlevel_{sessoes}sess"]
