@@ -525,12 +525,30 @@
     ]
    }
   },
+  "repro_subj01_me1_1sess_semlowlevel": {
+   "unclip": {
+    "arquivo": "repro_subj01_me1_1sess_semlowlevel__unclip.webp",
+    "sig": [
+     786433498,
+     1792513815739607953
+    ]
+   }
+  },
   "repro_subj01_me1_40sess": {
    "unclip": {
     "arquivo": "repro_subj01_me1_40sess__unclip.webp",
     "sig": [
      786433443,
      1792422037794966126
+    ]
+   }
+  },
+  "repro_subj01_me1_40sess_semlowlevel": {
+   "unclip": {
+    "arquivo": "repro_subj01_me1_40sess_semlowlevel__unclip.webp",
+    "sig": [
+     786433503,
+     1792574052172839636
     ]
    }
   },
@@ -839,7 +857,7 @@
   "arquivo": "vista.webp",
   "sig": [
    602113195,
-   1791837270040658676
+   1792428920155851560
   ]
  }
 }

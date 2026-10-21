@@ -2458,8 +2458,8 @@
    ]
   }
  },
- "espaco_clip": "ViT-L/14",
- "familia": "mindeye1",
+ "espaco_clip": "ViT-bigG/14",
+ "familia": "mindeye2",
  "fontes": [
   "results/tables/repro_subj01_me1_1sess_all_recons.csv",
   "train_logs/repro_subj01_me1_1sess/metrics.csv"
@@ -2467,7 +2467,32 @@
  "grupo": "experimento",
  "id": "repro_subj01_me1_1sess",
  "iniciado": true,
- "legendas": null,
+ "legendas": {
+  "CLIP-B_brain_img": 0.5926122665405273,
+  "CLIP-B_brain_ref": 0.6059049963951111,
+  "CLIP-B_img_ref": 0.8392383456230164,
+  "CLIP-B_relative": 0.7061310410499573,
+  "CLIP-L_brain_img": 0.4577183425426483,
+  "CLIP-L_brain_ref": 0.4547567665576935,
+  "CLIP-L_img_ref": 0.7765910625457764,
+  "CLIP-L_relative": 0.5893942713737488,
+  "Meteor_brain_img": 0.0,
+  "Meteor_brain_ref": 0.0,
+  "Meteor_img_ref": 0.4196759954156638,
+  "Meteor_relative": 0.0,
+  "Rouge1_brain_img": 0.0,
+  "Rouge1_brain_ref": 0.0,
+  "Rouge1_img_ref": 0.5066996914549835,
+  "Rouge1_relative": 0.0,
+  "RougeL_brain_img": 0.0,
+  "RougeL_brain_ref": 0.0,
+  "RougeL_img_ref": 0.46368458943691104,
+  "RougeL_relative": 0.0,
+  "Sentence_brain_img": 0.04864345118403435,
+  "Sentence_brain_ref": 0.051021989434957504,
+  "Sentence_img_ref": 0.7190179228782654,
+  "Sentence_relative": 0.067652627825737
+ },
  "notas": [],
  "params": {
   "net": 56055264,
@@ -2502,22 +2527,8 @@
  "tempo_s": 9755.0,
  "valores": {
   "refinada": {
-   "AlexNet(2)": 0.8703513513513513,
-   "AlexNet(5)": 0.8946196196196197,
-   "Brain Corr. V1": 0.2823163568973541,
-   "Brain Corr. V2": 0.2711489498615265,
-   "Brain Corr. V3": 0.27654045820236206,
-   "Brain Corr. V4": 0.2787383794784546,
-   "Brain Corr. higher_vis": 0.35526221990585327,
-   "Brain Corr. nsd_general": 0.34447258710861206,
    "BwdRetrieval": 0.2317777822415034,
-   "CLIP": 0.8084614614614615,
-   "EffNet-B": 0.8096725679063019,
-   "FwdRetrieval": 0.3060000071922938,
-   "InceptionV3": 0.8124564564564565,
-   "PixCorr": 0.2523602385847424,
-   "SSIM": 0.3431784337877125,
-   "SwAV": 0.46484475856986984
+   "FwdRetrieval": 0.3060000071922938
   },
   "unclip": {
    "AlexNet(2)": 0.8703513513513513,
