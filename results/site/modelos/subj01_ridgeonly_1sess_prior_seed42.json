@@ -1,8 +1,9 @@
 {
  "_params_sig": [
   3046319096,
-  1790794105325249741
+  1791850466339323252
  ],
+ "commit": "cba9e4ac0eb89e07eb1de6aff45ff686d735fcba",
  "concluido": true,
  "config": {
   "dataset": {
@@ -33,7 +34,7 @@
  },
  "config_descritiva": false,
  "config_erro": null,
- "config_fonte": "src/experimentos.py",
+ "config_fonte": "train_logs/repro_subj01_ridgeonly_1sess_prior/experimento.json",
  "curva": {
   "epocas": [
    1,
@@ -187,7 +188,7 @@
    149,
    150
   ],
-  "segundos": 6752.584792137146,
+  "segundos": 6613.297114610672,
   "series": {
    "lr": [
     0.00013,
@@ -1562,13 +1563,40 @@
  "espaco_clip": "ViT-bigG/14",
  "familia": "mindeye2",
  "fontes": [
-  "results/evals/subj01_ridgeonly_1sess_prior_seed42/subj01_ridgeonly_1sess_prior_seed42_retrieval.json",
-  "train_logs/subj01_ridgeonly_1sess_prior_seed42/metrics.csv"
+  "results/evals/repro_subj01_ridgeonly_1sess_prior/repro_subj01_ridgeonly_1sess_prior_retrieval.json",
+  "results/tables/repro_subj01_ridgeonly_1sess_prior_all_enhancedrecons.csv",
+  "results/tables/repro_subj01_ridgeonly_1sess_prior_all_recons.csv",
+  "train_logs/repro_subj01_ridgeonly_1sess_prior/metrics.csv"
  ],
  "grupo": "benchmark",
  "id": "subj01_ridgeonly_1sess_prior_seed42",
- "iniciado": null,
- "legendas": null,
+ "iniciado": true,
+ "legendas": {
+  "CLIP-B_brain_img": 0.6844449043273926,
+  "CLIP-B_brain_ref": 0.6744402050971985,
+  "CLIP-B_img_ref": 0.8392383456230164,
+  "CLIP-B_relative": 0.8155548572540283,
+  "CLIP-L_brain_img": 0.5818588137626648,
+  "CLIP-L_brain_ref": 0.5545294284820557,
+  "CLIP-L_img_ref": 0.7765910625457764,
+  "CLIP-L_relative": 0.7492473721504211,
+  "Meteor_brain_img": 0.2735982849214305,
+  "Meteor_brain_ref": 0.20987875335040565,
+  "Meteor_img_ref": 0.4196759954156638,
+  "Meteor_relative": 0.6519274104549342,
+  "Rouge1_brain_img": 0.3805736619449597,
+  "Rouge1_brain_ref": 0.3092536762532182,
+  "Rouge1_img_ref": 0.5066996914549835,
+  "Rouge1_relative": 0.75108327153732,
+  "RougeL_brain_img": 0.3579456541801267,
+  "RougeL_brain_ref": 0.28736925230416416,
+  "RougeL_img_ref": 0.46368458943691104,
+  "RougeL_relative": 0.7719593498132178,
+  "Sentence_brain_img": 0.3782612979412079,
+  "Sentence_brain_ref": 0.34840038418769836,
+  "Sentence_img_ref": 0.7190179228782654,
+  "Sentence_relative": 0.5260804891586304
+ },
  "notas": [
   "Retreino do Ridge 1024 + prior com o código atual. Junto das sementes 1 e 2, mede o ruído do treino."
  ],
@@ -1578,6 +1606,7 @@
   "ridge": 16102400
  },
  "publicada": false,
+ "reproducao": "repro_subj01_ridgeonly_1sess_prior",
  "resumo_dataset": {
   "exibicoes": 688,
   "imagens_unicas": 536,
@@ -1608,17 +1637,45 @@
  "retrieval_centrado": null,
  "rotulo": "Ridge 1024 + prior · 1 sessão · semente 42",
  "sessoes": 1,
- "status": "retrieval",
- "status_txt": "só retrieval",
- "tempo_s": 6752.584792137146,
+ "status": "completo",
+ "status_txt": "métricas completas",
+ "tempo_s": 6613.297114610672,
  "valores": {
   "refinada": {
-   "BwdRetrieval": 0.8812222381432852,
-   "FwdRetrieval": 0.9291111250718435
+   "AlexNet(2)": 0.8535205205205205,
+   "AlexNet(5)": 0.9278608608608608,
+   "Brain Corr. V1": 0.2992689311504364,
+   "Brain Corr. V2": 0.31898581981658936,
+   "Brain Corr. V3": 0.3248502314090729,
+   "Brain Corr. V4": 0.3052826523780823,
+   "Brain Corr. higher_vis": 0.3496663570404053,
+   "Brain Corr. nsd_general": 0.3495514690876007,
+   "BwdRetrieval": 0.8810000201066335,
+   "CLIP": 0.8244424424424425,
+   "EffNet-B": 0.8046087036204633,
+   "FwdRetrieval": 0.9275555690129598,
+   "InceptionV3": 0.8433263263263263,
+   "PixCorr": 0.18045888464823637,
+   "SSIM": 0.3483248224867638,
+   "SwAV": 0.4600522044479551
   },
   "unclip": {
-   "BwdRetrieval": 0.8812222381432852,
-   "FwdRetrieval": 0.9291111250718435
+   "AlexNet(2)": 0.8321361361361361,
+   "AlexNet(5)": 0.9271341341341341,
+   "Brain Corr. V1": 0.3149406313896179,
+   "Brain Corr. V2": 0.3296211063861847,
+   "Brain Corr. V3": 0.33207738399505615,
+   "Brain Corr. V4": 0.3062836527824402,
+   "Brain Corr. higher_vis": 0.34356796741485596,
+   "Brain Corr. nsd_general": 0.34952619671821594,
+   "BwdRetrieval": 0.8810000201066335,
+   "CLIP": 0.8155955955955956,
+   "EffNet-B": 0.812677400173668,
+   "FwdRetrieval": 0.9275555690129598,
+   "InceptionV3": 0.8579379379379379,
+   "PixCorr": 0.17569546724710947,
+   "SSIM": 0.28729481602126716,
+   "SwAV": 0.4717859370082428
   }
  }
 }
