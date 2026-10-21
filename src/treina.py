@@ -15,6 +15,14 @@ O que acontece:
    frr -> scripts/run_frr.sh, mindeye2 -> scripts/run_ridgeonly_prior.sh,
    mindeye1 -> scripts/me1_run.sh train.
 
+Depois do treino, --reconstrucao (so o FRR) gera as imagens a partir do embedding do proprio modelo,
+sem rede do MindEye2 (scripts/run_recon_embeddings.sh), e calcula as metricas delas:
+
+    python src/treina.py repro_subj01_frr_1sess --reconstrucao unclip    # unCLIP
+    python src/treina.py repro_subj01_frr_1sess --reconstrucao refino    # unCLIP + refinamento (SDXL)
+
+O padrao e none. Com o treino ja concluido, so a reconstrucao roda; etapa ja feita e pulada.
+
 Um experimento concluido nao roda de novo (marcador train_logs/<nome>/.treino_completo), e um
 nome que ja tem modelo treinado fora do treina.py (os do benchmark) e recusado, para nunca
 sobrescrever um modelo: para reproduzir um deles, use outro nome. Um nome de experimento nao muda
@@ -75,6 +83,7 @@ class Modelo:
     valida_dataset: callable = field(default=lambda h, resumo: None)   # antes de gravar o manifesto
     agregacoes: tuple = agregacao.MODOS     # modos de usar as repeticoes que o treino aceita
     saida: callable = field(default=lambda nome: paths.TRAIN_LOGS / nome / "last.pth")   # o modelo treinado
+    reconstrucao: str = None            # script que reconstroi a partir do modelo treinado (--reconstrucao)
 
     def completa(self, hiper):
         hiper = dict(hiper or {})
@@ -135,7 +144,8 @@ MODELOS = {
                   {"folds": 5, "grid": "doerig", "fracs": None, "global_fraction": False,
                    "seed": 42, "chunk": 8192},
                   _frr, agregacoes=("exibicoes", "media"),      # sem epocas: nada a sortear por epoca
-                  saida=lambda nome: paths.TABLES / f"{nome}_frr.json"),
+                  saida=lambda nome: paths.TABLES / f"{nome}_frr.json",
+                  reconstrucao="run_recon_embeddings.sh"),
     # src/train_ridgeonly.py: so a ridge do subj01, a partir do pre-treino nos outros 7 sujeitos.
     # batch_size None = o padrao do script (16 no 1024, 8 no 4096 + blurry); frozen_fp16 None = idem
     "mindeye2": Modelo(["run_ridgeonly_prior.sh"],
@@ -175,8 +185,22 @@ def _confere_igual(caminho, chave, novo, nome):
                          f"Mude o nome do experimento ou apague train_logs/{nome}.")
 
 
-def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
-    """Monta o dataset do experimento e treina. Devolve o resumo do dataset."""
+RECONSTRUCOES = ("none", "unclip", "refino")
+
+
+def _reconstroi(nome, modelo, hiper, reconstrucao, dry_run):
+    """Depois do treino: reconstrucao (unCLIP, com ou sem refinamento) e metricas, se pedidas."""
+    if reconstrucao == "none":
+        return
+    cmd = ["bash", str(paths.REPO / "scripts" / modelo.reconstrucao), nome, reconstrucao]
+    env = {"SEED": str(hiper["seed"])}
+    print(f"[{nome}] reconstrucao: SEED={env['SEED']} {shlex.join(cmd)}", flush=True)
+    if not dry_run:
+        subprocess.run(cmd, env={**os.environ, **env}, check=True)
+
+
+def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False, reconstrucao="none"):
+    """Monta o dataset do experimento, treina e, se pedido, reconstroi. Devolve o resumo do dataset."""
     if not re.fullmatch(r"[A-Za-z0-9_.-]+", nome):
         raise ValueError(f"nome {nome!r}: so letras, numeros, _ . -")
     sobra = set(exp) - {"modelo", "hiper", "dataset", "rotulo"}
@@ -191,6 +215,11 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
     if cfg.agregacao is not None and cfg.agregacao not in modelo.agregacoes:
         raise ValueError(f"{exp['modelo']}: agregacao {cfg.agregacao!r} nao se aplica; use uma de {modelo.agregacoes}")
     hiper = modelo.completa(exp.get("hiper"))
+    if reconstrucao not in RECONSTRUCOES:
+        raise ValueError(f"reconstrucao {reconstrucao!r}: use uma de {RECONSTRUCOES}")
+    if reconstrucao != "none" and not modelo.reconstrucao:
+        raise ValueError(f"{exp['modelo']}: --reconstrucao so vale para o FRR; o MindEye2 e o MindEye1 "
+                         "reconstroem pelos proprios scripts (run_recon.sh, me1_run.sh)")
 
     pasta = paths.TRAIN_LOGS / nome
     manifesto, registro, completo = pasta / "dataset.json", pasta / "experimento.json", pasta / ".treino_completo"
@@ -218,6 +247,7 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
         _confere_igual(registro, "modelo", exp["modelo"], nome)
     if completo.exists() and not dry_run:
         print(f"[{nome}] ja treinado: {modelo.saida(nome)} (para treinar de novo, apague {pasta})", flush=True)
+        _reconstroi(nome, modelo, hiper, reconstrucao, dry_run)
         return resumo
     env, args = modelo.traduz(hiper)
     env.update({"MODEL_NAME": nome, "NUM_SESSIONS": str(cfg.sessoes), "DATASET": str(manifesto)})
@@ -231,6 +261,7 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
     cmd = ["bash", str(paths.REPO / "scripts" / modelo.script[0]), *modelo.script[1:], *args]
     print(f"[{nome}] {' '.join(f'{k}={shlex.quote(v)}' for k, v in env.items())} {shlex.join(cmd)}", flush=True)
     if dry_run:
+        _reconstroi(nome, modelo, hiper, reconstrucao, dry_run)
         return resumo
 
     with open(registro, "w") as f:
@@ -240,6 +271,7 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False):
                    "comando": {"env": env, "cmd": cmd}}, f, indent=1, ensure_ascii=False)
     subprocess.run(cmd, env=ambiente, check=True)
     completo.touch()
+    _reconstroi(nome, modelo, hiper, reconstrucao, dry_run)
     return resumo
 
 
@@ -252,6 +284,8 @@ def main():
     p.add_argument("--so_dataset", action="store_true", help="monta e resume o dataset, sem treinar")
     p.add_argument("--dry_run", action="store_true", help="mostra o comando sem gravar nem treinar")
     p.add_argument("--retoma", action="store_true", help="mindeye2: continua do last.pth (RESUME=1)")
+    p.add_argument("--reconstrucao", choices=RECONSTRUCOES, default="none",
+                   help="frr: depois do treino, reconstroi pelo unCLIP (unclip) ou unCLIP + refinamento (refino)")
     a = p.parse_args()
 
     if a.lista or not a.nomes:
@@ -265,7 +299,8 @@ def main():
     if faltam:
         sys.exit(f"experimentos inexistentes: {faltam}; veja --lista")
     for nome in a.nomes:
-        roda(nome, TODOS[nome], so_dataset=a.so_dataset, dry_run=a.dry_run, retoma=a.retoma)
+        roda(nome, TODOS[nome], so_dataset=a.so_dataset, dry_run=a.dry_run, retoma=a.retoma,
+             reconstrucao=a.reconstrucao)
 
 
 if __name__ == "__main__":

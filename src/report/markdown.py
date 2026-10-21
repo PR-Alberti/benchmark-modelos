@@ -84,9 +84,12 @@ def markdown(dados, args):
     L += ["## FRR: o baseline linear", "",
           "Regressão ridge fracionária (Rokem & Kay, 2020) dos 15.724 voxels direto para o embedding CLIP "
           "achatado (256 × 1.664 = 425.984 números), seguindo Doerig et al. (2025): validação cruzada de "
-          "5 dobras agrupada por imagem e uma fração escolhida para cada dimensão do alvo. Sem rede, sem "
-          "prior e sem reconstrução, então só o retrieval é comparável com os outros modelos; cosseno, "
-          "Pearson e cosseno centrado medem o quanto do embedding verdadeiro a regressão recupera.", "",
+          "5 dobras agrupada por imagem e uma fração escolhida para cada dimensão do alvo. Sem rede e sem "
+          "prior; cosseno, Pearson e cosseno centrado medem o quanto do embedding verdadeiro a regressão "
+          "recupera. A reconstrução é opcional (`src/treina.py --reconstrucao unclip|refino`): o embedding "
+          "previsto vai direto para o unCLIP e, no refino, para o SDXL guiado pela legenda que o GIT tira "
+          "dele. Nenhuma dessas redes viu fMRI, então o que vem do cérebro é só o FRR. Sem ela, só o "
+          "retrieval se compara com os outros modelos.", "",
           "| Variante | " + " | ".join(f"{r} ↑" for r, _, _ in cols) + " |", "|---|" + "---:|" * len(cols)]
     for g, gt in GRUPOS.items():
         vs = [v for v in dados["frr_variantes"] if v["grupo"] == g and v["dados"]]

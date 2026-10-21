@@ -19,6 +19,9 @@ export MINDEYE_DATA="$DATA"
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
 export HF_HOME="$DATA/.cache"                 # pesos do open_clip bigG vao para ca (~10 GB)
 export TRANSFORMERS_CACHE="$DATA/.cache"
+# pesos do torch.hub (redes das metricas); o mesmo lugar onde o setup/prefetch_weights.py os poe. Sem
+# isto o padrao segue o XDG_CACHE_HOME, que pode estar em outra particao
+export TORCH_HOME="${TORCH_HOME:-$HOME/.cache/torch}"
 # Sem isto o treino em batch 16 nao cabe quando o desktop tambem roda na GPU: o allocator
 # deixa ~2 GB reservados mas nao alocados e o backward estoura.
 export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"

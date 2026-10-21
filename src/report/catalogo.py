@@ -224,10 +224,12 @@ def _tempo_me1(etapas, log):
 
 def _todos():
     try:
-        from experimentos import BENCHMARK, EXPERIMENTOS
+        from experimentos import BENCHMARK, EXPERIMENTOS, REPRODUCOES
     except ImportError:
         return {}, {}
-    return BENCHMARK, EXPERIMENTOS
+    # as reproducoes entram com os experimentos: sem elas, uma repro_ sem train_logs nesta maquina
+    # (treinada em outra) perderia a configuracao e a familia
+    return BENCHMARK, {**EXPERIMENTOS, **REPRODUCOES}
 
 
 def config_efetiva(cfg):
@@ -322,7 +324,7 @@ def ids_com_resultado(d=None):
     return ids
 
 
-def _familia(mid, cfg, d):
+def _familia(mid, cfg, d, antiga=None):
     base = mid[:-len(PUBLICADA)] if mid.endswith(PUBLICADA) else mid
     if mid in CONHECIDOS and CONHECIDOS[mid].get("familia"):
         return CONHECIDOS[mid]["familia"]
@@ -334,7 +336,7 @@ def _familia(mid, cfg, d):
         return "frr"
     if (d["me1"] / base).exists():
         return "mindeye1"
-    return "mindeye2"
+    return antiga or "mindeye2"           # sem nada em disco: a do registro anterior
 
 
 def extrai(mid, antigo=None, d=None, benchmark=None, experimentos=None, resumos=None):
@@ -365,7 +367,7 @@ def extrai(mid, antigo=None, d=None, benchmark=None, experimentos=None, resumos=
         fonte = "conhecida" if k.get("config") else f"a de {k['base']} (src/experimentos.py)"
     else:
         cfg, fonte = None, None
-    familia = _familia(mid, cfg, d)
+    familia = _familia(mid, cfg, d, antigo.get("familia"))
     descritiva = familia == "artigo"
     efetiva, erro = (cfg, None) if descritiva else config_efetiva(cfg)
     r.update(familia=familia, config=efetiva, config_fonte=fonte, config_erro=erro,
@@ -402,7 +404,7 @@ def extrai(mid, antigo=None, d=None, benchmark=None, experimentos=None, resumos=
     if familia == "mindeye1" and valores["unclip"] and not valores["refinada"]:
         valores["refinada"] = dict(valores["unclip"])     # sem refinamento: a reconstrucao final e a mesma
     legendas = None
-    if familia in ("mindeye2", "artigo") and not publicada:
+    if familia in ("mindeye2", "artigo", "frr") and not publicada:
         for suf in ("_all_enhancedrecons", "_all_recons"):
             p = d["tables"] / f"{base}{suf}_caption_metrics.csv"
             legendas = _le_legendas(p)
@@ -497,10 +499,10 @@ def status(r):
     """completo | retrieval | treino | planejado, e o texto para o site."""
     v = r.get("valores") or {}
     imagem = any(t and any(k not in ("FwdRetrieval", "BwdRetrieval") for k in t) for t in v.values())
-    if r["familia"] == "frr" and r.get("retrieval"):
-        return "completo", "retrieval e embedding"
     if imagem:
         return "completo", "métricas completas"
+    if r["familia"] == "frr" and r.get("retrieval"):
+        return "completo", "retrieval e embedding"
     if r.get("retrieval") and r["retrieval"].get("fonte") != "treino":
         return "retrieval", "só retrieval"
     if r.get("curva"):

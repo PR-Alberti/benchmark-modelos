@@ -70,6 +70,19 @@ setup/setup_env.sh --with-extras                              # ambiente ~/envs/
 ~/envs/fmri/bin/python setup/download_data.py --stage finetune --subj 1   # dados das 40 sessões + ponto de partida
 ```
 
+Para reconstruir as imagens do FRR (`treina.py --reconstrucao unclip|refino`), o caminho B precisa
+ainda do unCLIP, do SDXL do refinamento e das redes das métricas (~40 GB; o Versatile Diffusion do
+MindEye1 não entra):
+
+```bash
+~/envs/fmri/bin/python setup/download_data.py --stage recon enhanced evals --subj 1
+~/envs/fmri/bin/python setup/prefetch_weights.py      # o Versatile Diffusion (23 GB) só serve ao MindEye1
+```
+
+Se `XDG_CACHE_HOME` apontar para uma partição pequena, exporte antes `HF_HOME=~/.cache/huggingface` e
+`TORCH_HOME=~/.cache/torch`: o HuggingFace e o `torch.hub` gravam lá os temporários dos downloads, e um
+disco cheio derruba o download com `No space left on device`, mesmo com espaço em `~`.
+
 Nos dois caminhos, tudo é idempotente: se cair, rode o mesmo comando e ele continua de onde parou.
 Os dados ficam em `~/mindeyev2` (mude com `MINDEYE_DATA=/outro/lugar` ou `--data-path`) e o ambiente
 em `~/envs/fmri` (`MINDEYE_ENV`). Exporte as mesmas variáveis em todos os comandos seguintes se mudar.

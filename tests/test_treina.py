@@ -62,7 +62,7 @@ class Hiper(unittest.TestCase):
 
 
 MAQUINA = {"HOME", "PWD", "BASH_SOURCE", "MINDEYE_ENV", "MINDEYE_DATA", "CUDA_VISIBLE_DEVICES",
-           "PYTORCH_CUDA_ALLOC_CONF", "ME1_DATA"}      # configuracao da maquina, nao do experimento
+           "PYTORCH_CUDA_ALLOC_CONF", "ME1_DATA", "TORCH_HOME"}      # configuracao da maquina, nao do experimento
 
 
 def variaveis_lidas(*arquivos):
@@ -176,6 +176,66 @@ class Experimentos(unittest.TestCase):
                 treina.roda("x", exp, dry_run=True)
         with self.assertRaisesRegex(ValueError, "nome"):
             treina.roda("a b", {"modelo": "frr"}, dry_run=True)
+
+
+class Reconstrucao(unittest.TestCase):
+    """--reconstrucao: depois do treino do FRR, o run_recon_embeddings.sh; padrao none."""
+    FRR = {"modelo": "frr", "dataset": {"sessoes": 1}}
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.patches = [mock.patch.object(treina.paths, "TRAIN_LOGS", Path(self.tmp.name)),
+                        mock.patch.object(treina.paths, "TABLES", Path(self.tmp.name) / "tables"),
+                        mock.patch.object(treina.dc, "monta", return_value={
+                            **MANIFESTO_FALSO, "config": dc.ConfigDataset(sessoes=1).como_dict()}),
+                        mock.patch.object(treina, "_commit", return_value="abc")]
+        for p in self.patches:
+            p.start()
+
+    def tearDown(self):
+        for p in self.patches:
+            p.stop()
+        self.tmp.cleanup()
+
+    def roda(self, exp, **kw):
+        with redirect_stdout(io.StringIO()) as out, mock.patch("subprocess.run") as run:
+            treina.roda("exp", exp, **kw)
+        return out.getvalue(), [c.args[0] for c in run.call_args_list], run
+
+    def test_padrao_nao_reconstroi(self):
+        _, cmds, _ = self.roda(self.FRR)
+        self.assertEqual([c[1].rsplit("/", 1)[-1] for c in cmds], ["run_frr.sh"])
+
+    def test_reconstroi_depois_do_treino(self):
+        for modo in ("unclip", "refino"):
+            with self.subTest(modo):
+                _, cmds, run = self.roda(self.FRR, reconstrucao=modo)
+                self.assertEqual([c[1].rsplit("/", 1)[-1] for c in cmds], ["run_frr.sh", "run_recon_embeddings.sh"])
+                self.assertEqual(cmds[-1][2:], ["exp", modo])
+                self.assertEqual(run.call_args_list[-1].kwargs["env"]["SEED"], "42")
+                (Path(self.tmp.name) / "exp" / ".treino_completo").unlink()
+
+    def test_concluido_so_reconstroi(self):
+        self.roda(self.FRR)
+        out, cmds, _ = self.roda(self.FRR, reconstrucao="refino")
+        self.assertIn("ja treinado", out)
+        self.assertEqual([c[1].rsplit("/", 1)[-1] for c in cmds], ["run_recon_embeddings.sh"])
+
+    def test_dry_run_mostra_sem_rodar(self):
+        out, cmds, _ = self.roda(self.FRR, reconstrucao="unclip", dry_run=True)
+        self.assertEqual(cmds, [])
+        self.assertIn("run_recon_embeddings.sh exp unclip", out)
+
+    def test_so_o_frr_e_modo_valido(self):
+        with self.assertRaisesRegex(ValueError, "so vale para o FRR"):
+            treina.roda("x", {"modelo": "mindeye2"}, dry_run=True, reconstrucao="unclip")
+        with self.assertRaisesRegex(ValueError, "use uma de"):
+            treina.roda("x", self.FRR, dry_run=True, reconstrucao="sim")
+
+    def test_script_aceita_os_modos(self):
+        texto = (paths.REPO / "scripts" / "run_recon_embeddings.sh").read_text()
+        for modo in treina.RECONSTRUCOES[1:]:
+            self.assertIn(modo, texto)
 
 
 DADOS = os.path.exists(f"{paths.DATA}/wds/subj01/train/39.tar")
