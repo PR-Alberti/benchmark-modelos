@@ -53,6 +53,13 @@ MODELOS = [
 # MindEye1 sem o low-level: fora das tabelas do BENCHMARK.md (so no site), mas com reproducao
 ME1_SEM_LOWLEVEL = ["subj01_me1_1sess_semlowlevel", "subj01_me1_40sess_semlowlevel"]
 
+# Corridas do ruido (ocultas no site) e a reproducao que as substitui. Os retreinos de semente 42 sao a
+# mesma corrida das reproducoes do 1sess_prior e do 1sess (docs/REEXECUTAR.md), entao nao tem repro_ propria.
+SUBSTITUIDOS = {"subj01_ridgeonly_1sess_prior_seed42": "repro_subj01_ridgeonly_1sess_prior",
+                "subj01_ridgeonly_1sess_noprior_seed42": "repro_subj01_ridgeonly_1sess",
+                "subj01_ridgeonly_1sess_prior_seed1": "repro_subj01_ridgeonly_1sess_prior_seed1",
+                "subj01_ridgeonly_1sess_prior_seed2": "repro_subj01_ridgeonly_1sess_prior_seed2"}
+
 
 def fonte(mid, tabelas=None):
     """O id de onde saem os resultados do modelo de referencia `mid`.
@@ -64,6 +71,9 @@ def fonte(mid, tabelas=None):
     (results/tables por padrao).
     """
     tabelas = tabelas or paths.TABLES
+    if mid in SUBSTITUIDOS:
+        repro = SUBSTITUIDOS[mid]
+        return repro if (tabelas / f"{repro}_all_enhancedrecons.csv").exists() else mid
     referencias = ({m["id"] for m in MODELOS if not m.get("paper")} | {i for i, _, _ in FRR_VARIANTES}
                    | set(ME1_SEM_LOWLEVEL))
     if mid not in referencias:

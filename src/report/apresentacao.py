@@ -39,7 +39,7 @@ COLUNAS_GALERIA = [
 CUSTO = [
     ("subj01_frr_1sess", "FRR · 1 sessão", 14, 5, "start"),
     ("subj01_frr_40sess", "FRR · 40", 14, 5, "start"),
-    ("subj01_ridgeonly_1sess_prior_seed42", "Ridge 1024 · 1 sessão", -14, 19, "end"),
+    ("subj01_ridgeonly_1sess_prior", "Ridge 1024 · 1 sessão", -14, 19, "end"),
     ("subj01_ridgeonly_1sess_4096blurry", "Ridge 4096 + blurry · 1", -14, -9, "end"),
     ("subj01_ridgeonly_40sess_prior", "Ridge 1024 · 40", 0, -16, "middle"),
     ("subj01_ridgeonly_40sess_4096blurry", "4096 + blurry · 40", 10, 24, "start"),
@@ -47,97 +47,35 @@ CUSTO = [
     ("subj01_me1_40sess", "MindEye1 · 40", -14, 22, "end"),
 ]
 
-# a reexecucao (docs/REEXECUTAR.md): cada repro_<id> ao lado do <id> do benchmark. (id, rotulo, contra quem
-# comparar as metricas de imagem quando o original nao as tem: as sementes 1 e 2 so tem as do release)
+# a reexecucao (docs/REEXECUTAR.md): as reproducoes ocupam o lugar dos originais, que foram apagados; esta
+# tabela e o registro de quanto elas se afastaram deles (medido uma vez, na reexecucao). (rotulo, familia,
+# maior diferenca nas metricas de imagem)
 PREFIXO_REPRO = "repro_"
-REPRODUCAO = [
-    ("subj01_frr_1sess", "FRR · 1 sessão", None),
-    ("subj01_frr_40sess", "FRR · 40 sessões", None),
-    ("subj01_ridgeonly_1sess", "Ridge 1024 sem prior · 1", None),
-    ("subj01_ridgeonly_1sess_prior", "Ridge 1024 + prior · 1", None),
-    ("subj01_ridgeonly_1sess_prior_seed1", "semente 1", "subj01_ridgeonly_1sess_prior"),
-    ("subj01_ridgeonly_1sess_prior_seed2", "semente 2", "subj01_ridgeonly_1sess_prior"),
-    ("subj01_ridgeonly_1sess_4096blurry", "Ridge 4096 + blurry · 1", None),
-    ("subj01_ridgeonly_40sess_prior", "Ridge 1024 + prior · 40", None),
-    ("subj01_ridgeonly_40sess_4096blurry", "Ridge 4096 + blurry · 40", None),
+DIFERENCAS = [
+    ("FRR, as seis variantes", "frr", "0 (idêntico)"),
+    ("Ridge 4096 + blurry · 1", "mindeye2", "0 (idêntico, época por época)"),
+    ("MindEye1 · 1", "mindeye1", "0 (idêntico)"),
+    ("MindEye1 sem low-level · 1 e 40", "mindeye1", "0 (idêntico)"),
+    ("MindEye1 · 40", "mindeye1", "0,14 p.p. · 0,0007"),
+    ("Ridge 1024 + prior · 1", "mindeye2", "0,70 p.p. · 0,0030"),
+    ("Ridge 1024 sem prior · 1", "mindeye2", "1,24 p.p. · 0,0008"),
+    ("Ridge 1024 + prior · 40", "mindeye2", "0,89 p.p. · 0,0023"),
+    ("Ridge 4096 + blurry · 40", "mindeye2", "0,59 p.p. · 0,0064"),
+    ("Ridge 1024 + prior · sementes 1 e 2", "mindeye2", "1,19 e 0,95 p.p. · 0,0056 e 0,0038"),
 ]
 PCT = {m["id"] for m in site.METRICAS if m["fmt"] == "pct"}
 RETRIEVAL = {"FwdRetrieval", "BwdRetrieval"}
-
-
-def _imagem(m):
-    """As metricas de imagem de um registro (sem o retrieval, que toda tabela tem): {tipo: {metrica: valor}}."""
-    out = {}
-    for tipo, t in ((m or {}).get("valores") or {}).items():
-        t = {k: v for k, v in (t or {}).items() if k not in RETRIEVAL and v is not None}
-        if t:
-            out[tipo] = t
-    return out
-
-
-def diferenca(a, b):
-    """A maior diferenca entre as metricas de imagem de dois registros: (p.p. nas porcentagens, nas demais),
-    ou None se um dos dois nao tem metricas de imagem."""
-    ia, ib = _imagem(a), _imagem(b)
-    pares = [(k, ia[t][k], ib[t][k]) for t in set(ia) & set(ib) for k in set(ia[t]) & set(ib[t])]
-    if not pares:
-        return None
-    pp = max((100 * abs(x - y) for k, x, y in pares if k in PCT), default=0.0)
-    resto = max((abs(x - y) for k, x, y in pares if k not in PCT), default=0.0)
-    return pp, resto
 
 
 def _dec(x, casas):
     return f"{x:.{casas}f}".replace(".", ",")
 
 
-def _ret_como(r, o):
-    """O retrieval cerebro -> imagem da reproducao medido como o do original: se o original so tem o das tabelas
-    do final_evaluations (sem intervalo), o das tabelas da reproducao, e nao o do verify_retrieval.
-    Devolve (valor, mesma fonte do original?)."""
-    if ((o or {}).get("retrieval") or {}).get("fonte") == "final_evaluations":
-        img = _imagem(r)     # so uma tabela com metricas de imagem veio do final_evaluations
-        for tipo in ("refinada", "unclip"):
-            t = (r.get("valores") or {}).get(tipo) or {}
-            if tipo in img and t.get("BwdRetrieval") is not None:
-                return t["BwdRetrieval"], True
-        return _ret(r, "bwd"), False
-    return _ret(r, "bwd"), True
-
-
-def reproducao(por_id):
-    """As linhas do slide da reproducao, so dos modelos que tem o original e a reproducao."""
-    linhas = []
-    for mid, rotulo, base_img in REPRODUCAO:
-        o, r = por_id.get(mid), por_id.get(PREFIXO_REPRO + mid)
-        if not o or not r:
-            continue
-        ret_r, mesma = _ret_como(r, o)
-        ret = [_ret(o, "bwd"), ret_r]
-        dif = diferenca(por_id.get(base_img) or o, r)
-        if o.get("familia") == "frr":         # o FRR para no embedding: so o retrieval se compara
-            img = "0 (idêntico)" if ret[0] == ret[1] else "só retrieval"
-        elif dif is None:
-            img = "reconstrução pendente" if not _imagem(r) else "—"
-        elif dif == (0.0, 0.0):
-            img = "0 (idêntico)"
-        else:
-            img = (f"{_dec(dif[0], 2)} p.p. · {_dec(dif[1], 4)}" + (" <small>contra o release</small>" if base_img else ""))
-        linhas.append({"id": mid, "rotulo": rotulo, "familia": o.get("familia"), "sub": bool(base_img),
-                       "pp": dif[0] if dif else None, "mesma_fonte": mesma,
-                       "ret": [_pct(x, 2) for x in ret],
-                       "tempo": [duracao(m.get("tempo_s")) or "—" for m in (o, r)], "img": img})
-    return linhas
-
-
-def _tabela_reproducao(linhas):
+def _tabela_reproducao():
     fam = {"frr": "fam-frr", "mindeye2": "fam-me2", "mindeye1": "fam-me1"}
-    corpo = "".join(
-        f'<tr class="{fam.get(l["familia"], "")}{" sub" if l["sub"] else ""}"><th>{site._e(l["rotulo"])}</th>'
-        f'<td class="num">{l["ret"][0]} → {l["ret"][1]}{"" if l["mesma_fonte"] else "*"}</td>'
-        f'<td class="num">{site._e(l["tempo"][0])} → {site._e(l["tempo"][1])}</td>'
-        f'<td class="num">{l["img"]}</td></tr>' for l in linhas)
-    return ('<table class="tab tab-repro"><thead><tr><th>Modelo</th><th>Retrieval cér→img</th><th>Treino</th>'
+    corpo = "".join(f'<tr class="{fam.get(f, "")}"><th>{site._e(r)}</th><td class="num">{site._e(d)}</td></tr>'
+                    for r, f, d in DIFERENCAS)
+    return ('<table class="tab tab-repro"><thead><tr><th>Modelo</th>'
             '<th>Maior diferença nas métricas de imagem</th></tr></thead>'
             f'<tbody>{corpo}</tbody></table>')
 
@@ -185,23 +123,13 @@ def valores(modelos, planejados):
     v = {"data": f"{MESES[agora.month - 1]} de {agora.year}", "n_planejados": str(len(planejados)),
          "repo": site.REPO_URL, "repo_curto": site.REPO_URL.replace("https://", "")}
     repro = [m for m in modelos if m["id"].startswith(PREFIXO_REPRO)]
-    linhas = reproducao(por_id)
     v["n_repro"] = str(len(repro))
     v["n_repro_completas"] = str(sum(1 for m in repro if m.get("status") == "completo"))
-    v["tabela:reproducao"] = _tabela_reproducao(linhas)
+    v["tabela:reproducao"] = _tabela_reproducao()
     horas = sum(m.get("tempo_s") or 0 for m in repro) / 3600
     v["repro:horas_treino"] = f"{horas:.0f} h"
-    frr = [l for l in linhas if l["familia"] == "frr"]
-    pps = [l["pp"] for l in linhas if l["familia"] == "mindeye2" and l["pp"] is not None]
-    v["repro:resumo"] = " ".join(
-        ([("O FRR sai idêntico" if all(l["ret"][0] == l["ret"][1] for l in frr) else "O FRR muda") + ";"] if frr else [])
-        + ([f"o ridge-only fica a até {_dec(max(pps), 2)} p.p. do original nas métricas de imagem."]
-           if pps else []))
-    v["repro:nota_fonte"] = ("" if all(l["mesma_fonte"] for l in linhas) else
-                             " (* a reprodução, pelo verify_retrieval; o original, pela tabela, sem intervalo)")
-    pendentes = [l["rotulo"] for l in linhas if l["img"] == "reconstrução pendente"]
-    v["repro:pendente"] = (f"a reconstrução da reprodução do {pendentes[0]} sessão" if len(pendentes) == 1 else
-                           f"a reconstrução de {len(pendentes)} reproduções" if pendentes else "")
+    v["repro:resumo"] = ("O FRR e o MindEye1 de 1 sessão saem idênticos; o ridge-only e o MindEye1 de 40 sessões "
+                         "ficam a até 1,24 p.p. dos originais nas métricas de imagem.")
     for m in modelos:
         v[f"bwd:{m['id']}"] = _pct(_ret(m, "bwd"))
         v[f"fwd:{m['id']}"] = _pct(_ret(m, "fwd"))
@@ -279,8 +207,6 @@ def dados_pagina(modelos, galeria, semantica, exemplos):
     custo = []
     for mid, rot, dx, dy, ancora in CUSTO:
         m = por_id.get(mid)
-        if not (m and m.get("tempo_s")) and (por_id.get(PREFIXO_REPRO + mid) or {}).get("tempo_s"):
-            m = por_id[PREFIXO_REPRO + mid]     # o original nao tem tempo (checkpoint do release): o da reproducao
         if m and m.get("tempo_s") and _ret(m, "bwd") is not None:
             custo.append({"id": m["id"], "nome": m.get("rotulo") or mid, "rotulo": rot, "familia": m["familia"],
                           "sessoes": m.get("sessoes"), "tempo_s": m["tempo_s"], "bwd": _ret(m, "bwd"),
