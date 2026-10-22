@@ -145,6 +145,34 @@ for _n, _r in ((3000, 1), (1500, 2), (1000, 3)):
 
 
 # =============================================================================================
+# MindEye2 ridge-only com 2, 5, 10 e 20 sessoes, com e sem low-level (branch ME2-intermediate_sessions).
+# As pontas, 1 e 40 sessoes, ja estao no benchmark (repro_subj01_ridgeonly_{1,40}sess_prior e
+# _4096blurry) e entram na curva sem treinar de novo.
+#
+# "Sem low-level" e o Ridge 1024 + prior (partida: multisubject_subj01_1024hid_nolow_300ep) e "com" e o
+# Ridge 4096 + blurry (partida: final_multisubject_subj01), os mesmos pares do benchmark: o checkpoint com
+# o ramo blurry e 4096, entao o low-level e o hidden_dim mudam juntos (veja _valida_mindeye2).
+#
+# Epocas: as duas pontas usam receitas diferentes (150 epocas com 1 sessao, 20 com 40), entao as
+# intermediarias interpolam as epocas na escala geometrica do numero de sessoes,
+# 150 * (20/150) ** (ln N / ln 40), arredondado: 100, 60, 40 e 30 epocas (cerca de 8,4 mil, 12,7 mil,
+# 16,9 mil e 25,3 mil passos no batch 16, entre os 6,4 mil de 1 sessao e os 33,7 mil de 40). Batch
+# e padrao de cada configuracao (16 e 8), congelados em fp16 como nas 40 sessoes, e checkpoint a cada
+# epoca. A unica semente e a 42.
+# =============================================================================================
+EPOCAS_POR_SESSOES = {2: 100, 5: 60, 10: 40, 20: 30}
+
+for _n, _ep in EPOCAS_POR_SESSOES.items():
+    _comum = {"num_epochs": _ep, "frozen_fp16": True, "ckpt_interval": 1}
+    EXPERIMENTOS[f"subj01_ridgeonly_{_n}sess_prior"] = {
+        "modelo": "mindeye2", "hiper": dict(_comum), "dataset": {"sessoes": _n},
+        "rotulo": f"Ridge 1024 + prior · {_n} sessões"}
+    EXPERIMENTOS[f"subj01_ridgeonly_{_n}sess_4096blurry"] = {
+        "modelo": "mindeye2", "hiper": {**_comum, "hidden_dim": 4096, "blurry": True},
+        "dataset": {"sessoes": _n}, "rotulo": f"Ridge 4096 + blurry · {_n} sessões"}
+
+
+# =============================================================================================
 # Reproducoes dos modelos do benchmark pelo treina.py (docs/REEXECUTAR.md, scripts/run_reexecutar.sh):
 # o mesmo dicionario com outro nome, ja que o treina.py nao sobrescreve um modelo do benchmark. A
 # corrida refeita fica com o que as originais nao registraram: configuracao, commit do codigo,
