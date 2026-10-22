@@ -127,6 +127,8 @@ PRESETS = [
      ["subj01_ridgeonly_1sess_prior", "subj01_ridgeonly_1sess"]),
     ("lowlevel", "MindEye1 e o low-level", "O MindEye1 com e sem a imagem borrada do low-level guiando a reconstrução.",
      ["subj01_me1_1sess", "subj01_me1_1sess_semlowlevel", "subj01_me1_40sess", "subj01_me1_40sess_semlowlevel"]),
+    ("sessoes_me1", "MindEye1 por número de sessões", "O MindEye1 com 1, 5, 10, 20 e 40 sessões, com e sem o low-level.",
+     [f"subj01_me1_{n}sess{v}" for v in ("", "_semlowlevel") for n in (1, 5, 10, 20, 40)]),
     ("frr", "Variantes do FRR", "A grade de Doerig, uma fração só para todas as dimensões e a grade estendida.",
      ["subj01_frr_1sess", "subj01_frr_1sess_global", "subj01_frr_1sess_ext", "subj01_frr_40sess",
       "subj01_frr_40sess_global", "subj01_frr_40sess_ext"]),
