@@ -144,6 +144,20 @@ for _n, _r in ((3000, 1), (1500, 2), (1000, 3)):
     }
 
 
+# MindEye1 em 5, 10 e 20 sessoes (as N primeiras, o dataset completo delas), entre os 1 e 40 do benchmark,
+# com e sem o low-level (scripts/run_me1_sessoes.sh). O alto nivel e treinado uma vez por tamanho: o
+# "_semlowlevel" e o mesmo checkpoint, so a reconstrucao muda (sem o img2img a partir da borrada), e por
+# isso nao tem treino proprio -- nao rode o treina.py com ele.
+for _n in (5, 10, 20):
+    _hiper = {"save_every": 5} if _n == 5 else {}
+    EXPERIMENTOS[f"subj01_me1_{_n}sess"] = {
+        "modelo": "mindeye1", "hiper": dict(_hiper), "dataset": {"sessoes": _n},
+        "rotulo": f"MindEye1 · {_n} sessões"}
+    EXPERIMENTOS[f"subj01_me1_{_n}sess_semlowlevel"] = {
+        "modelo": "mindeye1", "hiper": dict(_hiper), "dataset": {"sessoes": _n},
+        "rotulo": f"MindEye1 sem low-level · {_n} sessões"}
+
+
 # =============================================================================================
 # Reproducoes dos modelos do benchmark pelo treina.py (docs/REEXECUTAR.md, scripts/run_reexecutar.sh):
 # o mesmo dicionario com outro nome, ja que o treina.py nao sobrescreve um modelo do benchmark. A

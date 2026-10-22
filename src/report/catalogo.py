@@ -430,9 +430,12 @@ def extrai(mid, antigo=None, d=None, benchmark=None, experimentos=None, resumos=
                 retrieval = {"fwd": {"media": t["FwdRetrieval"]}, "bwd": {"media": t["BwdRetrieval"]},
                              "fonte": "final_evaluations"}
 
-    curva = None if publicada else _le_curva(d["train_logs"] / mid / "metrics.csv")
+    de_treino = mid                       # onde esta o metrics.csv: o _semlowlevel sem treino proprio usa o do alto nivel
+    if mid.endswith("_semlowlevel") and not (d["train_logs"] / mid / "metrics.csv").exists():
+        de_treino = mid[:-len("_semlowlevel")]
+    curva = None if publicada else _le_curva(d["train_logs"] / de_treino / "metrics.csv")
     if curva:
-        fontes.append(f"train_logs/{mid}/metrics.csv")
+        fontes.append(f"train_logs/{de_treino}/metrics.csv")
         if not retrieval:
             retrieval = {"fwd": {"media": curva["series"]["teste_fwd"][-1]},
                          "bwd": {"media": curva["series"]["teste_bwd"][-1]},
@@ -459,13 +462,17 @@ def extrai(mid, antigo=None, d=None, benchmark=None, experimentos=None, resumos=
     elif familia == "mindeye2" and curva:
         tempo = curva["segundos"]
     elif familia == "mindeye1":
-        if base.startswith("repro_"):                    # alto nivel e low-level, com o prefixo
-            etapas = [base] if base.endswith("_semlowlevel") else \
-                [base, base.replace("subj01_me1_", "subj01_me1_lowlevel_", 1)]
+        log = d["logs"] / "me1_benchmark.log"
+        baixo = base.replace("subj01_me1_", "subj01_me1_lowlevel_", 1)
+        if base.endswith("_semlowlevel"):
+            # com treino proprio (as reproducoes e os originais) ou so a reconstrucao de outro modelo
+            # (scripts/run_me1_sessoes.sh): neste caso o tempo e o do alto nivel do modelo de onde vem
+            tempo = _tempo_me1([base], log) or _tempo_me1([base[:-len("_semlowlevel")]], log)
+        elif base.startswith("repro_"):                  # alto nivel e low-level, com o prefixo
+            tempo = _tempo_me1([base, baixo], log)
         else:
-            etapas = [base] if (base.endswith("_semlowlevel") or exp_json) else \
-                [base, f"subj01_me1_lowlevel_{sessoes}sess"]
-        tempo = _tempo_me1(etapas, d["logs"] / "me1_benchmark.log")
+            etapas = [base] if exp_json else [base, f"subj01_me1_lowlevel_{sessoes}sess"]
+            tempo = (_tempo_me1([base, baixo], log) if exp_json else None) or _tempo_me1(etapas, log)
     r["tempo_s"] = tempo
     if not publicada and familia != "frr":
         pasta = d["me1"] if familia == "mindeye1" else d["train_logs"]

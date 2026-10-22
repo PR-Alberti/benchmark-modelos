@@ -174,7 +174,8 @@ class Descricoes(unittest.TestCase):
         self.assertIn("id: 'res-' + mt.slug", js)
 
     def test_presets_e_pares_apontam_para_modelos_do_benchmark(self):
-        conhecidos = set(catalogo.ROTULOS)
+        from experimentos import EXPERIMENTOS
+        conhecidos = set(catalogo.ROTULOS) | set(EXPERIMENTOS)       # os de sessoes intermediarias sao experimentos
         for _, _, _, ids in site.PRESETS:
             self.assertLessEqual(set(ids), conhecidos)
         for _, a, b in site.PARES:
