@@ -17,7 +17,7 @@ voxels do sujeito s ──Rₛ──▶ k números ──Q──▶ embedding CL
 
 | | Experimento | Pré-treino da leitura Q | Ajuste no subj01 |
 |---|---|---|---|
-| A | `subj01_frr_{1,40}sess` (o FRR de sempre) | — (voxels → CLIP direto) | tudo |
+| A | `repro_subj01_frr_{1,40}sess` e `subj01_frr_20sess` (o FRR de sempre) | — (voxels → CLIP direto) | tudo |
 | **B** | `subj01_frr_postoreduzido_{1,40}sess` | só o próprio subj01 (controle de posto reduzido) | só R₁ |
 | **C** | `subj01_frr_multisujeito_{1,40}sess` | sujeitos 2–8, todas as sessões | só R₁ |
 

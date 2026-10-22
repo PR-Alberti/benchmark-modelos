@@ -164,13 +164,14 @@ def coleta(args):
                    le_curva(paths.TRAIN_LOGS / fonte("subj01_ridgeonly_40sess_4096blurry") / "metrics.csv")))
     for sem, sub in [(42, "retreino com o código atual"), (1, "outra semente"), (2, "outra semente")]:
         curvas.append((f"Ridge 1024 + prior · semente {sem}", sub,
-                       le_curva(paths.TRAIN_LOGS / f"subj01_ridgeonly_1sess_prior_seed{sem}/metrics.csv")))
+                       le_curva(paths.TRAIN_LOGS / fonte(f"subj01_ridgeonly_1sess_prior_seed{sem}") / "metrics.csv")))
     curvas.append(("Ridge 1024 sem prior · semente 42", "retreino com o código atual",
-                   le_curva(paths.TRAIN_LOGS / "subj01_ridgeonly_1sess_noprior_seed42/metrics.csv")))
+                   le_curva(paths.TRAIN_LOGS / fonte("subj01_ridgeonly_1sess_noprior_seed42") / "metrics.csv")))
     dados["curvas"] = [{"titulo": t, "sub": sub, "dados": c} for t, sub, c in curvas]
 
     # ruido de referencia: so a semente muda, na config 1024 + prior
-    # os retreinos de semente 42 sao a mesma corrida das reproducoes do 1sess_prior e do 1sess
+    # os retreinos de semente 42 sao a mesma corrida das reproducoes do 1sess_prior e do 1sess; as de 1 e 2, as
+    # reproducoes das sementes
     mesma42 = {"subj01_ridgeonly_1sess_prior_seed42": "repro_subj01_ridgeonly_1sess_prior",
                "subj01_ridgeonly_1sess_noprior_seed42": "repro_subj01_ridgeonly_1sess"}
 
@@ -182,16 +183,12 @@ def coleta(args):
                 return r["fwd"]["media"], r["bwd"]["media"]
         return None, None
 
-    e1 = le_tabela(f"{fonte('subj01_ridgeonly_1sess_prior')}_all_enhancedrecons") or {}
-    e3 = le_tabela(f"{fonte('subj01_ridgeonly_1sess')}_all_enhancedrecons") or {}
-    treino = [("42 · checkpoint do release", e1.get("FwdRetrieval"), e1.get("BwdRetrieval"))]
-    for sem, rot in [(42, "42 · retreino com o código atual"), (1, "1"), (2, "2")]:
+    treino = []
+    for sem, rot in [(42, "42"), (1, "1"), (2, "2")]:
         treino.append((rot, *retr(f"subj01_ridgeonly_1sess_prior_seed{sem}")))
     controle = [
-        ("com prior · checkpoint do release", e1.get("FwdRetrieval"), e1.get("BwdRetrieval")),
-        ("sem prior · checkpoint do release", e3.get("FwdRetrieval"), e3.get("BwdRetrieval")),
-        ("com prior · retreino, semente 42", *retr("subj01_ridgeonly_1sess_prior_seed42")),
-        ("sem prior · retreino, semente 42", *retr("subj01_ridgeonly_1sess_noprior_seed42")),
+        ("com prior · semente 42", *retr("subj01_ridgeonly_1sess_prior_seed42")),
+        ("sem prior · semente 42", *retr("subj01_ridgeonly_1sess_noprior_seed42")),
     ]
     dados["ruido"] = {
         "treino": treino,

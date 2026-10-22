@@ -62,7 +62,15 @@ medida de ruído, feita uma vez; não a repita.
 **Referências.** Decidido em 16/10 e concluído em 19/10 (todas as linhas de referência vêm das reproduções, menos as do artigo; as `_semlowlevel` desde 21/10): as linhas do benchmark (os ids `subj01_…`) passam a ser lidas das
 reproduções `repro_subj01_…`. O id público não mudou; `report/config.py` (`fonte`) aponta cada um para a
 reprodução assim que ela tem as tabelas de resultado, e as linhas `repro_…` ficam escondidas do site para
-não duplicar. Os registros e as tabelas dos originais seguem no histórico do git. Mudaram, pela reprodução,
+não duplicar. Em 21/10 as tabelas `results/tables/subj01_*` dos originais e os registros das sementes foram apagados da
+árvore: só ficam no histórico do git. Os registros `subj01_…` do site passaram a ser lidos das reproduções, e as
+sementes de 1, 2 e 42 também (`SUBSTITUIDOS` em `report/config.py`; as de 42 são a mesma corrida das
+reproduções do 1024 + prior e do 1024 sem prior). Ficaram, por não terem reprodução: a reconstrução com a semente 7
+(`…_rseed7`), os modelos do artigo, `results/tables/pre_benchmark` e `results/metrics`. A tabela de diferenças acima
+é o único registro da comparação com os originais (o slide "Reprodução" da apresentação a repete). O BENCHMARK.md e
+`results/benchmark/index.html` perderam as linhas "checkpoint do release" da seção Ruído; para regenerá-los é preciso
+a máquina com `train_logs/` e `results/evals/`, porque o `make_benchmark.py` sem eles troca a galeria e os números
+por traços. Mudaram, pela reprodução,
 as tabelas do BENCHMARK.md (até 1,24 p.p.) e as conclusões escritas à mão em `report/texts.py`, já revistas
 com os números novos.
 

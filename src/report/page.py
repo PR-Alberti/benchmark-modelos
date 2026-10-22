@@ -293,7 +293,7 @@ def ruido_html(dados):
     linhas = []
     for rot, f, b in r["treino"]:
         linhas.append(f'<tr><td class="modelo">{esc(rot)}</td>{celula(f, "pct")}{celula(b, "pct")}</tr>')
-    sementes = [(f, b) for _, f, b in r["treino"][1:] if f is not None]
+    sementes = [(f, b) for _, f, b in r["treino"] if f is not None]
     if len(sementes) >= 2:
         fs, bs = [v[0] for v in sementes], [v[1] for v in sementes]
         linhas.append('<tr class="teto"><td class="modelo">maior diferença entre sementes</td>'
@@ -468,16 +468,11 @@ def pagina(dados, args):
       entre modelos menores que estas estão dentro do ruído.</p></header>
     <h3>Semente do treino · retrieval top-1 entre 300</h3>
     {ruido_treino}
-    <p class="nota">O retreino com a semente 42 não repete o checkpoint do release bit a bit: desde
-    aquele treino, a única mudança no caminho do 1024 foi guardar as imagens da época em fp16 (o
-    conserto de memória do treino de 40 sessões), o que arredonda de outro jeito os alvos CLIP já
-    na primeira iteração. O resultado final fica no mesmo lugar.</p>
     <h3>Semente da reconstrução · o mesmo modelo 1024 + prior amostrado duas vezes</h3>
     {ruido_amostragem}
     <h3>Com e sem prior · o mesmo script e a mesma semente</h3>
-    <p class="nota">Os dois checkpoints de 1024 do release vieram de scripts e versões de código
-    diferentes. O retreino muda só <code>--use_prior</code>, para isolar o efeito da loss do prior
-    no treino da ridge.</p>
+    <p class="nota">O mesmo script e a mesma semente; muda só <code>--use_prior</code>, para isolar o efeito
+    da loss do prior no treino da ridge.</p>
     {ruido_controle}
   </section>
 
@@ -486,8 +481,7 @@ def pagina(dados, args):
       <p class="nota">Top-1 entre 300 no teste, medido ao fim de cada época pelo próprio treino
       sempre nas mesmas 300 primeiras imagens de teste. O número das tabelas é a média de 30
       sorteios de 300 entre as 1.000, por isso difere um pouco.
-      Só as corridas que gravaram <code>metrics.csv</code>: os checkpoints do release vieram de
-      corridas anteriores, sem esse registro; as sementes do 1024 + prior mostram a mesma
+      Só as corridas que gravaram <code>metrics.csv</code>; as sementes do 1024 + prior mostram a mesma
       configuração.</p></header>
     <ul class="legenda-series">
       <li><span class="chave" style="border-color:var(--s1)"></span>Img→cér: dada a imagem, achar o seu cérebro</li>
@@ -580,10 +574,6 @@ def pagina(dados, args):
             corridas do 4096 + blurry descrita no docs/EXPERIMENTO.md não era ruído: com o mesmo código,
             a corrida se repete exatamente, e entre aquelas duas o código mudou (o conserto do
             ColorJitter em fp16 entrou pouco antes da segunda).</li>
-          <li>As métricas do 1024 + prior foram recalculadas sobre os tensores do release. As das
-            reconstruções unCLIP saíram idênticas às da tabela antiga do repositório; as das
-            refinadas diferem um pouco (PixCorr 0,181 contra 0,182; Incep 83,6% contra 84,3%),
-            sinal de que a tabela antiga veio de uma geração anterior das refinadas.</li>
         </ul>
       </div>
     </div>

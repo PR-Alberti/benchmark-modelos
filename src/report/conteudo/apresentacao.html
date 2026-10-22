@@ -157,7 +157,7 @@
         <tr><th>O que treina</th><td class="fam-frr">{{params:frr}}</td><td class="fam-me2">{{params:mindeye2}}</td>
           <td class="fam-me1">{{params:mindeye1}}</td></tr>
         <tr><th>Treino, 1 → 40 sessões</th><td class="num">{{tempo:subj01_frr_1sess}} → {{tempo:subj01_frr_40sess}}</td>
-          <td class="num">{{tempo:subj01_ridgeonly_1sess_prior_seed42}} → {{tempo:subj01_ridgeonly_40sess_prior}}</td>
+          <td class="num">{{tempo:subj01_ridgeonly_1sess_prior}} → {{tempo:subj01_ridgeonly_40sess_prior}}</td>
           <td class="num">{{tempo:subj01_me1_1sess}} → {{tempo:subj01_me1_40sess}}</td></tr>
         <tr><th>Referência</th><td>Rokem &amp; Kay, 2020; grade de Doerig et al., 2025</td><td>Scotti et al., 2024</td>
           <td>Scotti et al., 2023</td></tr>
@@ -450,8 +450,7 @@
     <div class="legenda" data-legenda="custo"></div>
     <div class="grafico" data-grafico="custo"></div>
     <figcaption>Tempo de treino numa RTX A4500 (escala logarítmica) contra o retrieval cérebro → imagem. O MindEye1 soma
-      os dois caminhos; o Ridge 4096 + blurry de 40 sessões usa o tempo da reprodução, porque o checkpoint original não
-      guardou o seu. O artigo (fine-tune completo em 8 × A100) fica de fora.</figcaption>
+      os dois caminhos. O artigo (fine-tune completo em 8 × A100) fica de fora.</figcaption>
   </figure>
 </section></div>
 
@@ -465,9 +464,10 @@
   </div>
   <div class="corpo">
     {{tabela:reproducao}}
-    <p class="nota-tab">Original → reprodução. Diferença nas métricas de imagem: em pontos percentuais nas identificações
-      2-way, e em valor absoluto nas demais (PixCorr, SSIM, correlação cerebral...), nas reconstruções unCLIP e refinadas.
-      Retrieval medido do mesmo jeito nos dois{{repro:nota_fonte}}. As linhas do benchmark continuam sendo as originais; as reproduções aparecem no site com o rótulo "· reprodução".</p>
+    <p class="nota-tab">Diferença entre a reprodução e a corrida original, que foi substituída por ela: em pontos
+      percentuais nas identificações 2-way, e em valor absoluto nas demais (PixCorr, SSIM, correlação cerebral...), nas
+      reconstruções unCLIP e refinadas. Medido uma vez, na reexecução. O site e as tabelas mostram as reproduções,
+      cada uma com configuração, commit, curva e tempo registrados.</p>
   </div>
 </section></div>
 
@@ -592,8 +592,7 @@
         <li><span>Rodar os {{n_planejados}} experimentos já definidos em <code>src/experimentos.py</code>
           <small>imagens × repetições com 3.000 exibições, 5 classes balanceadas, pessoa + animal e os 4 modos de
           agregação</small></span></li>
-        <li><span>Fechar a reexecução <small>{{repro:pendente}}; medir o efeito da semente do treino nas métricas de
-          imagem; reproduzir o MindEye1</small></span></li>
+        <li><span>Medir o efeito da semente do treino nas métricas de imagem</span></li>
         <li><span>Um modelo não linear por sujeito, da literatura</span></li>
         <li><span>Mais pontos na escala de sessões <small>as condições de 25, 35 e 50 h do plano</small></span></li>
         <li><span>Reduzir variedade maximizando a distância entre as imagens</span></li>
