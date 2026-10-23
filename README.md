@@ -218,4 +218,4 @@ repetições nos quatro modos de agregação, e 3.000 × 1, 1.500 × 2, 1.000 ×
 
 ## Licença
 
-MIT. `src/generative_models/` e `src/autoencoder/` mantêm as licenças próprias.
+MIT. O código de terceiros em `vendor/` (`generative_models/`, `autoencoder/`) mantém as licenças próprias.

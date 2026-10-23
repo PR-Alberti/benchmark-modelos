@@ -267,7 +267,7 @@ D="$DATA_PATH"
 verifica "MindEye2 ridge-only (1 sessao)" "$D/betas_all_subj01_fp32_renorm.hdf5" \
     "$D/coco_images_224_float16.hdf5" "$D/wds/subj01/train/0.tar" \
     "$D/train_logs/multisubject_subj01_1024hid_nolow_300ep/last.pth" -- \
-    src "import sys; sys.path.insert(0,'generative_models'); import mindeye_ridge.models, mindeye_ridge.utils; from generative_models.sgm.modules.encoders.modules import FrozenOpenCLIPImageEmbedder"
+    src "from mindeye_ridge import paths; paths.add_vendored_to_path(); import mindeye_ridge.models, mindeye_ridge.utils; from generative_models.sgm.modules.encoders.modules import FrozenOpenCLIPImageEmbedder"
 if [[ $MINIMO -eq 0 ]]; then
     verifica "MindEye2 ridge-only (40 sessoes, 4096 + blurry)" "$D/wds/subj01/train/39.tar" \
         "$D/train_logs/final_multisubject_subj01/last.pth" "$D/convnext_xlarge_alpha0.75_fullckpt.pth" -- \

@@ -25,9 +25,9 @@ from transformers import CLIPModel, AutoTokenizer, AutoProcessor
 import evaluate
 import pandas as pd
 
-from generative_models.sgm.modules.encoders.modules import FrozenOpenCLIPImageEmbedder
 from mindeye_ridge import paths
 paths.add_vendored_to_path()
+from generative_models.sgm.modules.encoders.modules import FrozenOpenCLIPImageEmbedder
 from mindeye_ridge.models import GNet8_Encoder
 
 # tf32 data type is faster than standard float32
