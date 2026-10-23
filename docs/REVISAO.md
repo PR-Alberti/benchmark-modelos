@@ -26,7 +26,12 @@ estão hoje em `src/etapas/`, e `src/generative_models/` e `src/autoencoder/` em
 Índice: [1. Decompor os modelos em peças](#1-decompor-os-modelos-em-peças) ·
 [2. Críticas gerais](#2-críticas-gerais) · [3. O que a segunda rodada corrigiu](#3-o-que-a-segunda-rodada-corrigiu) ·
 [4. O que está bem feito](#4-o-que-está-bem-feito) · [5. Prioridades](#5-prioridades) ·
-[6. Divergências que ficaram](#6-divergências-que-ficaram)
+[6. Divergências que ficaram](#6-divergências-que-ficaram) ·
+[7. Conferência da revisão](#7-conferência-da-revisão-23102026)
+
+> **Leia a seção 7 junto com as anteriores.** A conferência de 23/10/2026 achou afirmações erradas ou
+> desatualizadas nesta revisão (o ruído de semente nas métricas de imagem já pode ser medido, a conta do
+> fatorial, o alcance do `ckpt_interval`, a "lei de escala") e revisa a lista de prioridades.
 
 ---
 
@@ -305,3 +310,96 @@ separada sobre o 1024; o plano de encaixes da seção 1, que se apoia nos itens 
   metadados ao lado de cada saída) em primeiro, por ser pré-requisito de quase tudo. Cético e pragmático
   o veem como risco futuro, não como erro já visível nos números. O caso que já muda números é a
   mistura 75/25 pelo nome, e por isso ele está no item 1 da seção 5.
+
+---
+
+## 7. Conferência da revisão (23/10/2026)
+
+Cada afirmação central das seções 1 a 6 foi conferida no código, nas tabelas de `results/tables/` e, quando
+deu, nos dados, já depois da reorganização das pastas (commit `877d4f1`).
+
+### 7.1 Confirmadas
+
+| Afirmação | Evidência |
+|---|---|
+| Mistura 75/25 disparada pelo nome | `src/etapas/final_evaluations.py:171-173` |
+| ME2 tira a média das saídas no teste, FRR e ME1 a dos betas | `src/etapas/recon_inference.py:360-373` |
+| `_all_clipvoxels.pt` do ME2 é a saída da cabeça contrastiva; o `prior_out` não é gravado | `src/etapas/recon_inference.py:375-384` |
+| IC de 30 sorteios sobrepostos | `src/mindeye_ridge/embedding_metrics.py:49-51` |
+| Métricas por imagem calculadas e descartadas | `final_evaluations.py:274`, `305` (`return_avg`) |
+| Negrito sem margem estatística | `src/report/rows.py:12-13` |
+| Trava blurry ⇒ hidden 4096 | `src/treina.py:141-142`; `scripts/run_ridgeonly_prior.sh:21-36` escolhe o checkpoint pelo `BLURRY` |
+| Captioner `microsoft/git-large-coco` | `src/mindeye_ridge/decodificador.py:29-30` |
+| **As 1.000 imagens de teste são todas `train2017`** | `nsd_stim_info_merged.csv`: `shared1000` → `{'train2017': 1000}`. O GIT foi afinado no split Karpathy (train2014 + val2014 menos ~10 mil de validação e teste), então a maior parte delas provavelmente esteve no treino de legendas. Segue "provável": não há o `dataset_coco.json` para conferir imagem a imagem |
+| Dois avaliadores de retrieval, sem rótulo | `final_evaluations`: 92,76 / 88,10 e 78,29 / 72,08; `verify_retrieval` (`docs/REEXECUTAR.md:51`): 92,91 / 88,12 e 78,41 / 72,59 |
+| README com número que não bate com nenhum avaliador | `README.md` (tabela "Combinações testadas"): sem prior 78,5 / 72,1 |
+| `fonte()` troca para `repro_` pela existência do arquivo | `src/report/config.py:64-88`. É intencional e está no docstring; o risco é a volta silenciosa ao original quando a tabela da reprodução falta |
+| Teste avaliado a cada época, sem validação separada; checkpoint sempre o último | `src/etapas/train_ridgeonly.py:372`, `876`, `1021-1030` |
+| ME1 sem low-level: PixCorr 0,252 → 0,132, CLIP 80,8% → 81,4% | `results/tables/repro_subj01_me1_1sess{,_semlowlevel}_all_recons.csv` |
+| Ganho do multi-sujeito (C − B, Img→cér): +21,8 pt / −0,4 / −0,9 | `results/tables/subj01_frr_{multisujeito,postoreduzido}_{1,20,40}sess_frr.json` (62,9 − 41,1; 94,1 − 94,5; 96,1 − 97,0) |
+
+### 7.2 Erradas ou desatualizadas
+
+- **"O efeito da semente de treino nas métricas de imagem não foi medido"** (seções 2.2 e 5, e
+  `BENCHMARK.md`, Resumo, "Ruído"). Os dados já existem: as reproduções das sementes 1 e 2 do Ridge 1024 +
+  prior têm a tabela completa (`results/tables/repro_subj01_ridgeonly_1sess_prior_seed{1,2}_all_enhancedrecons.csv`).
+  Com a semente 42, a amplitude entre as 3 sementes, nas refinadas:
+
+  | PixCorr | SSIM | Alex(2) | Alex(5) | Incep | CLIP | Eff | SwAV | Img→cér | Cér→img |
+  |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+  | 0,0014 | 0,002 | 0,3 pt | 0,2 pt | 0,5 pt | 0,7 pt | 0,008 | 0,004 | 0,3 pt | 0,4 pt |
+
+  Somada à reamostragem da reconstrução (até 0,6 pt), dá uma régua de ~1 pt nas identificações 2-way.
+  São 3 sementes de uma configuração só (o 1024 de 1 sessão), não de cada modelo.
+- **"À frente do artigo em 9/10 fica dentro do ruído"** (seções 2.2 e 2.3): exagerada. A vantagem do 4096 +
+  blurry sobre o artigo com 1 sessão (Alex(2) +2,0, Alex(5) +1,5, Incep +2,2, CLIP +1,8 pt; PixCorr +0,016;
+  Eff −0,019; SwAV −0,014; Img→cér +1,6) fica de ~2,5 a ~10 vezes acima da amplitude entre sementes.
+  Somando a reamostragem da reconstrução (até 0,6 pt), o caso de fronteira é o CLIP (+1,8 contra ~1,3). Continua valendo que as 9 métricas são correlacionadas (não são 9
+  evidências) e que o artigo é um checkpoint só, de outro regime de treino.
+- **"Lei de escala com 2 pontos"** (seção 2.3): injusta. A apresentação diz que o plano *busca* uma lei de
+  escala (`src/report/conteudo/apresentacao.html:26`) e lista mais pontos de sessões como próximo passo
+  (`:597`); não afirma ter uma. Fica a observação: os dados de hoje são um contraste, não uma curva.
+- **"Fatorial completo, ~4.600 células"** (seção 1): erro de conta. 2·4·3·3·2·2·2·2·2 = **2.304** (6.912 com
+  1, 20 e 40 sessões). A conclusão (inviável, e muitas células nem existem) não muda.
+- **`ckpt_interval` "só afeta o Ridge 1024 de 1 sessão"** (seção 3): errada na outra direção. Os
+  experimentos ainda não rodados de MindEye2 (`subj01_me2_pessoa_animal`, `subj01_me2_1000img_3rep_*`,
+  `src/experimentos.py:106-134`, de 20 a 60 épocas com 40 sessões) não definem `ckpt_interval` e herdam o
+  999 do shell: uma queda perde a corrida inteira. O pragmático estava certo para eles.
+- **"`BENCHMARK.md` editado à mão; o gerador desfaria a edição"** (seções 2.5 e 3): sem base. O commit
+  `28148bf` mudou o `BENCHMARK.md` junto com o gerador (`src/report/data.py`, `page.py`, `config.py`), na
+  mesma direção. O que está defasado é o cabeçalho ("commit `7e331f1`"), porque o `make_benchmark.py` não
+  roda sem os tensores de `results/evals/` e `~/mindeyev2/evals/all_captions.pt` (conferido: falha nesta
+  máquina sem escrever nada).
+- **"Colisão de nomes à espera de acontecer"** (seção 2.6): risco baixo. O `mindeye_ridge` importa
+  `utils` e `models` qualificados (`from mindeye_ridge import utils`); só os scripts do MindEye1 usam o nome
+  solto. Com a reorganização, só `tests/test_agregacao.py` ainda põe `mindeye1/src` no `sys.path`.
+- **"Retrieval do ridge-only acima do ME1 não é comparável"** (seção 2.3): exagerada. Top-1 entre 300 é a
+  mesma tarefa, com o mesmo acaso, para os dois; o que muda é o espaço em que se mede a distância. A
+  ressalva certa é "a mesma tarefa em espaços diferentes", não "incomparável".
+- **FRR → prior do ME2 com "cosseno centrado 0,12"** (seção 1): é o de 1 sessão; com 40 sessões é 0,22.
+
+### 7.3 Sugestões revistas
+
+| Sugestão original (seção 5) | Revisão |
+|---|---|
+| 1. Uma agregação no teste para todos | Não forçar uma só: a média das saídas é o protocolo do artigo do MindEye2 e trocá-la tira a comparação com ele. Registrar a agregação como coluna e rodar a outra como variante |
+| 1. Tabela unCLIP como primária | Mantida para ME2 × FRR (tira o refino e o GIT). Para o MindEye1 não resolve: o gerador dele é outro (Versatile Diffusion), e a comparação de imagem com ele segue sendo de pipeline inteiro |
+| 2. Métricas por imagem + bootstrap pareado | Mantida, e é a de maior retorno |
+| 3. Controles de teto, piso e legenda | Mantida; o custo está mais perto de 6–8 GPU-h (o teto com refino é uma reconstrução completa, ~3 h) |
+| 4. Proveniência | Mantida. Acrescentar: o resumo do `BENCHMARK.md` ("não foi medido") desatualizou, e o `make_benchmark.py` deveria calcular a régua de semente das tabelas que já existem |
+| 5. 3 sementes nos contrastes de 1 sessão | **Mais barata do que dito.** O 1024 + prior já tem 3 sementes com métricas de imagem. Faltam só as do 1024 sem prior (2 × ~4 h com a reconstrução) e as do 4096 + blurry (2 × ~6 h), se quiser a régua de cada configuração |
+| Fatorial 2³ com o blurry como cabeça nova sobre o 1024 | Trocar por **4096 com e sem a perda blurry, a partir do mesmo checkpoint**. Separa o blurry da dimensão sem treinar uma peça nova (que seria treinada só com os dados do subj01, enquanto a do 4096 veio do pré-treino). Hoje o script escolhe o checkpoint pelo `BLURRY` (`run_ridgeonly_prior.sh:21-36`), então isso pede uma mudança pequena: aceitar o 4096 com `--no-blurry_recon` |
+| 7. Site fora do git | **Retirada.** O site fica no git. Se o diff a cada etapa incomodar, a alternativa é regenerar só sob demanda, não tirar o site |
+| 7. `ckpt_interval` | **Sobe de prioridade**: definir `ckpt_interval` (1 ou 5) como padrão do mindeye2 no `treina.py` antes de rodar os experimentos de 40 sessões |
+| 7. `NOVO_COMPUTADOR.md`, `pyproject.toml`, aposentar `run_benchmark.sh`, isolar o `sys.path` | **Feito** na reorganização (commits `b158151`, `fdb4e6f`): branch, tempos e `frr_ms` corrigidos; `pip install -e .`; o `scripts/README.md` marca o `run_benchmark.sh` como o lote original |
+| 7. Registro único de modelos, lockfile + sha256 | Seguem pendentes |
+
+### 7.4 Prioridades, depois da conferência
+
+1. **`ckpt_interval` padrão no mindeye2** (uma linha no `treina.py`). Protege os experimentos que ainda vão rodar.
+2. **Métricas por imagem** em formato longo, com metadados, e a régua de semente calculada das tabelas que existem. Corrigir o "não foi medido" do `BENCHMARK.md`.
+3. **Mistura 75/25 e agregação como parâmetros explícitos**, gravados no CSV. Tabela unCLIP como primária entre ME2 e FRR.
+4. **Controles de teto, piso e legenda**, ~6–8 GPU-h, sem treino.
+5. **Rótulo dos dois avaliadores** e o número do README.
+6. **4096 com e sem a perda blurry** a partir do mesmo checkpoint, no lugar do fatorial 2³.
+7. Restringir "o pré-treino é o que mais vale" (`apresentacao.html:374`), que é a narrativa realmente confundida.
