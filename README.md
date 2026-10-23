@@ -5,9 +5,9 @@ mesmo treino, o mesmo teste (1.000 imagens compartilhadas) e as mesmas métricas
 
 | Modelo | Código | Saída |
 |---|---|---|
-| **MindEye2** ridge-only ([Scotti et al., 2024](https://arxiv.org/abs/2403.11207)) | `src/train_ridgeonly.py` | embedding CLIP ViT-bigG + imagem (SDXL unCLIP) |
-| **FRR**, ridge fracionária ([Rokem & Kay, 2020](https://doi.org/10.1093/gigascience/giaa133)) | `src/run_frr.py` | embedding CLIP ViT-bigG |
-| **FRR multi-sujeito**: espaço compartilhado linear, pré-treino nos sujeitos 2–8 ([docs/FRR_MULTISUJEITO.md](docs/FRR_MULTISUJEITO.md)) | `src/run_frr_ms.py` | embedding CLIP ViT-bigG |
+| **MindEye2** ridge-only ([Scotti et al., 2024](https://arxiv.org/abs/2403.11207)) | `src/etapas/train_ridgeonly.py` | embedding CLIP ViT-bigG + imagem (SDXL unCLIP) |
+| **FRR**, ridge fracionária ([Rokem & Kay, 2020](https://doi.org/10.1093/gigascience/giaa133)) | `src/etapas/run_frr.py` | embedding CLIP ViT-bigG |
+| **FRR multi-sujeito**: espaço compartilhado linear, pré-treino nos sujeitos 2–8 ([docs/FRR_MULTISUJEITO.md](docs/FRR_MULTISUJEITO.md)) | `src/etapas/run_frr_ms.py` | embedding CLIP ViT-bigG |
 | **MindEye1** ([Scotti et al., 2023](https://arxiv.org/abs/2305.18274)) | `mindeye1/src/Train_MindEye.py` | embedding CLIP ViT-L/14 + imagem (Versatile Diffusion) |
 
 Site com início, uso e resultados interativos de todos os modelos: [`results/site/index.html`](results/site/index.html);

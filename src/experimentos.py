@@ -48,7 +48,7 @@ escolha deixa.
 # =============================================================================================
 
 BENCHMARK = {
-    # FRR (src/run_frr.py): as 20 fracoes de Doerig et al., uma por dimensao do alvo, CV de 5 dobras
+    # FRR (src/etapas/run_frr.py): as 20 fracoes de Doerig et al., uma por dimensao do alvo, CV de 5 dobras
     "subj01_frr_1sess": {"modelo": "frr", "hiper": {}, "dataset": {"sessoes": 1}},
     "subj01_frr_40sess": {"modelo": "frr", "hiper": {}, "dataset": {"sessoes": 40}},
     # sensibilidade: uma fracao so para todas as dimensoes, e a grade estendida ate 0,001
@@ -57,7 +57,7 @@ BENCHMARK = {
     "subj01_frr_1sess_ext": {"modelo": "frr", "hiper": {"grid": "extended"}, "dataset": {"sessoes": 1}},
     "subj01_frr_40sess_ext": {"modelo": "frr", "hiper": {"grid": "extended"}, "dataset": {"sessoes": 40}},
 
-    # MindEye2 ridge-only (src/train_ridgeonly.py): so a ridge do subj01 treina, a partir do
+    # MindEye2 ridge-only (src/etapas/train_ridgeonly.py): so a ridge do subj01 treina, a partir do
     # pre-treino nos outros 7 sujeitos
     "subj01_ridgeonly_1sess_prior": {"modelo": "mindeye2", "hiper": {}, "dataset": {"sessoes": 1}},
     "subj01_ridgeonly_1sess": {"modelo": "mindeye2", "hiper": {"prior": False}, "dataset": {"sessoes": 1}},
@@ -143,7 +143,7 @@ for _n, _r in ((3000, 1), (1500, 2), (1000, 3)):
         "dataset": {"sessoes": 40, "n_imagens": _n, "repeticoes": _r, "semente": 0},
     }
 
-# FRR multi-sujeito (src/run_frr_ms.py): espaco compartilhado de k = 1.024 dimensoes, peso igual por
+# FRR multi-sujeito (src/etapas/run_frr_ms.py): espaco compartilhado de k = 1.024 dimensoes, peso igual por
 # sujeito, ajuste fino so da ridge do subj01. O modelo C pre-treina a leitura nos sujeitos 2-8 (um pre-
 # treino so, para as duas quantidades de dados); o B, o controle de posto reduzido, a aprende so com o
 # proprio subj01. C contra B mede o efeito dos outros sujeitos; B contra o FRR, o do gargalo de k (o FRR

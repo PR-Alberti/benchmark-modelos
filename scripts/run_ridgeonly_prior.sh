@@ -78,7 +78,7 @@ BATCH_SIZE=${BATCH_SIZE:-$DEFAULT_BATCH}   # 16 no 1024; 8 no 4096+blurry
 mkdir -p $TRAIN_LOGS/$MODEL_NAME
 confere_dataset "$TRAIN_LOGS/$MODEL_NAME" "$([ "$RESUME" = 1 ] && [ -f "$TRAIN_LOGS/$MODEL_NAME/last.pth" ] && echo 1 || echo 0)"
 
-$ENVP/bin/python train_ridgeonly.py \
+$ENVP/bin/python etapas/train_ridgeonly.py \
     --data_path=$DATA \
     `# sd_image_var_autoenc e convnext ficam em $DATA, nao em $DATA/.cache` \
     --cache_dir=$DATA \
