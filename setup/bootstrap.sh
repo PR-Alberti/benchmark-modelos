@@ -90,6 +90,9 @@ titulo "2. Ambiente Python  ($ENV_PATH)"
 
 env_pronto() { "$ENV_PATH/bin/python" -c "import torch, open_clip, clip, deepspeed" >/dev/null 2>&1; }
 env_me1()    { "$ENV_PATH/bin/python" -c "import info_nce, pytorch_msssim, bitsandbytes" >/dev/null 2>&1; }
+# o codigo de src/ instalado em modo editavel (pyproject.toml) e apontando para ESTE clone: de fora do
+# repositorio, o mindeye_ridge tem de importar e o REPO dele tem de ser esta pasta
+env_repo()   { [[ "$(cd / && "$ENV_PATH/bin/python" -c "import mindeye_ridge.paths as p; print(p.REPO)" 2>/dev/null)" == "$(pwd -P)" ]]; }
 
 if env_pronto; then
     ok "ja existe e importa a stack principal"
@@ -100,6 +103,13 @@ if env_pronto; then
     else
         "$ENV_PATH/bin/pip" install -q --no-deps info-nce-pytorch==0.1.0 pytorch-msssim==1.0.0 bitsandbytes==0.43.3 \
             && ok "pacotes do MindEye1 instalados" || problema "pip falhou nos pacotes do MindEye1"
+    fi
+    # ambientes criados antes do pyproject.toml nao tem o codigo do repositorio instalado
+    if env_repo; then ok "codigo do repositorio instalado (pip install -e .)"
+    elif [[ $CHECK_ONLY -eq 1 ]]; then falta "codigo do repositorio no ambiente (pip install -e .)"
+    else
+        "$ENV_PATH/bin/pip" install -q --no-deps --no-build-isolation -e . \
+            && ok "codigo do repositorio instalado (pip install -e .)" || problema "pip install -e . falhou"
     fi
 elif [[ $CHECK_ONLY -eq 1 ]]; then
     falta "nao existe - rode sem --check para criar (~15 min)"

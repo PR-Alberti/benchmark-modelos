@@ -87,9 +87,15 @@ echo "==> instalando os pacotes do MindEye1"
 # caber em 20 GB (bitsandbytes). --no-deps: sem isso o pip tenta trocar a versao do torch
 "$PIP" install --no-deps info-nce-pytorch==0.1.0 pytorch-msssim==1.0.0 bitsandbytes==0.43.3
 
+echo "==> instalando o codigo deste repositorio (pyproject.toml, modo editavel)"
+# src/ entra no ambiente: mindeye_ridge, report e treina importam de qualquer pasta, e uma
+# mudanca no codigo vale na hora. --no-deps: as dependencias sao as fixadas acima
+REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+"$PIP" install --no-deps --no-build-isolation -e "$REPO_DIR"
+
 echo
 echo "==> verificando a instalacao"
-REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)" "$ENV_PATH/bin/python" - <<'PY'
+REPO_DIR="$REPO_DIR" "$ENV_PATH/bin/python" - <<'PY'
 import warnings; warnings.filterwarnings("ignore")
 import os, sys
 import torch, numpy, h5py, webdataset, open_clip, transformers, diffusers, accelerate, kornia

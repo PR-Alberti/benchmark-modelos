@@ -118,9 +118,7 @@ Escreva o dicionário num arquivo (não precisa editar o repositório):
 
 ```bash
 cat > ~/meu_experimento.py <<'EOF'
-import sys
-sys.path.insert(0, "/home/SEU_USUARIO/benchmark-modelos/src")    # troque pelo caminho do clone
-import treina
+import treina                               # o setup instala src/ no ambiente (pip install -e .)
 
 exp = {
     "modelo": "frr",                       # frr | mindeye2 | mindeye1
