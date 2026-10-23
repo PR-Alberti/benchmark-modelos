@@ -214,7 +214,7 @@ repetições nos quatro modos de agregação, e 3.000 × 1, 1.500 × 2, 1.000 ×
 | `results/` | tabelas, site e página (no git); tensores e logs (fora) |
 | `train_logs/` | checkpoints (fora do git) |
 | `tests/` | testes |
-| `docs/` | [NOVO_COMPUTADOR](docs/NOVO_COMPUTADOR.md), [SETUP](docs/SETUP.md), [MINDEYE1](docs/MINDEYE1.md), [EXPERIMENTO](docs/EXPERIMENTO.md), [ESTAGIO](docs/ESTAGIO.md), [REEXECUTAR](docs/REEXECUTAR.md), [FRR_MULTISUJEITO](docs/FRR_MULTISUJEITO.md) |
+| `docs/` | [NOVO_COMPUTADOR](docs/NOVO_COMPUTADOR.md), [SETUP](docs/SETUP.md), [MINDEYE1](docs/MINDEYE1.md), [EXPERIMENTO](docs/EXPERIMENTO.md), [ESTAGIO](docs/ESTAGIO.md), [REEXECUTAR](docs/REEXECUTAR.md), [FRR_MULTISUJEITO](docs/FRR_MULTISUJEITO.md), [REVISAO](docs/REVISAO.md) |
 
 ## Licença
 
