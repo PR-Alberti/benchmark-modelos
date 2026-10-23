@@ -260,17 +260,21 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   └── me1_fake_data.py  inspect_ckpt.py   utilitários: dados sintéticos do MindEye1, flags de um checkpoint
 ├── mindeye1/                    MindEye1: src/ (código original + ajustes), download.py,
 │                                train_logs/ (links e saídas, fora do git)
-├── src/                         pontos de entrada (rodam de qualquer diretório)
-│   ├── train_ridgeonly.py       treino
-│   ├── recon_inference.py       gera as reconstruções
-│   ├── enhanced_recon_inference.py   refina as reconstruções
-│   ├── final_evaluations.py     calcula as métricas
-│   ├── verify_retrieval.py      só o retrieval, sem difusão
-│   ├── run_frr.py               FRR: voxels → embedding CLIP
-│   ├── experimentos.py          treinos com dataset controlado: um dicionário por experimento
+├── src/
 │   ├── treina.py                roda um experimento (dataset + script de treino do modelo)
+│   ├── experimentos.py          os experimentos: um dicionário por modelo
+│   ├── make_site.py             gera o site (results/site)
 │   ├── make_benchmark.py        monta results/benchmark/ e BENCHMARK.md
 │   ├── make_comparison.py       figura imagem vista × reconstruções
+│   ├── etapas/                  as etapas do pipeline, chamadas pelos scripts/run_*.sh
+│   │   ├── train_ridgeonly.py   MindEye2: treino
+│   │   ├── recon_inference.py   MindEye2: gera as reconstruções
+│   │   ├── recon_embeddings.py  reconstrói a partir de um embedding pronto (FRR)
+│   │   ├── enhanced_recon_inference.py   refina as reconstruções
+│   │   ├── final_evaluations.py calcula as métricas
+│   │   ├── verify_retrieval.py  só o retrieval, sem difusão
+│   │   ├── run_frr.py           FRR: voxels → embedding CLIP
+│   │   └── run_frr_ms.py        FRR multi-sujeito
 │   ├── mindeye_ridge/           biblioteca (utils, models, modeling_git, paths, nsd_data,
 │   │                            clip_targets, frr, embedding_metrics, semantica,
 │   │                            dataset_controlado, agregacao, resultados)
@@ -419,7 +423,7 @@ mas o retrieval não o acompanha (veja o `BENCHMARK.md`).
 
 ### Treino original do artigo (não o ridge-only)
 
-Os notebooks de `notebooks/mindeye2_original/` são os do MindEye2 original e importam `utils` e `models` do layout antigo (tudo em `src/`). Para rodar esta receita, converta o notebook para dentro de `src/` e troque os imports por `from mindeye_ridge import utils` e `from mindeye_ridge.models import ...`; ou use o `src/train_ridgeonly.py`, que já faz isso e treina tudo quando chamado com `--no-ridge_only` (`python src/train_ridgeonly.py --no-ridge_only --multisubject_ckpt=<dados>/train_logs/multisubject_subj01_1024hid_nolow_300ep ...`, com os mesmos argumentos que o `scripts/run_ridgeonly_prior.sh` passa).
+Os notebooks de `notebooks/mindeye2_original/` são os do MindEye2 original e importam `utils` e `models` do layout antigo (tudo em `src/`). Para rodar esta receita, converta o notebook para dentro de `src/` e troque os imports por `from mindeye_ridge import utils` e `from mindeye_ridge.models import ...`; ou use o `src/etapas/train_ridgeonly.py`, que já faz isso e treina tudo quando chamado com `--no-ridge_only` (`python src/etapas/train_ridgeonly.py --no-ridge_only --multisubject_ckpt=<dados>/train_logs/multisubject_subj01_1024hid_nolow_300ep ...`, com os mesmos argumentos que o `scripts/run_ridgeonly_prior.sh` passa).
 
 ```bash
 jupyter nbconvert notebooks/mindeye2_original/Train.ipynb --to python --output-dir src

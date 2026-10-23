@@ -2,7 +2,7 @@
 
 Extensão linear do FRR para vários sujeitos, no molde do MindEye2: um pré-treino nos outros 7 sujeitos do
 NSD e, no subj01, o ajuste só da ridge dele. Tudo linear e em forma fechada. Código em
-`src/mindeye_ridge/multisujeito.py` (o modelo) e `src/run_frr_ms.py` (treino, avaliação e saída).
+`src/mindeye_ridge/multisujeito.py` (o modelo) e `src/etapas/run_frr_ms.py` (treino, avaliação e saída).
 
 ```
 voxels do sujeito s ──Rₛ──▶ k números ──Q──▶ embedding CLIP bigG (256 × 1.664)

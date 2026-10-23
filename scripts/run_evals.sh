@@ -40,7 +40,7 @@ fi
 
 LOGDIR=$TRAIN_LOGS/$MODEL_NAME; mkdir -p "$LOGDIR"
 echo "=== final_evaluations: $MODEL_NAME ($KIND) ==="
-$ENVP/bin/python -u final_evaluations.py \
+$ENVP/bin/python -u etapas/final_evaluations.py \
     --model_name="$MODEL_NAME" --all_recons_path="$RECONS" \
     --data_path=$DATA --cache_dir=$DATA --subj=1 \
     2>&1 | tee -a "$LOGDIR/evals_$KIND.log"
