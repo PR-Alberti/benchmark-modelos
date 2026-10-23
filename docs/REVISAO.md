@@ -18,6 +18,11 @@ entre eles é sinal fraco: o valor está nos ângulos, não no consenso. O que t
 **conferido no código** por mais de um revisor; essas afirmações estão marcadas com ✅. Nenhum treino nem
 reconstrução foi rodado; os testes (176, sem GPU) passaram.
 
+**Caminhos.** Os `arquivo:linha` citados são do commit `8f83d5a`, antes da reorganização das pastas: as
+etapas que estavam em `src/` (`train_ridgeonly.py`, `recon_inference.py`, `enhanced_recon_inference.py`,
+`recon_embeddings.py`, `final_evaluations.py`, `verify_retrieval.py`, `run_frr.py`, `run_frr_ms.py`)
+estão hoje em `src/etapas/`, e `src/generative_models/` e `src/autoencoder/` em `vendor/`.
+
 Índice: [1. Decompor os modelos em peças](#1-decompor-os-modelos-em-peças) ·
 [2. Críticas gerais](#2-críticas-gerais) · [3. O que a segunda rodada corrigiu](#3-o-que-a-segunda-rodada-corrigiu) ·
 [4. O que está bem feito](#4-o-que-está-bem-feito) · [5. Prioridades](#5-prioridades) ·
