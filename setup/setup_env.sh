@@ -98,7 +98,8 @@ import clip, dalle2_pytorch, deepspeed
 src = os.path.join(os.environ["REPO_DIR"], "src")
 if os.path.isdir(src):
     sys.path.insert(0, src)
-    sys.path.insert(0, os.path.join(src, "generative_models"))
+    from mindeye_ridge import paths
+    paths.add_vendored_to_path()
     os.chdir(src)
     from generative_models.sgm.modules.encoders.modules import FrozenOpenCLIPImageEmbedder  # noqa
     from mindeye_ridge.models import BrainNetwork  # noqa

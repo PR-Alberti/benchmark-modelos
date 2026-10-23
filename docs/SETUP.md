@@ -274,9 +274,10 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   ├── mindeye_ridge/           biblioteca (utils, models, modeling_git, paths, nsd_data,
 │   │                            clip_targets, frr, embedding_metrics, semantica,
 │   │                            dataset_controlado, agregacao, resultados)
-│   ├── report/                  o código da página e do BENCHMARK.md (dados, tabelas, textos,
-│   │                            markdown e, em assets/, o CSS e o JavaScript)
-│   ├── generative_models/       código da Stability AI, como está
+│   └── report/                  o código da página e do BENCHMARK.md (dados, tabelas, textos,
+│                                markdown e, em assets/, o CSS e o JavaScript)
+├── vendor/                      código de terceiros, como veio (não editar)
+│   ├── generative_models/       código da Stability AI (SDXL, unCLIP)
 │   └── autoencoder/             ConvNeXt do MindEye2
 ├── results/
 │   ├── tables/                  CSVs e JSONs com as métricas finais        (no git)

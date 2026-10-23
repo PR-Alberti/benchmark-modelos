@@ -105,12 +105,12 @@ print(model_name)
 print(all_images.shape, all_recons.shape, all_clipvoxels.shape,
       all_blurryrecons.shape if all_blurryrecons is not None else None, all_predcaptions.shape)
 
-config = OmegaConf.load(str(paths.SRC / "generative_models/configs/unclip6.yaml"))
+config = OmegaConf.load(str(paths.VENDOR / "generative_models/configs/unclip6.yaml"))
 config = OmegaConf.to_container(config, resolve=True)
 unclip_params = config["model"]["params"]
 sampler_config = unclip_params["sampler_config"]
 sampler_config['params']['num_steps'] = 38
-config = OmegaConf.load(str(paths.SRC / "generative_models/configs/inference/sd_xl_base.yaml"))
+config = OmegaConf.load(str(paths.VENDOR / "generative_models/configs/inference/sd_xl_base.yaml"))
 config = OmegaConf.to_container(config, resolve=True)
 refiner_params = config["model"]["params"]
 

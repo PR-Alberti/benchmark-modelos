@@ -10,6 +10,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 SRC = REPO / "src"
+VENDOR = REPO / "vendor"               # codigo de terceiros, como veio (generative_models, autoencoder)
 DATA = Path(os.environ.get("MINDEYE_DATA", "~/mindeyev2")).expanduser()
 
 TRAIN_LOGS = REPO / "train_logs"       # checkpoints e logs de treino (fora do git)
@@ -24,11 +25,12 @@ SITE = RESULTS / "site"                # o site gerado pelo make_site.py
 
 
 def add_vendored_to_path():
-    """Poe src/ e src/generative_models/ no sys.path.
+    """Poe src/, vendor/ e vendor/generative_models/ no sys.path.
 
-    O repositorio da Stability AI (src/generative_models) se importa como `sgm`, de dentro
-    dele, e o resto do codigo como `generative_models.sgm`; os dois precisam funcionar.
+    O repositorio da Stability AI (vendor/generative_models) se importa como `sgm`, de dentro
+    dele, e o resto do codigo como `generative_models.sgm`; os dois precisam funcionar. O
+    vendor/ tambem traz o `autoencoder` (ConvNeXt do MindEye2).
     """
-    for p in (SRC, SRC / "generative_models"):
+    for p in (SRC, VENDOR, VENDOR / "generative_models"):
         if str(p) not in sys.path:
             sys.path.append(str(p))
