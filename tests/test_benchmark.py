@@ -6,10 +6,8 @@ Usa dados sinteticos, sem depender dos resultados em disco.
 """
 import os
 import re
-import sys
 import unittest
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 from report import config, fmt, markdown, page, rows, texts
 
 

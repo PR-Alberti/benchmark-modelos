@@ -3,14 +3,12 @@
     cd tests && python -m unittest test_multisujeito -v
 """
 import os
-import sys
 import tempfile
 import unittest
 
 import numpy as np
 import torch
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 from mindeye_ridge import frr
 from mindeye_ridge import multisujeito as ms
 

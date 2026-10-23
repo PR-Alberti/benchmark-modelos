@@ -25,6 +25,11 @@ setup/bootstrap.sh --ckpts        # + checkpoints ridge-only do release (reposit
 ~/envs/fmri/bin/python -m unittest discover -s tests
 ```
 
+O setup instala o código de `src/` no ambiente em modo editável (`pip install -e .`, configurado no
+[`pyproject.toml`](pyproject.toml)): `import mindeye_ridge`, `import treina` e `import report` funcionam
+de qualquer pasta, e uma mudança no código vale na hora. Num ambiente criado antes disso, rode
+`setup/bootstrap.sh` de novo, ou só `~/envs/fmri/bin/pip install --no-deps --no-build-isolation -e .`.
+
 | Preparação | Download | Disco |
 |---|---|---|
 | `--minimo` | ~35 GB | 40 GB |
@@ -111,7 +116,7 @@ python src/make_site.py --exemplos                                    # refaz os
 ### Resultado de um modelo
 
 ```bash
-cd src && python -c "from mindeye_ridge import resultados; print(resultados.retrieval('<nome>'))"
+python -c "from mindeye_ridge import resultados; print(resultados.retrieval('<nome>'))"
 ```
 
 | Onde | O quê |

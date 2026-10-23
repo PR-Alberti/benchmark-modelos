@@ -3,8 +3,6 @@
     cd tests && python -m unittest test_semantica -v
 """
 import itertools
-import os
-import sys
 import tempfile
 import unittest
 import zipfile
@@ -14,7 +12,6 @@ from unittest import mock
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 from mindeye_ridge import semantica
 
 
