@@ -237,11 +237,13 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 ~/benchmark-modelos/             ← este repositório (código)
 ├── README.md                    o que é e como rodar
 ├── BENCHMARK.md                 tabelas do benchmark (gerado)
-├── docs/
+├── pyproject.toml               instala src/ no ambiente (pip install -e ., feito pelo setup_env.sh)
+├── docs/                        documentação; o índice é o docs/README.md
+│   ├── GUIA.md                  para quem vai mexer no código: glossário, pipeline, onde fica cada coisa
+│   ├── NOVO_COMPUTADOR.md       do computador zerado ao primeiro treino
 │   ├── SETUP.md                 este arquivo
-│   ├── MINDEYE1.md              instalação, ajustes e protocolo do MindEye1
-│   ├── EXPERIMENTO.md           o que foi feito e por quê
-│   └── ESTAGIO.md               plano de estágio: o que já está feito
+│   ├── EXPERIMENTO.md  FRR_MULTISUJEITO.md  MINDEYE1.md   os modelos
+│   └── ESTAGIO.md  REEXECUTAR.md  REVISAO.md              plano, reexecução e revisão
 ├── setup/
 │   ├── bootstrap.sh             prepara a máquina inteira (chama os de baixo)
 │   ├── setup_env.sh             cria o ambiente Python
