@@ -365,6 +365,32 @@
    "a view of a person.",
    "a view of a person."
   ],
+  "subj01_frr_20sess": [
+   "a man standing on a surfboard.",
+   "a man is sitting down.",
+   "a man standing in front of a fence.",
+   "a table with a bunch of food on it",
+   "a view of a room.",
+   "a large area of land that has been mowed.",
+   "a man is sitting down.",
+   "a large area of grass.",
+   "a young man is sitting in front of a camera.",
+   "a view of a person.",
+   "a large white building.",
+   "a man standing on a skateboard.",
+   "a large area of grass.",
+   "a view of a building.",
+   "a man standing in front of a wall.",
+   "a large group of people.",
+   "a large white and black sign.",
+   "a man standing on a beach next to a body of water.",
+   "a man standing next to a fence.",
+   "a large white building.",
+   "a view of a large area.",
+   "a large white building.",
+   "a man standing in front of a wall.",
+   "a man standing in front of a building."
+  ],
   "subj01_frr_40sess": [
    "a man standing on a surfboard.",
    "a man is standing in front of a wall.",
@@ -379,6 +405,162 @@
    "a large white and black sign.",
    "a man standing in front of a building.",
    "a large area with a lot of space for a small table.",
+   "a view of a large area.",
+   "a man standing in front of a building.",
+   "a large group of people.",
+   "a large open area with a lot of people around it.",
+   "a man standing on a beach next to a building.",
+   "a man standing next to a fence.",
+   "a large white building.",
+   "a view of a man's face.",
+   "a large white building.",
+   "a man standing in front of a wall.",
+   "a large group of people."
+  ],
+  "subj01_frr_multisujeito_1sess": [
+   "a man standing on a skateboard.",
+   "a view of a person.",
+   "a man standing in front of a fence.",
+   "a table with a bunch of food on it",
+   "a view of a person.",
+   "a view of a person.",
+   "a man is standing in front of a wall.",
+   "a view of a person.",
+   "a man is standing in front of a wall.",
+   "a view of a person.",
+   "a large white and black sign.",
+   "a man standing in front of a building.",
+   "a large area of grass.",
+   "a view of a building.",
+   "a man is sitting down.",
+   "a large group of people.",
+   "a large area of grass.",
+   "a man standing on a beach.",
+   "a man standing on a bench.",
+   "a large white building.",
+   "a view of a person.",
+   "a large white and blue building.",
+   "a man is standing in front of a wall.",
+   "a view of a person."
+  ],
+  "subj01_frr_multisujeito_20sess": [
+   "a man on a surfboard in the water.",
+   "a man is standing in front of a building.",
+   "a man standing in front of a fence.",
+   "a table with a bunch of food on it",
+   "a view of a room.",
+   "a large area of land that has been painted white.",
+   "a man is sitting down.",
+   "a large area of grass.",
+   "a young man is standing in front of a fence.",
+   "a large brown and white zebra.",
+   "a large white clock.",
+   "a man is standing in front of a building.",
+   "a large open area with a lot of people around it.",
+   "a view of a building.",
+   "a man standing in front of a wall.",
+   "a large group of people.",
+   "a large open area with a lot of people around it.",
+   "a man standing on a beach next to a body of water.",
+   "a large group of people.",
+   "a large white boat.",
+   "a large area of land that has been mowed.",
+   "a large white building.",
+   "a man standing in front of a wall.",
+   "a large group of people."
+  ],
+  "subj01_frr_multisujeito_40sess": [
+   "a man standing on a surfboard.",
+   "a man is standing in front of a wall.",
+   "a man standing in front of a fence.",
+   "a table with a bunch of food on it",
+   "a view of a person.",
+   "a large area of grass.",
+   "a man is sitting down.",
+   "a large area of grass.",
+   "a man is standing in front of a wall.",
+   "a view of a person.",
+   "a large white clock.",
+   "a man standing in front of a building.",
+   "a large area of grass.",
+   "a view of a large area.",
+   "a man standing in front of a building.",
+   "a large group of people.",
+   "a large open area with a lot of people around it.",
+   "a man standing on a beach next to a building.",
+   "a man standing next to a fence.",
+   "a large white building.",
+   "a view of a man's face.",
+   "a large white building.",
+   "a man standing in front of a wall.",
+   "a large group of people."
+  ],
+  "subj01_frr_postoreduzido_1sess": [
+   "a man standing on a skateboard.",
+   "a man is standing in front of a wall.",
+   "a man standing on a bench.",
+   "a table with a bunch of items on it",
+   "a view of a person.",
+   "a view of a man's face.",
+   "a man and a woman",
+   "a view of a man.",
+   "a man is standing in front of a wall.",
+   "a view of a person.",
+   "a white and black photo of a table",
+   "a man standing on a sidewalk.",
+   "a man standing in front of a building.",
+   "a view of a person.",
+   "a man is standing in front of a wall.",
+   "a large group of people.",
+   "a large area of grass.",
+   "a man standing on a beach next to a body of water.",
+   "a man standing next to a woman.",
+   "a large white building.",
+   "a view of a man's face.",
+   "a large white building.",
+   "a man is standing in front of a wall.",
+   "a view of a person."
+  ],
+  "subj01_frr_postoreduzido_20sess": [
+   "a man on a surfboard in the water.",
+   "a man is standing in front of a building.",
+   "a man standing in front of a fence.",
+   "a table with a bunch of food on it",
+   "a view of a room.",
+   "a large area of land that has been painted white.",
+   "a man is sitting down.",
+   "a large area of grass.",
+   "a young man is sitting in front of a camera.",
+   "a large group of people.",
+   "a large white building.",
+   "a man standing on a skateboard.",
+   "a large white and black sign.",
+   "a view of a building.",
+   "a man standing in front of a wall.",
+   "a group of people standing around each other.",
+   "a large number of people standing around.",
+   "a man standing on a beach next to a body of water.",
+   "a large group of people.",
+   "a large white boat.",
+   "a large area of land that has been cleared.",
+   "a large white building.",
+   "a man standing in front of a wall.",
+   "a large group of people."
+  ],
+  "subj01_frr_postoreduzido_40sess": [
+   "a man standing on a surfboard.",
+   "a man is standing in front of a wall.",
+   "a man standing in front of a fence.",
+   "a table with a bunch of food on it",
+   "a view of a person.",
+   "a large area of grass.",
+   "a man is sitting down.",
+   "a large area of grass.",
+   "a man is standing in front of a wall.",
+   "a view of a person.",
+   "a large white clock.",
+   "a man standing in front of a building.",
+   "a large open area with a lot of people around it.",
    "a view of a large area.",
    "a man standing in front of a building.",
    "a large group of people.",
@@ -830,6 +1012,22 @@
     ]
    }
   },
+  "subj01_frr_20sess": {
+   "refinada": {
+    "arquivo": "subj01_frr_20sess__refinada.webp",
+    "sig": [
+     786433453,
+     1792609636674356503
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_frr_20sess__unclip.webp",
+    "sig": [
+     786433413,
+     1792606327720350084
+    ]
+   }
+  },
   "subj01_frr_40sess": {
    "refinada": {
     "arquivo": "subj01_frr_40sess__refinada.webp",
@@ -843,6 +1041,102 @@
     "sig": [
      786433443,
      1792442614534164806
+    ]
+   }
+  },
+  "subj01_frr_multisujeito_1sess": {
+   "refinada": {
+    "arquivo": "subj01_frr_multisujeito_1sess__refinada.webp",
+    "sig": [
+     786433513,
+     1792538678878776247
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_frr_multisujeito_1sess__unclip.webp",
+    "sig": [
+     786433473,
+     1792535365725302224
+    ]
+   }
+  },
+  "subj01_frr_multisujeito_20sess": {
+   "refinada": {
+    "arquivo": "subj01_frr_multisujeito_20sess__refinada.webp",
+    "sig": [
+     786433518,
+     1792550493268106332
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_frr_multisujeito_20sess__unclip.webp",
+    "sig": [
+     786433478,
+     1792547175566598833
+    ]
+   }
+  },
+  "subj01_frr_multisujeito_40sess": {
+   "refinada": {
+    "arquivo": "subj01_frr_multisujeito_40sess__refinada.webp",
+    "sig": [
+     786433518,
+     1792562322488328742
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_frr_multisujeito_40sess__unclip.webp",
+    "sig": [
+     786433478,
+     1792559012177523607
+    ]
+   }
+  },
+  "subj01_frr_postoreduzido_1sess": {
+   "refinada": {
+    "arquivo": "subj01_frr_postoreduzido_1sess__refinada.webp",
+    "sig": [
+     786433518,
+     1792574153273819322
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_frr_postoreduzido_1sess__unclip.webp",
+    "sig": [
+     786433478,
+     1792570835958158858
+    ]
+   }
+  },
+  "subj01_frr_postoreduzido_20sess": {
+   "refinada": {
+    "arquivo": "subj01_frr_postoreduzido_20sess__refinada.webp",
+    "sig": [
+     786433523,
+     1792585966754700739
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_frr_postoreduzido_20sess__unclip.webp",
+    "sig": [
+     786433483,
+     1792582663795052207
+    ]
+   }
+  },
+  "subj01_frr_postoreduzido_40sess": {
+   "refinada": {
+    "arquivo": "subj01_frr_postoreduzido_40sess__refinada.webp",
+    "sig": [
+     786433523,
+     1792597801628854166
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_frr_postoreduzido_40sess__unclip.webp",
+    "sig": [
+     786433483,
+     1792594483557396898
     ]
    }
   },
@@ -1079,7 +1373,7 @@
   "arquivo": "vista.webp",
   "sig": [
    602113195,
-   1793191597475731325
+   1792705596118383737
   ]
  }
 }

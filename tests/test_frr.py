@@ -6,14 +6,12 @@ Os testes de referencia so rodam se `fracridge` estiver instalado (pip install f
 Tudo em float64 na CPU, para comparar com tolerancias apertadas; o de GPU, se houver, em fp32.
 """
 import os
-import sys
 import tempfile
 import unittest
 
 import numpy as np
 import torch
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 from mindeye_ridge import frr
 
 try:

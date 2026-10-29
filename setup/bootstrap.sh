@@ -7,6 +7,9 @@
 #   setup/bootstrap.sh --check      so diagnostica: o que ja existe, o que falta
 #   setup/bootstrap.sh --ckpts      + os checkpoints ridge-only ja treinados (release do GitHub)
 #   setup/bootstrap.sh --minimo     so o ridge-only de 1 sessao: ambiente + dados (~30 GB)
+#   setup/bootstrap.sh --multisujeito   + betas e tars dos sujeitos 2-8 (~12 GB), o pre-treino do
+#                                   FRR multi-sujeito (modelo frr_ms); os alvos CLIP deles (~50 GB) sao
+#                                   calculados no primeiro treino
 #
 # Opcoes: --env-path DIR (padrao ~/envs/fmri), --data-path DIR (padrao ~/mindeyev2).
 # Cada etapa e idempotente: pode interromper e rodar de novo que ele continua
@@ -28,6 +31,7 @@ SESSOES=()          # vazio = todas as 40
 MINIMO=0
 CHECK_ONLY=0
 WANT_CKPTS=0
+MULTISUJEITO=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -35,9 +39,10 @@ while [[ $# -gt 0 ]]; do
         --all)    shift ;;   # era a opcao para "tudo"; hoje tudo e o padrao
         --minimo) MINIMO=1; STAGES=(finetune); SESSOES=(--num-sessions 1); shift ;;
         --ckpts)  WANT_CKPTS=1; shift ;;
+        --multisujeito) MULTISUJEITO=1; shift ;;
         --env-path)  ENV_PATH="$2"; shift 2 ;;
         --data-path) DATA_PATH="$2"; shift 2 ;;
-        -h|--help)   sed -n '3,15p' "$0"; exit 0 ;;
+        -h|--help)   sed -n '3,17p' "$0"; exit 0 ;;
         *) echo "argumento desconhecido: $1" >&2; exit 1 ;;
     esac
 done
@@ -85,6 +90,9 @@ titulo "2. Ambiente Python  ($ENV_PATH)"
 
 env_pronto() { "$ENV_PATH/bin/python" -c "import torch, open_clip, clip, deepspeed" >/dev/null 2>&1; }
 env_me1()    { "$ENV_PATH/bin/python" -c "import info_nce, pytorch_msssim, bitsandbytes" >/dev/null 2>&1; }
+# o codigo de src/ instalado em modo editavel (pyproject.toml) e apontando para ESTE clone: de fora do
+# repositorio, o mindeye_ridge tem de importar e o REPO dele tem de ser esta pasta
+env_repo()   { [[ "$(cd / && "$ENV_PATH/bin/python" -c "import mindeye_ridge.paths as p; print(p.REPO)" 2>/dev/null)" == "$(pwd -P)" ]]; }
 
 if env_pronto; then
     ok "ja existe e importa a stack principal"
@@ -95,6 +103,13 @@ if env_pronto; then
     else
         "$ENV_PATH/bin/pip" install -q --no-deps info-nce-pytorch==0.1.0 pytorch-msssim==1.0.0 bitsandbytes==0.43.3 \
             && ok "pacotes do MindEye1 instalados" || problema "pip falhou nos pacotes do MindEye1"
+    fi
+    # ambientes criados antes do pyproject.toml nao tem o codigo do repositorio instalado
+    if env_repo; then ok "codigo do repositorio instalado (pip install -e .)"
+    elif [[ $CHECK_ONLY -eq 1 ]]; then falta "codigo do repositorio no ambiente (pip install -e .)"
+    else
+        "$ENV_PATH/bin/pip" install -q --no-deps --no-build-isolation -e . \
+            && ok "codigo do repositorio instalado (pip install -e .)" || problema "pip install -e . falhou"
     fi
 elif [[ $CHECK_ONLY -eq 1 ]]; then
     falta "nao existe - rode sem --check para criar (~15 min)"
@@ -127,6 +142,18 @@ else
         ok "dados no lugar"
     else
         erro "download falhou - pode rodar de novo, ele continua de onde parou"; exit 1
+    fi
+fi
+
+# FRR multi-sujeito: os outros 7 sujeitos do NSD, todas as sessoes (so betas e tars; as imagens sao as mesmas)
+if [[ $MULTISUJEITO -eq 1 ]]; then
+    titulo "3b. Sujeitos 2-8 (pre-treino do FRR multi-sujeito)"
+    if [[ $CHECK_ONLY -eq 1 ]]; then
+        "$PY" setup/download_data.py --stage train --subj 2 3 4 5 6 7 8 --data-path "$DATA_PATH" --dry-run 2>&1 | sed 's/^/  /'
+    elif "$PY" setup/download_data.py --stage train --subj 2 3 4 5 6 7 8 --data-path "$DATA_PATH" 2>&1 | sed 's/^/  /'; then
+        ok "sujeitos 2-8 no lugar"
+    else
+        erro "download dos sujeitos 2-8 falhou - pode rodar de novo"; exit 1
     fi
 fi
 
@@ -250,7 +277,7 @@ D="$DATA_PATH"
 verifica "MindEye2 ridge-only (1 sessao)" "$D/betas_all_subj01_fp32_renorm.hdf5" \
     "$D/coco_images_224_float16.hdf5" "$D/wds/subj01/train/0.tar" \
     "$D/train_logs/multisubject_subj01_1024hid_nolow_300ep/last.pth" -- \
-    src "import sys; sys.path.insert(0,'generative_models'); import mindeye_ridge.models, mindeye_ridge.utils; from generative_models.sgm.modules.encoders.modules import FrozenOpenCLIPImageEmbedder"
+    src "from mindeye_ridge import paths; paths.add_vendored_to_path(); import mindeye_ridge.models, mindeye_ridge.utils; from generative_models.sgm.modules.encoders.modules import FrozenOpenCLIPImageEmbedder"
 if [[ $MINIMO -eq 0 ]]; then
     verifica "MindEye2 ridge-only (40 sessoes, 4096 + blurry)" "$D/wds/subj01/train/39.tar" \
         "$D/train_logs/final_multisubject_subj01/last.pth" "$D/convnext_xlarge_alpha0.75_fullckpt.pth" -- \

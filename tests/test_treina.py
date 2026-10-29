@@ -6,7 +6,6 @@ import io
 import json
 import os
 import re
-import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -15,7 +14,6 @@ from unittest import mock
 
 import numpy as np
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 import treina
 from experimentos import BENCHMARK, TODOS
 from mindeye_ridge import dataset_controlado as dc
@@ -28,6 +26,28 @@ class Hiper(unittest.TestCase):
         env, args = treina.MODELOS["frr"].traduz(h)
         self.assertEqual(args, [])
         self.assertEqual(env["EXTRA"], "--folds=3 --grid=doerig --fracs 0.1 0.5 --seed=42 --chunk=8192 --global_fraction")
+
+    def test_frr_ms_vira_extra(self):
+        m = treina.MODELOS["frr_ms"]
+        env, _ = m.traduz(m.completa({}))
+        self.assertEqual(env["EXTRA"], "--k=1024 --pretreino 2 3 4 5 6 7 8 --pesos=sujeito --iteracoes=10 "
+                                       "--tolerancia=0.001 --validacao=0.1 --folds=5 --grid=doerig --seed=42 --chunk=8192")
+        env, _ = m.traduz(m.completa({"pretreino": "proprio", "k": 256}))
+        self.assertIn("--pretreino=proprio", env["EXTRA"])
+        self.assertIn("--k=256", env["EXTRA"])
+
+    def test_frr_ms_invalido(self):
+        m = treina.MODELOS["frr_ms"]
+        for h, msg in (({"pretreino": [1, 2]}, "entre 2 e 8"), ({"pretreino": []}, "entre 2 e 8"),
+                       ({"pretreino": "todos"}, "proprio"), ({"pesos": "imagem"}, "pesos"),
+                       ({"validacao": 0.6}, "validacao"), ({"k": 0}, "k >= 1")):
+            with self.subTest(h), self.assertRaisesRegex(ValueError, msg):
+                m.completa(h)
+
+    def test_frr_ms_reconstroi_e_so_usa_exibicoes(self):
+        self.assertEqual(treina.MODELOS["frr_ms"].reconstrucao, "run_recon_embeddings.sh")
+        with self.assertRaisesRegex(ValueError, "nao se aplica"):
+            treina.roda("x", {"modelo": "frr_ms", "dataset": {"agregacao": "media"}}, dry_run=True)
 
     def test_mindeye2_vira_variaveis_do_script(self):
         h = treina.MODELOS["mindeye2"].completa({"num_epochs": 20, "prior": False, "frozen_fp16": True})

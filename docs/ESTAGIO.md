@@ -23,7 +23,7 @@ estão no [BENCHMARK.md](../BENCHMARK.md), e o que foi feito e por quê, no [EXP
 
 | Tarefa do plano | Estado | Onde |
 |---|---|---|
-| Modelo linear por sujeito (FRR, Doerig et al.) | feito | `src/mindeye_ridge/frr.py`, `src/run_frr.py`. Validado contra o pacote `fracridge` e contra uma ridge resolvida pela equação normal (`tests/test_frr.py`) |
+| Modelo linear por sujeito (FRR, Doerig et al.) | feito | `src/mindeye_ridge/frr.py`, `src/etapas/run_frr.py`. Validado contra o pacote `fracridge` e contra uma ridge resolvida pela equação normal (`tests/test_frr.py`) |
 | Modelo não linear por sujeito, da literatura | **pendente** | Falta escolher por relevância e reprodutibilidade, e implementar |
 | MindEye2 simplificado (sem reconstrução de baixo nível e sem unCLIP), pré-treinado e adaptado ao sujeito | feito | Os ridge-only de 1024 (`scripts/run_ridgeonly_prior.sh`): só a ridge do sujeito é treinada, a partir do pré-treino nos outros 7 sujeitos |
 | Quais componentes do MindEye2 ficam mantidos, congelados ou retreinados | feito | [EXPERIMENTO.md](EXPERIMENTO.md): backbone e prior congelados, ridge treinada (2,21% dos parâmetros); o 4096 + blurry mantém o ramo de baixo nível |

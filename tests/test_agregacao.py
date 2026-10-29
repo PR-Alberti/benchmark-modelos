@@ -10,7 +10,6 @@ import numpy as np
 import torch
 
 RAIZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-sys.path.insert(0, os.path.join(RAIZ, "src"))
 sys.path.insert(0, os.path.join(RAIZ, "mindeye1", "src"))
 from mindeye_ridge import agregacao
 from mindeye_ridge import dataset_controlado as dc

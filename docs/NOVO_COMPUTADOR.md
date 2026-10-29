@@ -43,7 +43,6 @@ exec bash
 ```bash
 git clone https://github.com/PR-Alberti/benchmark-modelos.git
 cd benchmark-modelos
-git checkout controlled-dataset      # enquanto a branch não estiver na main
 ```
 
 ## 3. Preparar a máquina
@@ -79,6 +78,13 @@ MindEye1 não entra):
 ~/envs/fmri/bin/python setup/prefetch_weights.py      # o Versatile Diffusion (23 GB) só serve ao MindEye1
 ```
 
+Para o FRR multi-sujeito ([FRR_MULTISUJEITO.md](FRR_MULTISUJEITO.md)), mais os sujeitos 2–8 (12,1 GB de betas e
+tars); os alvos CLIP deles (~50 GB) são calculados na primeira corrida:
+
+```bash
+setup/bootstrap.sh --multisujeito          # ou: setup/download_data.py --stage train --subj 2 3 4 5 6 7 8
+```
+
 Se `XDG_CACHE_HOME` apontar para uma partição pequena, exporte antes `HF_HOME=~/.cache/huggingface` e
 `TORCH_HOME=~/.cache/torch`: o HuggingFace e o `torch.hub` gravam lá os temporários dos downloads, e um
 disco cheio derruba o download com `No space left on device`, mesmo com espaço em `~`.
@@ -90,14 +96,14 @@ em `~/envs/fmri` (`MINDEYE_ENV`). Exporte as mesmas variáveis em todos os coman
 Confira no fim:
 
 ```bash
-~/envs/fmri/bin/python -m unittest discover -s tests      # 134 testes, ~15 s; "OK (skipped=3)"
+~/envs/fmri/bin/python -m unittest discover -s tests      # 176 testes, ~30 s; "OK (skipped=4)"
 setup/bootstrap.sh --check                                # o resumo diz o que ainda falta
 ```
 
 ## 4. Rodar um treino
 
-Em terminal, o jeito é o `src/treina.py`. Cada treino é um dicionário com o modelo (`frr`, `mindeye2`
-ou `mindeye1`), os hiperparâmetros e o dataset; o que faltar fica no padrão do modelo.
+Em terminal, o jeito é o `src/treina.py`. Cada treino é um dicionário com o modelo (`frr`, `frr_ms`,
+`mindeye2` ou `mindeye1`), os hiperparâmetros e o dataset; o que faltar fica no padrão do modelo.
 
 ```bash
 tmux new -s treino
@@ -111,12 +117,10 @@ Escreva o dicionário num arquivo (não precisa editar o repositório):
 
 ```bash
 cat > ~/meu_experimento.py <<'EOF'
-import sys
-sys.path.insert(0, "/home/SEU_USUARIO/benchmark-modelos/src")    # troque pelo caminho do clone
-import treina
+import treina                               # o setup instala src/ no ambiente (pip install -e .)
 
 exp = {
-    "modelo": "frr",                       # frr | mindeye2 | mindeye1
+    "modelo": "frr",                       # frr | frr_ms | mindeye2 | mindeye1
     "hiper": {"seed": 42},                 # hiperparâmetros do modelo; o resto é padrão
     "dataset": {
         "sessoes": 40,                     # pool: as primeiras N sessões
@@ -179,7 +183,8 @@ MindEye1, do `last.pth`. O MindEye2 só retoma com `treina.roda(..., retoma=True
 dataset ou outros hiperparâmetros, ele para, para não misturar configurações.
 
 Quanto leva, numa A4500: FRR ~1 min (1 sessão) a ~30 min (40 sessões); MindEye2 ridge-only ~2 h (1 sessão)
-a ~8 h (40 sessões, 20 épocas); MindEye1 ~5 h (1 sessão) a ~20 h (40 sessões), sem contar o low-level.
+a ~8 h (40 sessões, 20 épocas); MindEye1 ~1 h 40 (1 sessão) a ~16 h (40 sessões), mais ~1 h e ~13 h do low-level
+(medidos no [REEXECUTAR.md](REEXECUTAR.md)).
 Num subconjunto, o tempo cai com o número de exibições.
 
 ## 5. Ver o resultado

@@ -8,8 +8,8 @@ unCLIP e, convertido para o ViT-L, para o GIT, que da a legenda usada no refinam
 checkpoint do MindEye2: as tres redes (mindeye_ridge/decodificador.py) foram treinadas so com imagens
 e texto. Sem ramo low-level, nao ha reconstrucao borrada.
 
-    python recon_embeddings.py --model_name repro_subj01_frr_1sess
-    python recon_embeddings.py --model_name repro_subj01_frr_1sess --max_images 8    # teste rapido
+    python src/etapas/recon_embeddings.py --model_name repro_subj01_frr_1sess
+    python src/etapas/recon_embeddings.py --model_name repro_subj01_frr_1sess --max_images 8    # teste rapido
 
 Grava <modelo>_all_recons.pt (n, 3, 256, 256) e <modelo>_all_predcaptions.pt, os mesmos arquivos do
 recon_inference.py, entao o enhanced_recon_inference.py e o final_evaluations.py seguem iguais. A

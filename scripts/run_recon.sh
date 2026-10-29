@@ -45,7 +45,7 @@ if [ -f "${OUT}_all_clipvoxels.pt" ] && [ -f "${OUT}_all_recons.pt" ] && [ ! -f 
     echo "=== recon_inference: $MODEL_NAME ja feito, pulando ==="
 else
     echo "=== recon_inference: $MODEL_NAME (hidden_dim=$HIDDEN_DIM, $BLURRY_MODE) ==="
-    $ENVP/bin/python recon_inference.py \
+    $ENVP/bin/python etapas/recon_inference.py \
         --model_name="$MODEL_NAME" \
         --data_path=$DATA --cache_dir=$DATA \
         --subj=1 --hidden_dim="$HIDDEN_DIM" --n_blocks=4 \
@@ -61,7 +61,7 @@ if [ -f "${OUT}_all_enhancedrecons.pt" ]; then
     echo "=== enhanced_recon_inference: $MODEL_NAME ja feito, pulando ==="
 else
     echo "=== enhanced_recon_inference: $MODEL_NAME ==="
-    $ENVP/bin/python enhanced_recon_inference.py \
+    $ENVP/bin/python etapas/enhanced_recon_inference.py \
         --model_name="$MODEL_NAME" \
         --data_path=$DATA --cache_dir=$DATA --subj=1 --seed="${SEED:-42}" \
         2>&1 | tee -a "$LOGDIR/enhanced.log"

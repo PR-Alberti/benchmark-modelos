@@ -4,13 +4,11 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 import treina                                                     # noqa: E402
 from mindeye_ridge import agregacao, dataset_controlado as dc, paths   # noqa: E402
 from report import apresentacao, catalogo, exemplos_site, galeria_site, semantica_site, site   # noqa: E402
