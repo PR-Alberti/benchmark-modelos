@@ -56,7 +56,7 @@ modelo() {
     [ "$bl" = blurry ] && bf=--blurry_recon
     treina "$m" || { FALHAS=$((FALHAS + 1)); etapa "$m: interrompido, a fila segue"; return 0; }
     # o retrieval tambem sai nas tabelas (sem o intervalo), entao a falha aqui nao interrompe o modelo
-    passo "$m" retrieval "retrieval com intervalo" "$ENVP/bin/python" verify_retrieval.py --model_name="$m" \
+    passo "$m" retrieval "retrieval com intervalo" "$ENVP/bin/python" etapas/verify_retrieval.py --model_name="$m" \
         --data_path="$DATA" --cache_dir="$DATA" --subj=1 --hidden_dim="$hd" --n_blocks=4 $bf \
         --frozen_ckpt="$fz" --new_test || FALHAS=$((FALHAS + 1))
     if [ "$RECON" = 1 ]; then
