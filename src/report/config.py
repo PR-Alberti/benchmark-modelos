@@ -4,6 +4,7 @@ from mindeye_ridge import paths
 
 
 REPO, DATA, SAIDA = paths.REPO, paths.DATA, paths.BENCHMARK
+REPO_URL = "https://github.com/PR-Alberti/benchmark-modelos"
 
 
 # Ordem das linhas e das colunas da galeria. "grupo" separa as comparacoes
