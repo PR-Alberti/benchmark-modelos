@@ -163,14 +163,14 @@ def _mindeye1(h):
 # "seed": o padrao e 42 em todos os modelos e deve ficar assim: uma unica semente, a mesma, em todo
 # experimento (so o ruido do Ridge 1024 + prior foi medido com outras; veja experimentos.py)
 MODELOS = {
-    # src/run_frr.py: validacao cruzada de 5 dobras sobre as 20 fracoes de Doerig et al.
+    # src/etapas/run_frr.py: validacao cruzada de 5 dobras sobre as 20 fracoes de Doerig et al.
     "frr": Modelo(["run_frr.sh"], ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "EXTRA"),
                   {"folds": 5, "grid": "doerig", "fracs": None, "global_fraction": False,
                    "seed": 42, "chunk": 8192},
                   _frr, agregacoes=("exibicoes", "media"),      # sem epocas: nada a sortear por epoca
                   saida=lambda nome: paths.TABLES / f"{nome}_frr.json",
                   reconstrucao="run_recon_embeddings.sh"),
-    # src/run_frr_ms.py: FRR multi-sujeito. Pre-treino linear (minimos alternados) de um espaco de k
+    # src/etapas/run_frr_ms.py: FRR multi-sujeito. Pre-treino linear (minimos alternados) de um espaco de k
     # dimensoes nos sujeitos 2-8 com peso igual por sujeito, ou pretreino="proprio" (o controle de posto
     # reduzido, so o subj01); depois, so a ridge do subj01, com a leitura congelada
     "frr_ms": Modelo(["run_frr_ms.sh"], ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "EXTRA"),
@@ -180,7 +180,7 @@ MODELOS = {
                      _frr_ms, _valida_frr_ms, agregacoes=("exibicoes",),
                      saida=lambda nome: paths.TABLES / f"{nome}_frr.json",
                      reconstrucao="run_recon_embeddings.sh"),
-    # src/train_ridgeonly.py: so a ridge do subj01, a partir do pre-treino nos outros 7 sujeitos.
+    # src/etapas/train_ridgeonly.py: so a ridge do subj01, a partir do pre-treino nos outros 7 sujeitos.
     # batch_size None = o padrao do script (16 no 1024, 8 no 4096 + blurry); frozen_fp16 None = idem
     "mindeye2": Modelo(["run_ridgeonly_prior.sh"],
                        ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "HIDDEN_DIM", "BLURRY", "MSCKPT", "FROZEN",

@@ -1,5 +1,5 @@
 #!/bin/bash
-# FRR multi-sujeito (src/run_frr_ms.py): pre-treino linear de um espaco compartilhado de k dimensoes nos
+# FRR multi-sujeito (src/etapas/run_frr_ms.py): pre-treino linear de um espaco compartilhado de k dimensoes nos
 # sujeitos 2-8 (modelo C) ou so no proprio subj01 (EXTRA=--pretreino=proprio, o controle de posto
 # reduzido, modelo B), e ajuste fino so da ridge do subj01. Mesmo treino, teste e alvo do run_frr.sh.
 #
@@ -21,7 +21,7 @@ MODEL_NAME=${MODEL_NAME:-subj01_frr_multisujeito_${NUM_SESSIONS}sess}
 
 mkdir -p "$TRAIN_LOGS/$MODEL_NAME"
 echo "=== FRR multi-sujeito: $MODEL_NAME ($NUM_SESSIONS sessoes) ==="
-$ENVP/bin/python run_frr_ms.py --model_name="$MODEL_NAME" --data_path="$DATA" --subj=1 \
+$ENVP/bin/python etapas/run_frr_ms.py --model_name="$MODEL_NAME" --data_path="$DATA" --subj=1 \
     --num_sessions="$NUM_SESSIONS" ${DATASET:+--dataset="$DATASET"} $EXTRA \
     2>&1 | grep --line-buffered -v -E "Warning|pynvml|warnings.warn|pkg_resources" \
     | tee -a "$TRAIN_LOGS/$MODEL_NAME/frr_ms.log"

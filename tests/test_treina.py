@@ -6,7 +6,6 @@ import io
 import json
 import os
 import re
-import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -15,7 +14,6 @@ from unittest import mock
 
 import numpy as np
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 import treina
 from experimentos import BENCHMARK, TODOS
 from mindeye_ridge import dataset_controlado as dc

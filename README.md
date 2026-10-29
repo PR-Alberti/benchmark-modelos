@@ -5,10 +5,13 @@ mesmo treino, o mesmo teste (1.000 imagens compartilhadas) e as mesmas métricas
 
 | Modelo | Código | Saída |
 |---|---|---|
-| **MindEye2** ridge-only ([Scotti et al., 2024](https://arxiv.org/abs/2403.11207)) | `src/train_ridgeonly.py` | embedding CLIP ViT-bigG + imagem (SDXL unCLIP) |
-| **FRR**, ridge fracionária ([Rokem & Kay, 2020](https://doi.org/10.1093/gigascience/giaa133)) | `src/run_frr.py` | embedding CLIP ViT-bigG |
-| **FRR multi-sujeito**: espaço compartilhado linear, pré-treino nos sujeitos 2–8 ([docs/FRR_MULTISUJEITO.md](docs/FRR_MULTISUJEITO.md)) | `src/run_frr_ms.py` | embedding CLIP ViT-bigG |
+| **MindEye2** ridge-only ([Scotti et al., 2024](https://arxiv.org/abs/2403.11207)) | `src/etapas/train_ridgeonly.py` | embedding CLIP ViT-bigG + imagem (SDXL unCLIP) |
+| **FRR**, ridge fracionária ([Rokem & Kay, 2020](https://doi.org/10.1093/gigascience/giaa133)) | `src/etapas/run_frr.py` | embedding CLIP ViT-bigG |
+| **FRR multi-sujeito**: espaço compartilhado linear, pré-treino nos sujeitos 2–8 ([docs/FRR_MULTISUJEITO.md](docs/FRR_MULTISUJEITO.md)) | `src/etapas/run_frr_ms.py` | embedding CLIP ViT-bigG |
 | **MindEye1** ([Scotti et al., 2023](https://arxiv.org/abs/2305.18274)) | `mindeye1/src/Train_MindEye.py` | embedding CLIP ViT-L/14 + imagem (Versatile Diffusion) |
+
+Novo no código? Comece pelo [docs/GUIA.md](docs/GUIA.md): o problema em uma página, o glossário, o
+pipeline de ponta a ponta e onde fica cada coisa. O índice da documentação está em [docs/README.md](docs/README.md).
 
 Site com início, uso e resultados interativos de todos os modelos: [`results/site/index.html`](results/site/index.html);
 apresentação do trabalho em slides: [`results/site/apresentacao.html`](results/site/apresentacao.html) (os dois abrem
@@ -24,6 +27,11 @@ setup/bootstrap.sh --minimo       # só ridge-only e FRR de 1 sessão
 setup/bootstrap.sh --ckpts        # + checkpoints ridge-only do release (repositório privado)
 ~/envs/fmri/bin/python -m unittest discover -s tests
 ```
+
+O setup instala o código de `src/` no ambiente em modo editável (`pip install -e .`, configurado no
+[`pyproject.toml`](pyproject.toml)): `import mindeye_ridge`, `import treina` e `import report` funcionam
+de qualquer pasta, e uma mudança no código vale na hora. Num ambiente criado antes disso, rode
+`setup/bootstrap.sh` de novo, ou só `~/envs/fmri/bin/pip install --no-deps --no-build-isolation -e .`.
 
 | Preparação | Download | Disco |
 |---|---|---|
@@ -111,7 +119,7 @@ python src/make_site.py --exemplos                                    # refaz os
 ### Resultado de um modelo
 
 ```bash
-cd src && python -c "from mindeye_ridge import resultados; print(resultados.retrieval('<nome>'))"
+python -c "from mindeye_ridge import resultados; print(resultados.retrieval('<nome>'))"
 ```
 
 | Onde | O quê |
@@ -205,17 +213,20 @@ repetições nos quatro modos de agregação, e 3.000 × 1, 1.500 × 2, 1.000 ×
 
 | Pasta | |
 |---|---|
-| `setup/` | preparar a máquina |
-| `scripts/` | rodar os modelos |
-| `src/` | MindEye2, FRR, `treina.py`, `experimentos.py`, o site (`make_site.py`) e a página do benchmark |
+| `setup/` | preparar a máquina (`bootstrap.sh` faz tudo) |
+| `scripts/` | os comandos de cada etapa, em bash ([scripts/README.md](scripts/README.md)) |
+| `src/` | `treina.py` e `experimentos.py` (o ponto de entrada), `make_site.py` e `make_benchmark.py` ([src/README.md](src/README.md)) |
+| `src/etapas/` | as etapas do pipeline: treino, reconstrução, refino, métricas |
 | `src/mindeye_ridge/` | biblioteca: dados, FRR, métricas, semântica, dataset controlado, agregação, resultados |
-| `mindeye1/` | MindEye1 adaptado |
+| `src/report/` | o código do site e do `BENCHMARK.md` |
+| `vendor/` | código de terceiros (os geradores de imagem), como veio ([vendor/README.md](vendor/README.md)) |
+| `mindeye1/` | MindEye1 adaptado ([mindeye1/README.md](mindeye1/README.md)) |
 | `notebooks/` | `treino.ipynb`, `classificacao_semantica.ipynb`, originais do MindEye2 |
 | `results/` | tabelas, site e página (no git); tensores e logs (fora) |
 | `train_logs/` | checkpoints (fora do git) |
-| `tests/` | testes |
-| `docs/` | [NOVO_COMPUTADOR](docs/NOVO_COMPUTADOR.md), [SETUP](docs/SETUP.md), [MINDEYE1](docs/MINDEYE1.md), [EXPERIMENTO](docs/EXPERIMENTO.md), [ESTAGIO](docs/ESTAGIO.md), [REEXECUTAR](docs/REEXECUTAR.md), [FRR_MULTISUJEITO](docs/FRR_MULTISUJEITO.md) |
+| `tests/` | testes, sem GPU |
+| `docs/` | documentação, com índice em [docs/README.md](docs/README.md) |
 
 ## Licença
 
-MIT. `src/generative_models/` e `src/autoencoder/` mantêm as licenças próprias.
+MIT. O código de terceiros em `vendor/` (`generative_models/`, `autoencoder/`) mantém as licenças próprias.
