@@ -72,11 +72,14 @@ FAMILIAS = [
     {"id": "mindeye2", "nome": "MindEye2 ridge-only", "h": 186, "s": 66, "l": 32},
     {"id": "artigo", "nome": "MindEye2 do artigo", "h": 266, "s": 46, "l": 48},
     {"id": "mindeye1", "nome": "MindEye1", "h": 24, "s": 82, "l": 45},
+    {"id": "frr_ms", "nome": "FRR multi-sujeito", "h": 322, "s": 48, "l": 45},
     {"id": "experimento", "nome": "Experimentos", "h": 140, "s": 52, "l": 35},
 ]
-GRUPOS_SELECAO = [{"id": "frr", "nome": "FRR"}, {"id": "mindeye2", "nome": "MindEye2 ridge-only"},
-                  {"id": "artigo", "nome": "MindEye2 · artigo"}, {"id": "mindeye1", "nome": "MindEye1"},
-                  {"id": "experimento", "nome": "Experimentos"}]
+# Secoes da lista de modelos (o "secao" de cada modelo, de _secao): as familias, o FRR multi-sujeito e
+# os experimentos que nao sao uma familia com outro numero de sessoes
+GRUPOS_SELECAO = [{"id": "frr", "nome": "FRR"}, {"id": "frr_ms", "nome": "FRR multi-sujeito"},
+                  {"id": "mindeye2", "nome": "MindEye2 ridge-only"}, {"id": "artigo", "nome": "MindEye2 · artigo"},
+                  {"id": "mindeye1", "nome": "MindEye1"}, {"id": "experimento", "nome": "Experimentos"}]
 
 CURVAS = [
     {"id": "teste_bwd", "nome": "Retrieval no teste · Cér→img", "fmt": "pct",
@@ -143,6 +146,43 @@ PARES = [("FRR", "subj01_frr_1sess", "subj01_frr_40sess"),
          ("MindEye1", "subj01_me1_1sess", "subj01_me1_40sess"),
          ("MindEye1 sem low-level", "subj01_me1_1sess_semlowlevel", "subj01_me1_40sess_semlowlevel"),
          ("Artigo (fine-tune completo)", "final_subj01_pretrained_1sess_24bs", "final_subj01_pretrained_40sess_24bs")]
+
+# O grafico "De 1 para 40 sessoes" do Resumo nao usa os PARES (que ficam para a apresentacao): cada serie e a
+# mesma configuracao com numeros de sessoes diferentes, reconhecida pelo id sem o "_<N>sess". Sai dos modelos
+# que existem, entao um experimento com outro numero de sessoes (o MindEye1 com 5, 10 e 20) entra sozinho.
+_SESS = re.compile(r"_\d+sess")
+_ROTULO_SESS = re.compile(r"\s*·\s*\d+\s+sess(ão|ões)$")
+
+
+def _serie(mid):
+    return _SESS.sub("", mid, count=1) if _SESS.search(mid) else None
+
+
+def series(ms):
+    """[{nome, ids}] das configuracoes com pelo menos dois numeros de sessoes, ids em ordem de sessoes."""
+    por = {}
+    for m in ms:
+        s = _serie(m["id"])
+        if s and m.get("sessoes") and all(x["sessoes"] != m["sessoes"] for x in por.get(s, [])):
+            por.setdefault(s, []).append(m)
+    saida = []
+    for grupo in por.values():
+        if len(grupo) < 2:
+            continue
+        grupo.sort(key=lambda m: m["sessoes"])
+        saida.append({"nome": _ROTULO_SESS.sub("", grupo[-1].get("rotulo") or grupo[-1]["id"]),
+                      "ids": [m["id"] for m in grupo]})
+    return saida
+
+
+def _secao(m, series_benchmark):
+    """Secao da lista: a familia; o FRR multi-sujeito tem a sua, e um experimento so fica em Experimentos
+    quando nao e uma configuracao do benchmark com outro numero de sessoes."""
+    if isinstance(m.get("config"), dict) and m["config"].get("modelo") == "frr_ms":
+        return "frr_ms"
+    if m["grupo"] == "experimento" and _serie(m["id"]) not in series_benchmark:
+        return "experimento"
+    return m["familia"]
 
 HIPER_DESC = {
     "frr": {
@@ -387,12 +427,19 @@ def dados_pagina(modelos, planejados, galeria, semantica):
             "valores": valores or None, "retrieval": ret, "curva": curva,
             "config": m.get("config") if m.get("config_descritiva") else _ordena_config(m.get("config"))})
     ids = {m["id"] for m in ms if m["valores"] or m["curva"]}
+    do_benchmark = {_serie(m["id"]) for m in ms if m["grupo"] == "benchmark"} - {None}
+    for m in ms:
+        m["secao"] = _secao(m, do_benchmark)
     presets = [{"id": i, "nome": n, "desc": d, "modelos": [x for x in lista if x in ids]} for i, n, d, lista in PRESETS]
     presets = [p for p in presets if len(p["modelos"]) >= 2]
-    exp = [m["id"] for m in ms if m["grupo"] == "experimento" and m["id"] in ids]
-    if exp:
-        presets.append({"id": "experimentos", "nome": "Experimentos", "desc": "Os modelos treinados num dataset "
-                        "controlado (fora do benchmark).", "modelos": exp})
+    for sec, nome, desc in (
+            ("frr_ms", "FRR multi-sujeito", "O FRR com a leitura compartilhada entre os sujeitos e o controle de posto "
+             "reduzido, em cada número de sessões."),
+            ("experimento", "Experimentos", "Os experimentos que não são uma configuração do benchmark com outro "
+             "número de sessões.")):
+        sel = [m["id"] for m in ms if m["secao"] == sec and m["id"] in ids]
+        if sel:
+            presets.append({"id": sec, "nome": nome, "desc": desc, "modelos": sel})
     padrao = presets[0]["modelos"] if presets else sorted(ids)[:8]
     teto = next((m["legendas"] for m in modelos if m.get("legendas")), None)
     leitura = texts.leitura(_compat_leitura(modelos))
@@ -400,7 +447,7 @@ def dados_pagina(modelos, planejados, galeria, semantica):
         "modelos": ms, "planejados": planejados, "metricas": METRICAS, "grupos_metricas": GRUPOS_METRICAS,
         "familias": FAMILIAS, "grupos": GRUPOS_SELECAO, "curvas": CURVAS, "fontes_retrieval": FONTES_RETRIEVAL,
         "presets": presets, "padrao": padrao,
-        "pares": [{"nome": n, "de": a, "para": b} for n, a, b in PARES],
+        "series": series([m for m in ms if m["id"] in ids]),
         "padroes": {"hiper": {k: v.padrao for k, v in treina.MODELOS.items()}, "dataset": dc.ConfigDataset().como_dict()},
         "benchmark_ids": list(BENCHMARK), "galeria": galeria, "semantica": semantica, "leitura": leitura,
         "teto_legendas": {k: teto.get(f"{k}_img_ref") for k, *_ in _LEG} if teto else None,

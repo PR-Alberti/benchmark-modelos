@@ -76,7 +76,7 @@
   (function () {
     var cont = {};
     MODELOS.forEach(function (m) {
-      var chave = m.grupo === 'experimento' ? 'experimento' : m.familia;
+      var chave = m.secao || m.familia;
       var f = FAM[chave] || {h: 0, s: 0, l: 45};
       var i = cont[chave] = (cont[chave] == null ? -1 : cont[chave]) + 1;
       var l = Math.max(20, Math.min(70, f.l + DEGRAUS[i % DEGRAUS.length]));
@@ -454,7 +454,7 @@
     var lista = $('#lista-modelos');
     lista.textContent = '';
     D.grupos.forEach(function (g) {
-      var ms = MODELOS.filter(function (m) { return (m.grupo === 'experimento' ? 'experimento' : m.familia) === g.id && temDados(m); });
+      var ms = MODELOS.filter(function (m) { return (m.secao || m.familia) === g.id && temDados(m); });
       if (!ms.length) return;
       var cab = h('input', {type: 'checkbox', 'aria-label': 'Todos de ' + g.nome});
       var dobra = h('button', {class: 'dobra', type: 'button', 'aria-controls': 'grupo-' + g.id},
@@ -525,7 +525,7 @@
   // nao muda a vista, e a lista diz por que, em vez de parecer que o clique nao funcionou.
   var FORA = {
     resumo: function (m) {
-      return D.pares.some(function (p) { return (p.de === m.id || p.para === m.id) && POR_ID[p.de] && POR_ID[p.para]; }) ? null : 'sem par de 1 e 40 sessões';
+      return D.series.some(function (s) { return s.ids.indexOf(m.id) >= 0; }) ? null : 'sem outro número de sessões';
     },
     tabela: function (m) { return m.valores ? null : 'sem métricas'; },
     graficos: function (m) {
@@ -574,25 +574,26 @@
 
     // 1 -> 40 sessoes
     var opcoes = ['BwdRetrieval', 'FwdRetrieval', 'CLIP', 'InceptionV3', 'AlexNet(2)', 'PixCorr', 'SSIM'];
-    var pares = D.pares.map(function (p) { return {nome: p.nome, a: POR_ID[p.de], b: POR_ID[p.para]}; })
-      .filter(function (p) { return p.a && p.b && (E.sel.has(p.a.id) || E.sel.has(p.b.id)); });      // o par de cada modelo marcado
+    // a serie de cada modelo marcado: a mesma configuracao em cada numero de sessoes que tem
+    var series = D.series.map(function (s) { return {nome: s.nome, ms: s.ids.map(function (i) { return POR_ID[i]; })}; })
+      .filter(function (s) { return s.ms.some(function (m) { return E.sel.has(m.id); }); });
     var painel = h('section', {class: 'painel'});
     var mt = MET[E.resumoMet] || MET.BwdRetrieval;
     painel.appendChild(h('header', null, h('b', {texto: 'De 1 para 40 sessões'}),
-      h('span', null, 'Cada modelo marcado na lista, treinado com ~1 h e com ~40 h de fMRI. ', eloDef(mt), (mt.maior ? ' (maior é melhor)' : ' (menor é melhor)') + '.')));
+      h('span', null, 'Cada configuração marcada na lista, em cada número de sessões com que foi treinada (de ~1 h a ~40 h de fMRI, eixo em escala log). ', eloDef(mt), (mt.maior ? ' (maior é melhor)' : ' (menor é melhor)') + '.')));
     painel.appendChild(h('div', {class: 'controles'}, segmentado('Métrica', opcoes.map(function (id) { return [id, MET[id].rotulo]; }), mt.id,
       function (val) { E.resumoMet = val; guarda(); renderAba(); })));
     var caixaSvg = h('div', {class: 'svg-caixa'});
     painel.appendChild(caixaSvg);
     v.appendChild(painel);
-    if (pares.length) requestAnimationFrame(function () { inclinacao(caixaSvg, pares, mt); });
-    else caixaSvg.appendChild(vazio('Nenhum modelo marcado tem versão de 1 e de 40 sessões.', presetBotao('principais', 'Ver os modelos principais')));
-    var faltam = pares.filter(function (p) { return valor(p.a, mt.id, 'refinada') == null || valor(p.b, mt.id, 'refinada') == null; })
-      .map(function (p) { return p.nome; });
+    if (series.length) requestAnimationFrame(function () { inclinacao(caixaSvg, series, mt); });
+    else caixaSvg.appendChild(vazio('Nenhum modelo marcado tem a mesma configuração com outro número de sessões.', presetBotao('principais', 'Ver os modelos principais')));
+    var faltam = series.filter(function (s) { return s.ms.filter(function (m) { return valor(m, mt.id, 'refinada') != null; }).length < 2; })
+      .map(function (s) { return s.nome; });
     if (faltam.length) painel.appendChild(h('p', {class: 'nota', texto: 'Sem esta métrica: ' + enumera(faltam) + '.'}));
-    if (pares.some(function (p) { return !E.sel.has(p.a.id) || !E.sel.has(p.b.id); }))
+    if (series.some(function (s) { return s.ms.some(function (m) { return !E.sel.has(m.id); }); }))
       painel.appendChild(h('p', {class: 'nota', texto: 'Ponto vazado: a versão que não está marcada na lista, mostrada como referência.'}));
-    poe(painel, notasRodape(pares.map(function (p) { return p.a; }), [mt.id]));      // null quando nao ha nota
+    poe(painel, notasRodape([].concat.apply([], series.map(function (s) { return s.ms; })), [mt.id]));      // null quando nao ha nota
 
     if (D.leitura && D.leitura.length) {
       v.appendChild(h('section', {class: 'secao'}, h('h3', {texto: 'Leitura do benchmark'}),
@@ -600,19 +601,26 @@
         h('ul', {class: 'conclusoes'}, D.leitura.map(function (t) { return h('li', {html: t}); }))));
     }
   }
-  function inclinacao(caixa, pares, mt) {
+  function inclinacao(caixa, series, mt) {
     caixa.textContent = '';
     var W = Math.max(320, caixa.clientWidth), estreito = W < 560;
-    var it = pares.map(function (p) { return {p: p, a: valor(p.a, mt.id, 'refinada'), b: valor(p.b, mt.id, 'refinada')}; })
-      .filter(function (x) { return x.a != null && x.b != null; });
-    if (!it.length) { caixa.appendChild(vazio('Nenhum par de modelos tem esta métrica.')); return; }
-    var vals = [];
-    it.forEach(function (x) { vals.push(x.a, x.b); });
+    // os pontos de cada serie com esta metrica, em ordem de sessoes; a e b sao as pontas
+    var it = series.map(function (s) {
+      var pts = s.ms.map(function (md) { return {m: md, v: valor(md, mt.id, 'refinada')}; }).filter(function (q) { return q.v != null; });
+      return {nome: s.nome, pts: pts, a: pts.length && pts[0].v, b: pts.length && pts[pts.length - 1].v,
+              ma: pts.length && pts[0].m, mb: pts.length && pts[pts.length - 1].m};
+    }).filter(function (x) { return x.pts.length >= 2; });
+    if (!it.length) { caixa.appendChild(vazio('Nenhuma configuração marcada tem esta métrica em dois números de sessões.')); return; }
+    var vals = [], sess = [];
+    it.forEach(function (x) { x.pts.forEach(function (q) { vals.push(q.v); if (sess.indexOf(q.m.sessoes) < 0) sess.push(q.m.sessoes); }); });
+    sess.sort(function (a, b) { return a - b; });
     var dom = dominio(vals, {pct: mt.fmt === 'pct'});
     var H = 320, m = {t: 18, b: 34, l: estreito ? 46 : 64, r: estreito ? 140 : 250};
     var x0 = m.l + 66, x1 = W - m.r;
+    var s0 = Math.min(1, sess[0]), s1 = Math.max(40, sess[sess.length - 1]);
+    var X = function (n) { return x0 + Math.log(n / s0) / Math.log(s1 / s0) * (x1 - x0); };
     var Y = function (v) { return m.t + (1 - (v - dom[0]) / (dom[1] - dom[0])) * (H - m.t - m.b); };
-    var svg = sv('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Variação de ' + (mt.nome || mt.rotulo) + ' de 1 para 40 sessões'}, caixa);
+    var svg = sv('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Variação de ' + (mt.nome || mt.rotulo) + ' com o número de sessões'}, caixa);
     marcasEixo(dom[0], dom[1], 5).forEach(function (t) {
       if (t < dom[0] - 1e-9 || t > dom[1] + 1e-9) return;
       sv('line', {class: 'grade', x1: m.l, x2: W - m.r + 8, y1: Y(t), y2: Y(t)}, svg);
@@ -622,8 +630,13 @@
       sv('line', {class: 'acaso', x1: m.l, x2: W - m.r + 8, y1: Y(mt.acaso), y2: Y(mt.acaso)}, svg);
       svTexto({x: W - m.r + 8, y: Y(mt.acaso) - 4, 'text-anchor': 'end'}, 'acaso', svg);
     }
-    svTexto({x: x0, y: H - 10, 'text-anchor': 'middle', class: 'rot'}, '1 sessão', svg);
-    svTexto({x: x1, y: H - 10, 'text-anchor': 'middle', class: 'rot'}, '40 sessões', svg);
+    // um rotulo por numero de sessoes presente, as intermediarias com uma linha guia; as pontas por extenso,
+    // menos na tela estreita, onde 20 e "40 sessoes" se encostariam
+    sess.forEach(function (n) {
+      var ponta = n === s0 || n === s1;
+      if (!ponta) sv('line', {class: 'grade', x1: X(n), x2: X(n), y1: m.t, y2: H - m.b}, svg);
+      svTexto({x: X(n), y: H - 10, 'text-anchor': 'middle', class: 'rot'}, ponta && !estreito ? plural(n, 'sessão', 'sessões') : String(n), svg);
+    });
     // rotulos sem sobreposicao: desce os que colidem
     function espalha(lista, chave) {
       lista.sort(function (a, b) { return a[chave] - b[chave]; });
@@ -632,32 +645,36 @@
     // dois pares com o mesmo valor em 1 sessao (o MindEye1 com e sem low-level): um rotulo so
     var dir = it.map(function (x) { return {x: x, y: Y(x.b)}; }), esq = [], vistos = {};
     it.forEach(function (x) {
-      var txt = fmt(x.a, mt.fmt) + marcas(x.p.a, mt.id), chave = txt + '@' + Math.round(Y(x.a));
+      var txt = fmt(x.a, mt.fmt) + marcas(x.ma, mt.id), chave = txt + '@' + Math.round(Y(x.a));
       if (vistos[chave]) return;
       vistos[chave] = true;
       esq.push({x: x, y: Y(x.a), txt: txt});
     });
     espalha(dir, 'y'); espalha(esq, 'y');
     it.forEach(function (x) {
-      var cor = x.p.b.cor;
+      var cor = x.mb.cor;
       var g = sv('g', {style: 'color:' + cor}, svg);
-      sv('line', {x1: x0, x2: x1, y1: Y(x.a), y2: Y(x.b), stroke: 'currentColor', 'stroke-width': 2.2}, g);
-      [[x0, x.a, x.p.a], [x1, x.b, x.p.b]].forEach(function (e) {      // ponta nao marcada na lista: vazada
-        var marcado = E.sel.has(e[2].id);
-        sv('circle', {cx: e[0], cy: Y(e[1]), r: marcado ? 4.5 : 3.6, fill: marcado ? 'currentColor' : 'var(--bg)',
+      sv('polyline', {points: x.pts.map(function (q) { return X(q.m.sessoes) + ',' + Y(q.v); }).join(' '), fill: 'none',
+        stroke: 'currentColor', 'stroke-width': 2.2, 'stroke-linejoin': 'round'}, g);
+      x.pts.forEach(function (q) {      // ponto nao marcado na lista: vazado
+        var marcado = E.sel.has(q.m.id);
+        sv('circle', {cx: X(q.m.sessoes), cy: Y(q.v), r: marcado ? 4.5 : 3.6, fill: marcado ? 'currentColor' : 'var(--bg)',
           stroke: 'currentColor', 'stroke-width': marcado ? 0 : 1.8}, g);
       });
       g.addEventListener('pointermove', function (ev) {
-        mostraDica(ev, '<b>' + esc(x.p.nome) + '</b><br>1 sessão: ' + fmt(x.a, mt.fmt) + '<br>40 sessões: ' + fmt(x.b, mt.fmt) +
-          '<br>diferença: ' + diferenca(x.b - x.a, mt.fmt));
+        mostraDica(ev, '<b>' + esc(x.nome) + '</b>' + x.pts.map(function (q) {
+          return '<br>' + plural(q.m.sessoes, 'sessão', 'sessões') + ': ' + fmt(q.v, mt.fmt);
+        }).join('') + '<br>diferença de ' + x.ma.sessoes + ' para ' + x.mb.sessoes + ': ' + diferenca(x.b - x.a, mt.fmt));
       });
       g.addEventListener('pointerleave', escondeDica);
     });
-    esq.forEach(function (o) { svTexto({x: x0 - 9, y: o.y + 4, 'text-anchor': 'end', class: 'forte'}, o.txt, svg); });
+    esq.forEach(function (o) { svTexto({x: X(o.x.ma.sessoes) - 9, y: o.y + 4, 'text-anchor': 'end', class: 'forte'}, o.txt, svg); });
     dir.forEach(function (o) {
       var t = svTexto({x: x1 + 10, y: o.y + 4, class: 'rot'}, '', svg);
-      var v1 = sv('tspan', {class: 'forte'}, t); v1.textContent = fmt(o.x.b, mt.fmt) + marcas(o.x.p.b, mt.id) + '  ';
-      var v2 = sv('tspan', null, t); v2.textContent = o.x.p.nome;
+      var v1 = sv('tspan', {class: 'forte'}, t); v1.textContent = fmt(o.x.b, mt.fmt) + marcas(o.x.mb, mt.id) + '  ';
+      // o nome inteiro fica na dica; na margem estreita ele seria cortado no meio
+      var v2 = sv('tspan', null, t), max = estreito ? 13 : 38;
+      v2.textContent = o.x.nome.length > max ? o.x.nome.slice(0, max - 1) + '…' : o.x.nome;
     });
   }
 

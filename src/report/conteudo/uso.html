@@ -303,6 +303,10 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
           Para tirar um modelo, apague o registro dele.</li>
         <li>Os experimentos de <code>src/experimentos.py</code> que ainda não rodaram aparecem em Fichas, como
           planejados, com o comando para treinar.</li>
+        <li>Na lista de modelos, um experimento que é uma configuração do benchmark com outro número de sessões (o
+          nome igual tirando o <code>_&lt;N&gt;sess</code>, como <code>subj01_me1_20sess</code>) fica na família dele, e
+          no Resumo entra na mesma linha, de 1 a 40 sessões. O FRR multi-sujeito tem seção própria; os outros
+          experimentos ficam em Experimentos.</li>
       </ul>
     </section>
   </div>
