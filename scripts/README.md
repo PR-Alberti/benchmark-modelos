@@ -24,5 +24,6 @@ experimento. Chamá-los direto também funciona, com variáveis de ambiente (vej
 | `me1_setup.sh` | prepara o MindEye1 sobre o ambiente do MindEye2 |
 | `me1_fake_data.py` | dados sintéticos do MindEye1, para medir memória e tempo sem baixar os dados |
 | `inspect_ckpt.py` | mostra as opções com que um checkpoint foi treinado |
+| `remapeia_commits.py` | troca hashes de commit de antes da reescrita do histórico (29/10/2026) pelos novos, em `train_logs/` ou outros arquivos |
 
 Todos são retomáveis: se interromper, rode o mesmo comando de novo.

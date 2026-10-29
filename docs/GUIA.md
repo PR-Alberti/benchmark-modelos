@@ -232,3 +232,11 @@ benchmark).
   `../train_logs` e `../../results`: não mova arquivos de lá.
 - **O site é regenerado ao fim de cada etapa** e está no git, então a árvore fica com alterações depois de um
   treino. É esperado.
+- **Commits sem co-autoria de IA.** Nenhum commit ou PR leva o Claude como co-autor (`Co-Authored-By`) nem
+  "Generated with Claude Code"; a regra está no [CLAUDE.md](../CLAUDE.md), que o Claude Code lê sozinho.
+- **Hashes de antes de 29/10/2026 mudaram.** O histórico foi reescrito para tirar essa co-autoria: o código de
+  cada commit é o mesmo, mas todos os hashes são outros
+  ([commits_reescritos_2026-10-29.txt](commits_reescritos_2026-10-29.txt) tem o antigo e o novo). O
+  `experimento.json` de cada treino guarda o hash do código: numa máquina com `train_logs/` daquela época, rode
+  `python scripts/remapeia_commits.py train_logs` antes de regenerar o site. Um clone antigo se alinha com
+  `git fetch && git reset --hard origin/<branch>` (sem alterações locais pendentes).
