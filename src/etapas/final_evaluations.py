@@ -25,9 +25,9 @@ from transformers import CLIPModel, AutoTokenizer, AutoProcessor
 import evaluate
 import pandas as pd
 
-from generative_models.sgm.modules.encoders.modules import FrozenOpenCLIPImageEmbedder
 from mindeye_ridge import paths
 paths.add_vendored_to_path()
+from generative_models.sgm.modules.encoders.modules import FrozenOpenCLIPImageEmbedder
 from mindeye_ridge.models import GNet8_Encoder
 
 # tf32 data type is faster than standard float32
@@ -321,6 +321,10 @@ print(all_recons_flattened.shape)
 
 corrsum = 0
 for i in tqdm(range(len(all_images))):
+    # reconstrucao constante (o unCLIP as vezes satura tudo em preto): o Pearson e indefinido e o
+    # NaN anularia a media inteira; conta como correlacao 0
+    if all_recons_flattened[i].std() == 0:
+        continue
     corrsum += np.corrcoef(all_images_flattened[i], all_recons_flattened[i])[0][1]
 corrmean = corrsum / len(all_images)
 

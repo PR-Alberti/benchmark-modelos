@@ -63,7 +63,7 @@ retrieval() {
     local m=$1 hd=$2 bf=--no-blurry_recon fz=""
     [ "$3" = blurry ] && bf=--blurry_recon
     [ -n "${4:-}" ] && fz="--frozen_ckpt=$4"
-    passo "$m" retrieval "retrieval com intervalo" "$ENVP/bin/python" verify_retrieval.py --model_name="$m" \
+    passo "$m" retrieval "retrieval com intervalo" "$ENVP/bin/python" etapas/verify_retrieval.py --model_name="$m" \
         --data_path="$DATA" --cache_dir="$DATA" --subj=1 --hidden_dim="$hd" --n_blocks=4 $bf $fz --new_test \
         || FALHAS=$((FALHAS + 1))
     return 0

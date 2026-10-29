@@ -1,0 +1,24 @@
+# Instala o codigo de src/ no ambiente em modo editavel:
+#
+#     ~/envs/fmri/bin/pip install --no-deps --no-build-isolation -e .
+#
+# (o setup/setup_env.sh ja faz isso). Depois, `import mindeye_ridge`, `import report` e `import treina`
+# funcionam de qualquer pasta (testes, notebooks, terminal), sem mexer no sys.path, e a mudanca num
+# arquivo vale na hora. As dependencias nao estao aqui: o setup/setup_env.sh as instala com as versoes
+# fixadas e as correcoes de compatibilidade, que o pip sozinho nao resolveria.
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "benchmark-modelos"
+version = "0.1.0"
+description = "Decodificacao da imagem vista a partir do fMRI (NSD): MindEye2, FRR e MindEye1 comparados"
+requires-python = ">=3.11,<3.12"
+license = {text = "MIT"}
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["mindeye_ridge", "report"]
+py-modules = ["treina", "experimentos"]

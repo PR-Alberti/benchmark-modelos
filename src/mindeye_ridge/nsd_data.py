@@ -6,6 +6,7 @@ indice da imagem (coluna 0, de 0 a 72.999) e a linha dela em `betas` (coluna 5).
 O mesmo recorte que o train_ridgeonly.py enxerga, so que em arrays.
 """
 import io
+import os
 import tarfile
 
 import h5py
@@ -30,6 +31,17 @@ def exibicoes_treino(data_path, subj, num_sessions):
         "beta": np.concatenate([b[:, COL_BETA] for b in behav]).astype(int),
         "sessao": np.concatenate([np.full(len(b), s) for s, b in enumerate(behav)]),
     }
+
+
+def sessoes(data_path, subj):
+    """Quantas sessoes de treino o sujeito tem no disco (um tar por sessao): 40, 32 ou 30 no NSD."""
+    n = 0
+    while os.path.exists(f"{data_path}/wds/subj0{subj}/train/{n}.tar"):
+        n += 1
+    if n == 0:
+        raise FileNotFoundError(f"{data_path}/wds/subj0{subj}/train/0.tar: baixe com "
+                                f"setup/download_data.py --stage train --subj {subj}")
+    return n
 
 
 def exibicoes_teste(data_path, subj):

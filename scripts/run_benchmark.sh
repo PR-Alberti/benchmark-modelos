@@ -61,7 +61,7 @@ retrieval() {   # 4o argumento opcional: ckpt de onde vem backbone e prior
     [ -n "${4:-}" ] && fz="--frozen_ckpt=$4"
     if [ -f "$EVALS/$m/${m}_retrieval.json" ]; then etapa "$m: retrieval ja medido"; return; fi
     etapa "$m: retrieval"
-    $ENVP/bin/python verify_retrieval.py --model_name="$m" --data_path="$DATA" \
+    $ENVP/bin/python etapas/verify_retrieval.py --model_name="$m" --data_path="$DATA" \
         --cache_dir="$DATA" --subj=1 --hidden_dim="$hd" --n_blocks=4 $bf $fz --new_test \
         >> "$TRAIN_LOGS/$m/retrieval.log" 2>&1
 }

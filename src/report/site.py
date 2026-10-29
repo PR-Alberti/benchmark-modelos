@@ -14,10 +14,10 @@ import re
 
 from . import texts
 from .catalogo import PUBLICADA
+from .config import REPO_URL
 from .fmt import commit, duracao
 
 AQUI = pathlib.Path(__file__).resolve().parent
-REPO_URL = "https://github.com/PR-Alberti/benchmark-modelos"
 
 # (id, rotulo curto, nome, grupo, maior e melhor, formato, acaso, descricao)
 _M = [
@@ -152,6 +152,23 @@ HIPER_DESC = {
         "fracs": "lista de frações em ordem crescente; quando dada, substitui a grade",
         "global_fraction": "uma fração só para todas as dimensões do alvo, em vez de uma por dimensão",
         "seed": "semente da divisão em dobras",
+        "chunk": "dimensões do alvo por bloco; só muda a memória usada",
+    },
+    "frr_ms": {
+        "k": "dimensão do espaço compartilhado entre os sujeitos (o gargalo voxels → k → CLIP); 1024, como o "
+             "hidden_dim do MindEye2 de 1024",
+        "pretreino": "sujeitos que aprendem a leitura compartilhada (2 a 8), ou \"proprio\": só o próprio subj01, "
+                     "o controle de posto reduzido",
+        "pesos": '"sujeito": peso igual por sujeito no pré-treino, como os lotes do MindEye2; "exibicao": cada '
+                 "exibição pesa o mesmo",
+        "iteracoes": "máximo de iterações dos mínimos quadrados alternados do pré-treino",
+        "tolerancia": "ganho relativo mínimo da perda de validação para seguir iterando",
+        "validacao": "fração das imagens de cada sujeito do pré-treino que fica de fora, para escolher as frações "
+                     "e parar as iterações",
+        "folds": "dobras da validação cruzada do ajuste fino no subj01, agrupada por imagem",
+        "grid": "as frações testadas, como no FRR",
+        "fracs": "lista de frações em ordem crescente; quando dada, substitui a grade",
+        "seed": "semente da divisão de validação, das dobras e do início (SVD aleatorizado)",
         "chunk": "dimensões do alvo por bloco; só muda a memória usada",
     },
     "mindeye2": {
@@ -313,7 +330,8 @@ def _compat_leitura(modelos):
     """O formato que texts.leitura_frr espera (o da pagina antiga)."""
     ms, variantes = [], []
     for m in modelos:
-        d = {"id": m["id"], "tabelas": {"enh": (m.get("valores") or {}).get("refinada")}}
+        d = {"id": m["id"], "tabelas": {"enh": (m.get("valores") or {}).get("refinada"),
+                                        "base": (m.get("valores") or {}).get("unclip")}}
         if m["familia"] == "frr" and m.get("frr") and m.get("retrieval"):
             d["frr_dados"] = {**m["frr"], "retrieval": {k: m["retrieval"][k] for k in ("fwd", "bwd")},
                               "retrieval_centrado": m.get("retrieval_centrado")}
@@ -444,7 +462,7 @@ def monta(modelos, planejados, galeria, semantica):
         "n_avaliados": str(avaliados), "n_planejados": str(len(planejados)),
         "metricas": html_metricas(), "campos_dataset": html_campos_dataset(), "agregacao": html_agregacao(),
         "supercategorias": html_supercategorias(semantica), "hiper:frr": html_hiper("frr"),
-        "hiper:mindeye2": html_hiper("mindeye2"), "hiper:mindeye1": html_hiper("mindeye1"),
+        "hiper:frr_ms": html_hiper("frr_ms"), "hiper:mindeye2": html_hiper("mindeye2"), "hiper:mindeye1": html_hiper("mindeye1"),
         "cartoes_familias": html_cartoes_familias(),
         "cor:frr": _cor_familia("frr"), "cor:mindeye2": _cor_familia("mindeye2"), "cor:mindeye1": _cor_familia("mindeye1"),
     }
