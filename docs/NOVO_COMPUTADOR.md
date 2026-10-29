@@ -43,7 +43,6 @@ exec bash
 ```bash
 git clone https://github.com/PR-Alberti/benchmark-modelos.git
 cd benchmark-modelos
-git checkout controlled-dataset      # enquanto a branch não estiver na main
 ```
 
 ## 3. Preparar a máquina
@@ -103,8 +102,8 @@ setup/bootstrap.sh --check                                # o resumo diz o que a
 
 ## 4. Rodar um treino
 
-Em terminal, o jeito é o `src/treina.py`. Cada treino é um dicionário com o modelo (`frr`, `mindeye2`
-ou `mindeye1`), os hiperparâmetros e o dataset; o que faltar fica no padrão do modelo.
+Em terminal, o jeito é o `src/treina.py`. Cada treino é um dicionário com o modelo (`frr`, `frr_ms`,
+`mindeye2` ou `mindeye1`), os hiperparâmetros e o dataset; o que faltar fica no padrão do modelo.
 
 ```bash
 tmux new -s treino
@@ -118,12 +117,10 @@ Escreva o dicionário num arquivo (não precisa editar o repositório):
 
 ```bash
 cat > ~/meu_experimento.py <<'EOF'
-import sys
-sys.path.insert(0, "/home/SEU_USUARIO/benchmark-modelos/src")    # troque pelo caminho do clone
-import treina
+import treina                               # o setup instala src/ no ambiente (pip install -e .)
 
 exp = {
-    "modelo": "frr",                       # frr | mindeye2 | mindeye1
+    "modelo": "frr",                       # frr | frr_ms | mindeye2 | mindeye1
     "hiper": {"seed": 42},                 # hiperparâmetros do modelo; o resto é padrão
     "dataset": {
         "sessoes": 40,                     # pool: as primeiras N sessões
@@ -186,7 +183,8 @@ MindEye1, do `last.pth`. O MindEye2 só retoma com `treina.roda(..., retoma=True
 dataset ou outros hiperparâmetros, ele para, para não misturar configurações.
 
 Quanto leva, numa A4500: FRR ~1 min (1 sessão) a ~30 min (40 sessões); MindEye2 ridge-only ~2 h (1 sessão)
-a ~8 h (40 sessões, 20 épocas); MindEye1 ~5 h (1 sessão) a ~20 h (40 sessões), sem contar o low-level.
+a ~8 h (40 sessões, 20 épocas); MindEye1 ~1 h 40 (1 sessão) a ~16 h (40 sessões), mais ~1 h e ~13 h do low-level
+(medidos no [REEXECUTAR.md](REEXECUTAR.md)).
 Num subconjunto, o tempo cai com o número de exibições.
 
 ## 5. Ver o resultado

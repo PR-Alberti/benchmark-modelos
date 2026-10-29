@@ -13,9 +13,9 @@ A saida e avaliada com o protocolo do verify_retrieval.py: 30 sorteios de 300 im
 top-1 nos dois sentidos, mesma semente. Nao ha reconstrucao: o modelo para no embedding,
 como o plano de estagio propoe (o alvo continuo dispensa avaliar a imagem gerada).
 
-    python run_frr.py --model_name subj01_frr_1sess --num_sessions 1
-    python run_frr.py --model_name subj01_frr_40sess --num_sessions 40
-    python run_frr.py --model_name subj01_frr_animais --num_sessions 40 --dataset ds.json
+    python src/etapas/run_frr.py --model_name subj01_frr_1sess --num_sessions 1
+    python src/etapas/run_frr.py --model_name subj01_frr_40sess --num_sessions 40
+    python src/etapas/run_frr.py --model_name subj01_frr_animais --num_sessions 40 --dataset ds.json
 
 Com --dataset (manifesto do mindeye_ridge.dataset_controlado), o treino sao as exibicoes do
 manifesto em vez das N primeiras sessoes; o teste nao muda. A agregacao do manifesto escolhe entre

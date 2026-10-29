@@ -57,7 +57,7 @@ accelerate launch Train.py --model_name=final_subj01_pretrained_1sess_24bs \
 Que roda:
 
 ```bash
-python src/train_ridgeonly.py --ridge_only \
+python src/etapas/train_ridgeonly.py --ridge_only \
     --multisubject_ckpt=$DATA/train_logs/multisubject_subj01_1024hid_nolow_300ep \
     --subj=1 --num_sessions=1 --batch_size=16 \
     --hidden_dim=1024 --use_prior --prior_scale=30 --no-blurry_recon \

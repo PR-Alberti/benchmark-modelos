@@ -15,8 +15,8 @@ Nos dois, o ajuste fino e o FRR comum (5 dobras, uma fracao por dimensao) dos vo
 T = (Y - ybar) Q', com Q congelada, e a previsao e ybar + t Q. Mesmo treino, teste, alvo e avaliacao do
 run_frr.py; a saida tem os mesmos arquivos, entao --reconstrucao, o relatorio e o site servem igual.
 
-    python run_frr_ms.py --model_name subj01_frr_multisujeito_1sess --num_sessions 1
-    python run_frr_ms.py --model_name subj01_frr_postoreduzido_1sess --num_sessions 1 --pretreino proprio
+    python src/etapas/run_frr_ms.py --model_name subj01_frr_multisujeito_1sess --num_sessions 1
+    python src/etapas/run_frr_ms.py --model_name subj01_frr_postoreduzido_1sess --num_sessions 1 --pretreino proprio
 
 Antes de qualquer conta, confere que nenhuma imagem de teste do subj01 (as 1.000 compartilhadas)
 aparece no treino de um sujeito do pre-treino. Os alvos CLIP de cada sujeito ficam em cache em
