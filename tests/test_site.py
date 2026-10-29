@@ -4,13 +4,11 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 import treina                                                     # noqa: E402
 from mindeye_ridge import agregacao, dataset_controlado as dc, paths   # noqa: E402
 from report import apresentacao, catalogo, exemplos_site, galeria_site, semantica_site, site   # noqa: E402
@@ -264,12 +262,10 @@ class ApresentacaoDoRepositorio(unittest.TestCase):
 
     def test_reproducao(self):
         self.assertIn('id="reproducao"', self.html)
-        linhas = {l["id"]: l for l in apresentacao.reproducao({m["id"]: m for m in self.modelos})}
-        self.assertEqual(set(linhas), {r[0] for r in apresentacao.REPRODUCAO})        # todas reproduzidas
-        for mid in ("subj01_frr_1sess", "subj01_frr_40sess", "subj01_ridgeonly_1sess_4096blurry"):
-            self.assertEqual(linhas[mid]["img"], "0 (idêntico)", mid)                    # docs/REEXECUTAR.md
-            self.assertEqual(linhas[mid]["ret"][0], linhas[mid]["ret"][1], mid)
+        for rotulo, _, diferenca in apresentacao.DIFERENCAS:       # docs/REEXECUTAR.md
+            self.assertIn(diferenca.replace("&", "&amp;"), self.html, rotulo)
         self.assertNotIn("p,p", self.html)
+        self.assertNotIn("contra o release", self.html)
 
     def test_toda_imagem_citada_existe(self):
         G, E = self.galeria, self.exemplos

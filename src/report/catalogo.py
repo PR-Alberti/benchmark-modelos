@@ -109,11 +109,14 @@ CONHECIDOS = {
 
 NOTAS = {
     "subj01_ridgeonly_1sess_prior": [
-        "Checkpoint do release checkpoints-v1, treinado com uma versão anterior do código; o retreino "
-        "com o código atual é o de semente 42."],
+        "Retreino com o código atual (semente 42). Substitui o checkpoint do release checkpoints-v1, "
+        "treinado com uma versão anterior do código; os dois diferem em até 0,7 ponto percentual nas "
+        "métricas de imagem (docs/REEXECUTAR.md)."],
     "subj01_ridgeonly_1sess": [
-        "Checkpoint do release checkpoints-v1, treinado com uma versão anterior do código e outro script; "
-        "o controle com o código atual é o sem prior de semente 42."],
+        "Retreino com o código atual (semente 42), o mesmo script do Ridge 1024 + prior, só sem a loss "
+        "do prior. Substitui o checkpoint do release checkpoints-v1, treinado com uma versão anterior do "
+        "código e outro script; os dois diferem em até 1,24 ponto percentual nas métricas de imagem "
+        "(docs/REEXECUTAR.md)."],
     "subj01_ridgeonly_1sess_prior_seed42": [
         "Retreino do Ridge 1024 + prior com o código atual. Junto das sementes 1 e 2, mede o ruído do treino."],
     "subj01_ridgeonly_1sess_noprior_seed42": [
@@ -258,6 +261,10 @@ AGREGACAO_TXT = {"exibicoes": "exibições separadas", "media": "média das repe
                  "sorteio": "repetição sorteada", "combinacao": "combinação das repetições"}
 
 
+# modelo do treina.py -> familia no site; o FRR multi-sujeito e da familia do FRR (mesmo alvo e avaliacao)
+FAMILIA_DO_MODELO = {"frr": "frr", "frr_ms": "frr", "mindeye2": "mindeye2", "mindeye1": "mindeye1"}
+
+
 def rotulo_automatico(cfg):
     """Rotulo legivel de um experimento a partir da configuracao (efetiva)."""
     m, h, d = cfg["modelo"], cfg.get("hiper") or {}, cfg.get("dataset") or {}
@@ -267,6 +274,10 @@ def rotulo_automatico(cfg):
             nome += " fração global"
         if h.get("grid") == "extended":
             nome += " grade estendida"
+    elif m == "frr_ms":
+        nome = "FRR posto reduzido" if h.get("pretreino") == "proprio" else "FRR multi-sujeito"
+        if h.get("k", 1024) != 1024:
+            nome += f" k = {h['k']}"
     elif m == "mindeye2":
         nome = f"Ridge {h.get('hidden_dim', 1024)}" + (" + blurry" if h.get("blurry") else "")
         nome += " sem prior" if h.get("prior") is False else (" + prior" if not h.get("blurry") else "")
@@ -330,8 +341,8 @@ def _familia(mid, cfg, d, antiga=None):
         return CONHECIDOS[mid]["familia"]
     if base.startswith("final_subj01_pretrained"):
         return "artigo"
-    if cfg and cfg.get("modelo") in ("frr", "mindeye2", "mindeye1"):
-        return cfg["modelo"]
+    if cfg and cfg.get("modelo") in FAMILIA_DO_MODELO:
+        return FAMILIA_DO_MODELO[cfg["modelo"]]
     if (d["tables"] / f"{base}_frr.json").exists():
         return "frr"
     if (d["me1"] / base).exists():
@@ -457,7 +468,8 @@ def extrai(mid, antigo=None, d=None, benchmark=None, experimentos=None, resumos=
         tempo = curva["segundos"]
     elif familia == "mindeye1":
         if base.startswith("repro_"):                    # alto nivel e low-level, com o prefixo
-            etapas = [base, base.replace("subj01_me1_", "subj01_me1_lowlevel_", 1)]
+            etapas = [base] if base.endswith("_semlowlevel") else \
+                [base, base.replace("subj01_me1_", "subj01_me1_lowlevel_", 1)]
         else:
             etapas = [base] if (base.endswith("_semlowlevel") or exp_json) else \
                 [base, f"subj01_me1_lowlevel_{sessoes}sess"]
@@ -623,7 +635,7 @@ def atualiza(pasta_registros, d=None, resumos=None):
         if mid in feitos:
             continue
         efetiva, erro = config_efetiva(cfg)
-        planejados.append({"id": mid, "familia": cfg["modelo"], "config": efetiva, "config_erro": erro,
+        planejados.append({"id": mid, "familia": FAMILIA_DO_MODELO.get(cfg["modelo"], cfg["modelo"]), "config": efetiva, "config_erro": erro,
                            "rotulo": cfg.get("rotulo") or (rotulo_automatico(efetiva) if not erro else mid),
                            "grupo": "benchmark" if mid in benchmark else "experimento"})
     ordem = {m: i for i, m in enumerate(ORDEM)}

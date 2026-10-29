@@ -105,7 +105,8 @@ FONTES_RETRIEVAL = {"frr": "run_frr.py, 30 sorteios de 300", "verify_retrieval":
 # results/site/modelos/; para mostrar de novo, tire o id daqui.
 OCULTOS = {"subj01_ridgeonly_1sess_prior_seed42", "subj01_ridgeonly_1sess_prior_seed1",
            "subj01_ridgeonly_1sess_prior_seed2", "subj01_ridgeonly_1sess_noprior_seed42",
-           "subj01_ridgeonly_1sess_prior_rseed7"}
+           "subj01_ridgeonly_1sess_prior_rseed7",
+           "repro_subj01_ridgeonly_1sess_prior_seed1", "repro_subj01_ridgeonly_1sess_prior_seed2"}
 
 # Selecoes prontas (so entram os modelos que existem): a primeira e a selecao inicial da pagina, e os
 # avisos de aba vazia oferecem algumas pelo id (presetBotao no site.js). Nao ha mais botoes na lista.
@@ -121,10 +122,9 @@ PRESETS = [
     ("s40", "40 sessões", "Todos os modelos de referência treinados com as 40 sessões.",
      ["subj01_frr_40sess", "subj01_ridgeonly_40sess_prior", "subj01_ridgeonly_40sess_4096blurry", "subj01_me1_40sess",
       "final_subj01_pretrained_40sess_24bs"]),
-    ("prior", "Efeito do prior", "Ridge 1024 de 1 sessão com e sem a loss do prior: os dois checkpoints do release e o "
-     "retreino com o mesmo script e a mesma semente.",
-     ["subj01_ridgeonly_1sess_prior", "subj01_ridgeonly_1sess", "subj01_ridgeonly_1sess_prior_seed42",
-      "subj01_ridgeonly_1sess_noprior_seed42"]),
+    ("prior", "Efeito do prior", "Ridge 1024 de 1 sessão com e sem a loss do prior, treinados com o mesmo script e a "
+     "mesma semente.",
+     ["subj01_ridgeonly_1sess_prior", "subj01_ridgeonly_1sess"]),
     ("lowlevel", "MindEye1 e o low-level", "O MindEye1 com e sem a imagem borrada do low-level guiando a reconstrução.",
      ["subj01_me1_1sess", "subj01_me1_1sess_semlowlevel", "subj01_me1_40sess", "subj01_me1_40sess_semlowlevel"]),
     ("frr", "Variantes do FRR", "A grade de Doerig, uma fração só para todas as dimensões e a grade estendida.",
@@ -150,6 +150,23 @@ HIPER_DESC = {
         "fracs": "lista de frações em ordem crescente; quando dada, substitui a grade",
         "global_fraction": "uma fração só para todas as dimensões do alvo, em vez de uma por dimensão",
         "seed": "semente da divisão em dobras",
+        "chunk": "dimensões do alvo por bloco; só muda a memória usada",
+    },
+    "frr_ms": {
+        "k": "dimensão do espaço compartilhado entre os sujeitos (o gargalo voxels → k → CLIP); 1024, como o "
+             "hidden_dim do MindEye2 de 1024",
+        "pretreino": "sujeitos que aprendem a leitura compartilhada (2 a 8), ou \"proprio\": só o próprio subj01, "
+                     "o controle de posto reduzido",
+        "pesos": '"sujeito": peso igual por sujeito no pré-treino, como os lotes do MindEye2; "exibicao": cada '
+                 "exibição pesa o mesmo",
+        "iteracoes": "máximo de iterações dos mínimos quadrados alternados do pré-treino",
+        "tolerancia": "ganho relativo mínimo da perda de validação para seguir iterando",
+        "validacao": "fração das imagens de cada sujeito do pré-treino que fica de fora, para escolher as frações "
+                     "e parar as iterações",
+        "folds": "dobras da validação cruzada do ajuste fino no subj01, agrupada por imagem",
+        "grid": "as frações testadas, como no FRR",
+        "fracs": "lista de frações em ordem crescente; quando dada, substitui a grade",
+        "seed": "semente da divisão de validação, das dobras e do início (SVD aleatorizado)",
         "chunk": "dimensões do alvo por bloco; só muda a memória usada",
     },
     "mindeye2": {

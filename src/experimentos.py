@@ -48,7 +48,7 @@ escolha deixa.
 # =============================================================================================
 
 BENCHMARK = {
-    # FRR (src/run_frr.py): as 20 fracoes de Doerig et al., uma por dimensao do alvo, CV de 5 dobras
+    # FRR (src/etapas/run_frr.py): as 20 fracoes de Doerig et al., uma por dimensao do alvo, CV de 5 dobras
     "subj01_frr_1sess": {"modelo": "frr", "hiper": {}, "dataset": {"sessoes": 1}},
     "subj01_frr_40sess": {"modelo": "frr", "hiper": {}, "dataset": {"sessoes": 40}},
     # sensibilidade: uma fracao so para todas as dimensoes, e a grade estendida ate 0,001
@@ -57,7 +57,7 @@ BENCHMARK = {
     "subj01_frr_1sess_ext": {"modelo": "frr", "hiper": {"grid": "extended"}, "dataset": {"sessoes": 1}},
     "subj01_frr_40sess_ext": {"modelo": "frr", "hiper": {"grid": "extended"}, "dataset": {"sessoes": 40}},
 
-    # MindEye2 ridge-only (src/train_ridgeonly.py): so a ridge do subj01 treina, a partir do
+    # MindEye2 ridge-only (src/etapas/train_ridgeonly.py): so a ridge do subj01 treina, a partir do
     # pre-treino nos outros 7 sujeitos
     "subj01_ridgeonly_1sess_prior": {"modelo": "mindeye2", "hiper": {}, "dataset": {"sessoes": 1}},
     "subj01_ridgeonly_1sess": {"modelo": "mindeye2", "hiper": {"prior": False}, "dataset": {"sessoes": 1}},
@@ -143,6 +143,26 @@ for _n, _r in ((3000, 1), (1500, 2), (1000, 3)):
         "dataset": {"sessoes": 40, "n_imagens": _n, "repeticoes": _r, "semente": 0},
     }
 
+# FRR multi-sujeito (src/etapas/run_frr_ms.py): espaco compartilhado de k = 1.024 dimensoes, peso igual por
+# sujeito, ajuste fino so da ridge do subj01. O modelo C pre-treina a leitura nos sujeitos 2-8 (um pre-
+# treino so, para as duas quantidades de dados); o B, o controle de posto reduzido, a aprende so com o
+# proprio subj01. C contra B mede o efeito dos outros sujeitos; B contra o FRR, o do gargalo de k (o FRR
+# de 20 sessoes entra para essa comparacao ter par nas tres quantidades de dados).
+EXPERIMENTOS["subj01_frr_20sess"] = {"modelo": "frr", "hiper": {}, "dataset": {"sessoes": 20}}
+for _s in (1, 20, 40):
+    EXPERIMENTOS[f"subj01_frr_multisujeito_{_s}sess"] = {
+        "modelo": "frr_ms",
+        "hiper": {"k": 1024, "pesos": "sujeito", "seed": 42},
+        "dataset": {"sessoes": _s},
+        "rotulo": f"FRR multi-sujeito · {_s} {'sessão' if _s == 1 else 'sessões'}",
+    }
+    EXPERIMENTOS[f"subj01_frr_postoreduzido_{_s}sess"] = {
+        "modelo": "frr_ms",
+        "hiper": {"k": 1024, "pretreino": "proprio", "seed": 42},
+        "dataset": {"sessoes": _s},
+        "rotulo": f"FRR posto reduzido (controle) · {_s} {'sessão' if _s == 1 else 'sessões'}",
+    }
+
 
 # =============================================================================================
 # MindEye2 ridge-only com 2, 5, 10 e 20 sessoes, com e sem low-level (branch ME2-intermediate_sessions).
@@ -196,6 +216,11 @@ _REPRODUZIR = {
 }
 REPRODUCOES = {f"repro_{nome}": {**BENCHMARK[nome], "rotulo": f"{rotulo} · reprodução"}
                for nome, rotulo in _REPRODUZIR.items()}
+# MindEye1 sem o low-level: o mesmo treino do alto nivel, so a reconstrucao muda
+# (PREFIXO=repro_ LOWLEVEL=0 scripts/run_me1_benchmark.sh)
+for _n in (1, 40):
+    REPRODUCOES[f"repro_subj01_me1_{_n}sess_semlowlevel"] = {
+        **BENCHMARK[f"subj01_me1_{_n}sess"], "rotulo": f"MindEye1 sem low-level · {_n} {'sessão' if _n == 1 else 'sessões'} · reprodução"}
 
 TODOS = {**BENCHMARK, **EXPERIMENTOS, **REPRODUCOES}
 assert len(TODOS) == len(BENCHMARK) + len(EXPERIMENTOS) + len(REPRODUCOES), "nome repetido entre os experimentos"

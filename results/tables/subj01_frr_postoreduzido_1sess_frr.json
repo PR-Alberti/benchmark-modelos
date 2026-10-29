@@ -1,0 +1,289 @@
+{
+ "modelo": "subj01_frr_postoreduzido_1sess",
+ "config": {
+  "modelo": "frr_ms",
+  "variante": "posto reduzido (so o proprio sujeito)",
+  "sujeito": 1,
+  "sessoes": 1,
+  "exibicoes_treino": 688,
+  "dataset": {
+   "sessoes": 1,
+   "n_imagens": null,
+   "repeticoes": null,
+   "classes": null,
+   "regra": "exclusiva",
+   "minimo": 10,
+   "maximo_outros": 2,
+   "balanceado": false,
+   "semente": 0,
+   "agregacao": null,
+   "subj": 1
+  },
+  "agregacao": "exibicoes",
+  "amostras_treino": 688,
+  "imagens_treino": 536,
+  "imagens_teste": 1000,
+  "voxels": 15724,
+  "dim_alvo": 425984,
+  "k": 1024,
+  "k_efetivo": 481,
+  "pretreino": "proprio",
+  "pesos": "sujeito",
+  "dobras": 5,
+  "semente": 42,
+  "grade": "doerig",
+  "bloco": 8192
+ },
+ "parametros_lineares": 212461548,
+ "parametros_ajustados_sujeito": 7563244,
+ "custo": {
+  "segundos_ajuste": 1.1150496006011963,
+  "segundos_pretreino": 7.404986143112183,
+  "segundos_embedding_alvos": 8.130073547363281e-05,
+  "embeddings_calculados_nesta_corrida": 0,
+  "pico_gpu_gib": 0.19935321807861328,
+  "gpu": "NVIDIA RTX A4500",
+  "pico_ram_gib": 5.942562103271484,
+  "segundos_total": 55.828887939453125
+ },
+ "cv": {
+  "fracs": [
+   0.05,
+   0.1,
+   0.15,
+   0.2,
+   0.25,
+   0.3,
+   0.35,
+   0.4,
+   0.45,
+   0.5,
+   0.55,
+   0.6,
+   0.65,
+   0.7,
+   0.75,
+   0.8,
+   0.85,
+   0.9,
+   0.95,
+   1.0
+  ],
+  "cv_r2_por_fracao": [
+   0.03071035284316037,
+   0.060820836178064885,
+   0.08725163626528343,
+   0.1095238666725572,
+   0.12807362253726695,
+   0.14300889898075275,
+   0.15491395696942323,
+   0.16434852913166298,
+   0.17159188728975427,
+   0.1770811108899637,
+   0.18108996803359023,
+   0.1838460594723933,
+   0.1854868643445543,
+   0.18625872634229823,
+   0.1861316865980308,
+   0.18527778366558234,
+   0.1838532822280795,
+   0.18176596145532453,
+   0.17916615155224258,
+   0.17604231541138704
+  ],
+  "cv_r2_escolhida": 0.2579848822931884,
+  "histograma_fracoes": [
+   208,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1,
+   1,
+   0,
+   1,
+   7,
+   6,
+   9,
+   8,
+   6,
+   8,
+   11,
+   12,
+   14,
+   189
+  ],
+  "por_alvo": true,
+  "posto_final": 687,
+  "pares_fracao_alvo_inalcancaveis": 0,
+  "segundos_cv": 0.41675639152526855,
+  "segundos_final": 0.11076974868774414,
+  "segundos_total": 0.5275261402130127
+ },
+ "pretreino": {
+  "config": {
+   "k": 1024,
+   "fracs": [
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.39999999999999997,
+    0.44999999999999996,
+    0.49999999999999994,
+    0.5499999999999999,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.7999999999999999,
+    0.85,
+    0.9,
+    0.95,
+    1.0
+   ],
+   "pesos": "sujeito",
+   "iteracoes": 10,
+   "tolerancia": 0.001,
+   "validacao": 0.1,
+   "seed": 42,
+   "chunk": 8192,
+   "rtol": 1e-10
+  },
+  "sujeitos": [
+   {
+    "nome": "subj01",
+    "voxels": 15724,
+    "posto": 625,
+    "exibicoes_treino": 626,
+    "exibicoes_validacao": 62,
+    "imagens_treino": 482,
+    "imagens_validacao": 54
+   }
+  ],
+  "historico": [
+   {
+    "iteracao": 1,
+    "perda_validacao": 1.00347382374046,
+    "r2_validacao": -0.0034738237404599026,
+    "r2_passo_R": [
+     0.1190962144708404
+    ],
+    "k_efetivo": 481,
+    "histograma_fracoes_W": [
+     362598,
+     19720,
+     10411,
+     6733,
+     4797,
+     3432,
+     2733,
+     2227,
+     1746,
+     1426,
+     1321,
+     1088,
+     936,
+     797,
+     682,
+     622,
+     557,
+     498,
+     420,
+     3240
+    ],
+    "segundos": 2.380002021789551
+   },
+   {
+    "iteracao": 2,
+    "perda_validacao": 1.004433873860942,
+    "r2_validacao": -0.0044338738609419615,
+    "r2_passo_R": [
+     0.24875354667806293
+    ],
+    "k_efetivo": 481,
+    "histograma_fracoes_W": [
+     387043,
+     17263,
+     6168,
+     3192,
+     2122,
+     1461,
+     1099,
+     796,
+     659,
+     542,
+     450,
+     427,
+     326,
+     276,
+     234,
+     245,
+     206,
+     173,
+     195,
+     3107
+    ],
+    "segundos": 2.3643851280212402
+   }
+  ],
+  "melhor_iteracao": 1,
+  "r2_validacao": -0.0034738237404599026,
+  "k_efetivo": 481,
+  "segundos": 7.404986143112183,
+  "diretorio": "/home/al.pedro.alberti/benchmark-modelos/train_logs/subj01_frr_postoreduzido_1sess/pretreino",
+  "dados": [
+   {
+    "sujeito": 1,
+    "exibicoes": 688,
+    "imagens": 536
+   }
+  ]
+ },
+ "retrieval": {
+  "fwd": {
+   "media": 0.4110000103712082,
+   "ic95": [
+    0.400887471068112,
+    0.4211125496743044
+   ]
+  },
+  "bwd": {
+   "media": 0.0956666685640812,
+   "ic95": [
+    0.088562101330542,
+    0.10277123579762039
+   ]
+  }
+ },
+ "retrieval_centrado": {
+  "fwd": {
+   "media": 0.47188890079657236,
+   "ic95": [
+    0.4622738345952264,
+    0.4815039669979183
+   ]
+  },
+  "bwd": {
+   "media": 0.30644445021947225,
+   "ic95": [
+    0.2973086738882285,
+    0.315580226550716
+   ]
+  }
+ },
+ "hubness": {
+  "cos_previsao_media_treino": 0.9185305237770081,
+  "cos_alvo_media_treino": 0.49505114555358887
+ },
+ "embedding": {
+  "cosseno_medio": 0.49051517248153687,
+  "pearson_medio": 0.4737869203090668,
+  "cosseno_centrado_medio": 0.10236504673957825,
+  "pearson_mediana": 0.4725937843322754
+ }
+}

@@ -5,7 +5,6 @@ import sys
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 from mindeye_ridge import paths
 
 
@@ -38,8 +37,9 @@ class Paths(unittest.TestCase):
     def test_vendored_entra_no_path_uma_vez(self):
         paths.add_vendored_to_path()
         paths.add_vendored_to_path()
-        self.assertEqual(sys.path.count(str(paths.SRC / "generative_models")), 1)
-        self.assertTrue((paths.SRC / "generative_models" / "sgm").is_dir())
+        self.assertEqual(sys.path.count(str(paths.VENDOR / "generative_models")), 1)
+        self.assertTrue((paths.VENDOR / "generative_models" / "sgm").is_dir())
+        self.assertTrue((paths.VENDOR / "autoencoder" / "convnext.py").is_file())
 
 
 if __name__ == "__main__":

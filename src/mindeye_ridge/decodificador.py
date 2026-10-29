@@ -63,7 +63,7 @@ def carrega_unclip(cache_dir, device):
     paths.add_vendored_to_path()
     from generative_models.sgm.models.diffusion import DiffusionEngine
 
-    config = OmegaConf.load(str(paths.SRC / "generative_models/configs/unclip6.yaml"))
+    config = OmegaConf.load(str(paths.VENDOR / "generative_models/configs/unclip6.yaml"))
     config = OmegaConf.to_container(config, resolve=True)
     unclip_params = config["model"]["params"]
     network_config = unclip_params["network_config"]

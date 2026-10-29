@@ -1,6 +1,6 @@
 # O que rodar de novo para o benchmark ficar completo
 
-Levantamento de 12/10/2026, atualizado em 16/10/2026 depois da reexecução. Parte do que está no git: os
+Levantamento de 12/10/2026, atualizado em 16/10/2026 depois da reexecução e em 21/10/2026 com o MindEye1 sem low-level. Parte do que está no git: os
 registros de cada modelo em `results/site/modelos/*.json` (o que o site conseguiu extrair de cada corrida)
 e o [BENCHMARK.md](../BENCHMARK.md).
 
@@ -11,8 +11,8 @@ A reexecução rodou numa RTX A4500 (a máquina de treino original não estava d
 pelo `src/treina.py` com o dicionário do benchmark, com outro nome (`repro_<nome>`), porque o `treina.py`
 não sobrescreve um modelo do benchmark. Cada um ficou com configuração, commit limpo do código, manifesto
 do dataset, curva, tempo, retrieval com intervalo de 95% e, nos ridge-only, reconstrução e métricas. Os
-resultados de cada modelo foram commitados quando ele terminou. Nenhuma tabela do benchmark foi alterada: as
-reproduções aparecem no site, no grupo Experimentos, com o rótulo "· reprodução".
+resultados de cada modelo foram commitados quando ele terminou. Desde 19/10 as reproduções ocupam o lugar dos
+originais no site e no BENCHMARK.md (veja **Referências**, abaixo).
 
 | Modelo (`repro_subj01_…`) | Treino medido | Treino original | Situação |
 |---|---|---|---|
@@ -26,6 +26,8 @@ reproduções aparecem no site, no grupo Experimentos, com o rótulo "· reprodu
 | `ridgeonly_1sess_prior` (1024 + prior) | 1 h 51 | 1 h 53 (semente 42) | completo (reconstrução e métricas em 16/10, 3 h 19) |
 | `me1_1sess` (MindEye1) | 2 h 43 (1 h 40 + 1 h 02 do low-level) | 2 h 53 | completo (reconstrução 47 min, métricas 3 min) |
 | `me1_40sess` (MindEye1) | 28 h 55 (16 h 03 + 12 h 51 do low-level) | 32 h 38 | completo (reconstrução 49 min, métricas 3 min) |
+| `me1_1sess_semlowlevel` (MindEye1 sem low-level) | 1 h 41 | 1 h 40 | completo em 20/10 (reconstrução 50 min, métricas 3 min) |
+| `me1_40sess_semlowlevel` (MindEye1 sem low-level) | 15 h 50 | 16 h 11 | completo em 21/10 (reconstrução 50 min, métricas 3 min) |
 | `final_subj01_pretrained_1sess_24bs`, `_40sess_24bs` | — (dos autores) | — | retrieval com intervalo |
 
 Medido nesta máquina: reconstrução de 186 a 194 min por modelo, 6 min para cada tabela de métricas (unCLIP e
@@ -39,6 +41,7 @@ refinada) e 3 min para o retrieval.
 | Ridge 4096 + blurry, 1 sessão | 0 (idêntico, época por época) |
 | MindEye1, 1 sessão | 0 (idêntico em todos os dígitos das métricas e do retrieval) |
 | MindEye1, 40 sessões | 0,14 p.p. (Incep); retrieval idêntico; 0,0007 nas demais |
+| MindEye1 sem low-level, 1 e 40 sessões | 0 (idêntico até a 4ª casa em todas as métricas e no retrieval) |
 | Ridge 1024 + prior, 1 sessão, contra o release | 0,7 p.p. (Incep); 0,003 (Eff) |
 | Ridge 1024 + prior, 40 sessões | 0,89 p.p. nas porcentagens; 0,0023 nas demais |
 | Ridge 4096 + blurry, 40 sessões | 0,59 p.p.; 0,0064 (PixCorr 0,337 contra 0,339) |
@@ -56,17 +59,26 @@ foram treinados em outra máquina e, no caso dos checkpoints do release, com uma
 Ridge 1024 + prior e a reconstrução com a semente 7 (`…_rseed7`, só no benchmark original) são a única
 medida de ruído, feita uma vez; não a repita.
 
-**Referências.** Decidido em 16/10 e concluído em 19/10 (todas as linhas de referência vêm das reproduções, menos as do artigo e as `_semlowlevel`): as linhas do benchmark (os ids `subj01_…`) passam a ser lidas das
+**Referências.** Decidido em 16/10 e concluído em 19/10 (todas as linhas de referência vêm das reproduções, menos as do artigo; as `_semlowlevel` desde 21/10): as linhas do benchmark (os ids `subj01_…`) passam a ser lidas das
 reproduções `repro_subj01_…`. O id público não mudou; `report/config.py` (`fonte`) aponta cada um para a
 reprodução assim que ela tem as tabelas de resultado, e as linhas `repro_…` ficam escondidas do site para
-não duplicar. Os registros e as tabelas dos originais seguem no histórico do git. Mudaram, pela reprodução,
+não duplicar. Em 21/10 as tabelas `results/tables/subj01_*` dos originais e os registros das sementes foram apagados da
+árvore: só ficam no histórico do git. Os registros `subj01_…` do site passaram a ser lidos das reproduções, e as
+sementes de 1, 2 e 42 também (`SUBSTITUIDOS` em `report/config.py`; as de 42 são a mesma corrida das
+reproduções do 1024 + prior e do 1024 sem prior). Ficaram, por não terem reprodução: a reconstrução com a semente 7
+(`…_rseed7`), os modelos do artigo, `results/tables/pre_benchmark` e `results/metrics`. A tabela de diferenças acima
+é o único registro da comparação com os originais (o slide "Reprodução" da apresentação a repete). O BENCHMARK.md e
+`results/benchmark/index.html` perderam as linhas "checkpoint do release" da seção Ruído; para regenerá-los é preciso
+a máquina com `train_logs/` e `results/evals/`, porque o `make_benchmark.py` sem eles troca a galeria e os números
+por traços. Mudaram, pela reprodução,
 as tabelas do BENCHMARK.md (até 1,24 p.p.) e as conclusões escritas à mão em `report/texts.py`, já revistas
 com os números novos.
 
-1. **Variantes `subj01_me1_*_semlowlevel`** (MindEye1 sem o low-level): continuam só com os resultados do
-   original. Refazê-las pede outro treino do alto nível cada, que não foi medido nem rodado
-   (`PREFIXO=repro_ LOWLEVEL=0 scripts/run_me1_benchmark.sh`; o `treina.py` não tem entrada `repro_…_semlowlevel`
-   em `REPRODUCOES`, é preciso acrescentá-la).
+**Variantes `subj01_me1_*_semlowlevel`** (MindEye1 sem o low-level): refeitas em 20 e 21/10 com
+`PREFIXO=repro_ LOWLEVEL=0 scripts/run_me1_benchmark.sh`, a partir das entradas `repro_…_semlowlevel` de
+`REPRODUCOES`. Como as outras referências, as linhas `subj01_me1_*_semlowlevel` passam a ser lidas delas
+(`ME1_SEM_LOWLEVEL` em `report/config.py`, já que não estão nas tabelas do BENCHMARK.md). Nada da reexecução
+falta rodar nesta máquina; o que segue precisa da máquina original.
 
 ## O que não dá para fazer sem a máquina de treino original
 

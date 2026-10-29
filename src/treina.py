@@ -12,10 +12,10 @@ O que acontece:
 2. os hiperparametros sao completados com os padroes do modelo (MODELOS, abaixo) e tudo vai
    para train_logs/<nome>/experimento.json, com o commit do codigo;
 3. o script de treino do modelo roda com DATASET apontando para o manifesto:
-   frr -> scripts/run_frr.sh, mindeye2 -> scripts/run_ridgeonly_prior.sh,
+   frr -> scripts/run_frr.sh, frr_ms -> scripts/run_frr_ms.sh, mindeye2 -> scripts/run_ridgeonly_prior.sh,
    mindeye1 -> scripts/me1_run.sh train.
 
-Depois do treino, --reconstrucao (so o FRR) gera as imagens a partir do embedding do proprio modelo,
+Depois do treino, --reconstrucao (so o FRR e o FRR multi-sujeito) gera as imagens a partir do embedding do proprio modelo,
 sem rede do MindEye2 (scripts/run_recon_embeddings.sh), e calcula as metricas delas:
 
     python src/treina.py repro_subj01_frr_1sess --reconstrucao unclip    # unCLIP
@@ -103,6 +103,30 @@ def _frr(h):
     return {"EXTRA": " ".join(extras)}, []
 
 
+def _frr_ms(h):
+    pre = h["pretreino"]
+    extras = _flags({"k": h["k"], "pretreino": pre if pre == "proprio" else list(pre), "pesos": h["pesos"],
+                     "iteracoes": h["iteracoes"], "tolerancia": h["tolerancia"], "validacao": h["validacao"],
+                     "folds": h["folds"], "grid": h["grid"], "fracs": h["fracs"], "seed": h["seed"],
+                     "chunk": h["chunk"]})
+    return {"EXTRA": " ".join(extras)}, []
+
+
+def _valida_frr_ms(h):
+    pre = h["pretreino"]
+    if pre != "proprio" and (not isinstance(pre, (list, tuple)) or not pre
+                             or not set(pre) <= {2, 3, 4, 5, 6, 7, 8}):
+        raise ValueError("frr_ms: pretreino e 'proprio' (so o subj01) ou uma lista de sujeitos entre 2 e 8")
+    if h["k"] < 1:
+        raise ValueError("frr_ms: k >= 1")
+    if h["pesos"] not in ("sujeito", "exibicao"):
+        raise ValueError("frr_ms: pesos e 'sujeito' (igual por sujeito) ou 'exibicao'")
+    if not 0 < h["validacao"] < 0.5:
+        raise ValueError("frr_ms: validacao entre 0 e 0,5 (fracao das imagens de cada sujeito)")
+    if h["iteracoes"] < 1:
+        raise ValueError("frr_ms: iteracoes >= 1")
+
+
 def _mindeye2(h):
     env = {"HIDDEN_DIM": h["hidden_dim"], "NUM_EPOCHS": h["num_epochs"], "MAX_LR": h["max_lr"],
            "PRIOR": _sim_nao(h["prior"]), "BLURRY": _sim_nao(h["blurry"]), "SEED": h["seed"],
@@ -139,14 +163,24 @@ def _mindeye1(h):
 # "seed": o padrao e 42 em todos os modelos e deve ficar assim: uma unica semente, a mesma, em todo
 # experimento (so o ruido do Ridge 1024 + prior foi medido com outras; veja experimentos.py)
 MODELOS = {
-    # src/run_frr.py: validacao cruzada de 5 dobras sobre as 20 fracoes de Doerig et al.
+    # src/etapas/run_frr.py: validacao cruzada de 5 dobras sobre as 20 fracoes de Doerig et al.
     "frr": Modelo(["run_frr.sh"], ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "EXTRA"),
                   {"folds": 5, "grid": "doerig", "fracs": None, "global_fraction": False,
                    "seed": 42, "chunk": 8192},
                   _frr, agregacoes=("exibicoes", "media"),      # sem epocas: nada a sortear por epoca
                   saida=lambda nome: paths.TABLES / f"{nome}_frr.json",
                   reconstrucao="run_recon_embeddings.sh"),
-    # src/train_ridgeonly.py: so a ridge do subj01, a partir do pre-treino nos outros 7 sujeitos.
+    # src/etapas/run_frr_ms.py: FRR multi-sujeito. Pre-treino linear (minimos alternados) de um espaco de k
+    # dimensoes nos sujeitos 2-8 com peso igual por sujeito, ou pretreino="proprio" (o controle de posto
+    # reduzido, so o subj01); depois, so a ridge do subj01, com a leitura congelada
+    "frr_ms": Modelo(["run_frr_ms.sh"], ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "EXTRA"),
+                     {"k": 1024, "pretreino": [2, 3, 4, 5, 6, 7, 8], "pesos": "sujeito", "iteracoes": 10,
+                      "tolerancia": 1e-3, "validacao": 0.1, "folds": 5, "grid": "doerig", "fracs": None,
+                      "seed": 42, "chunk": 8192},
+                     _frr_ms, _valida_frr_ms, agregacoes=("exibicoes",),
+                     saida=lambda nome: paths.TABLES / f"{nome}_frr.json",
+                     reconstrucao="run_recon_embeddings.sh"),
+    # src/etapas/train_ridgeonly.py: so a ridge do subj01, a partir do pre-treino nos outros 7 sujeitos.
     # batch_size None = o padrao do script (16 no 1024, 8 no 4096 + blurry); frozen_fp16 None = idem
     "mindeye2": Modelo(["run_ridgeonly_prior.sh"],
                        ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "HIDDEN_DIM", "BLURRY", "MSCKPT", "FROZEN",
@@ -218,7 +252,7 @@ def roda(nome, exp, so_dataset=False, dry_run=False, retoma=False, reconstrucao=
     if reconstrucao not in RECONSTRUCOES:
         raise ValueError(f"reconstrucao {reconstrucao!r}: use uma de {RECONSTRUCOES}")
     if reconstrucao != "none" and not modelo.reconstrucao:
-        raise ValueError(f"{exp['modelo']}: --reconstrucao so vale para o FRR; o MindEye2 e o MindEye1 "
+        raise ValueError(f"{exp['modelo']}: --reconstrucao so vale para o FRR e o frr_ms; o MindEye2 e o MindEye1 "
                          "reconstroem pelos proprios scripts (run_recon.sh, me1_run.sh)")
 
     pasta = paths.TRAIN_LOGS / nome
@@ -285,7 +319,7 @@ def main():
     p.add_argument("--dry_run", action="store_true", help="mostra o comando sem gravar nem treinar")
     p.add_argument("--retoma", action="store_true", help="mindeye2: continua do last.pth (RESUME=1)")
     p.add_argument("--reconstrucao", choices=RECONSTRUCOES, default="none",
-                   help="frr: depois do treino, reconstroi pelo unCLIP (unclip) ou unCLIP + refinamento (refino)")
+                   help="frr e frr_ms: depois do treino, reconstroi pelo unCLIP (unclip) ou unCLIP + refinamento (refino)")
     a = p.parse_args()
 
     if a.lista or not a.nomes:

@@ -1598,7 +1598,7 @@
   "Sentence_relative": 0.5260804891586304
  },
  "notas": [
-  "Checkpoint do release checkpoints-v1, treinado com uma versão anterior do código; o retreino com o código atual é o de semente 42."
+  "Retreino com o código atual (semente 42). Substitui o checkpoint do release checkpoints-v1, treinado com uma versão anterior do código; os dois diferem em até 0,7 ponto percentual nas métricas de imagem (docs/REEXECUTAR.md)."
  ],
  "params": {
   "backbone": 453360280,
