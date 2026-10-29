@@ -1,6 +1,6 @@
 # Revisão do benchmark: a ideia de decompor os modelos e críticas gerais
 
-Revisão feita em 22/10/2026 sobre o commit `8f83d5a`, no formato de "conselho" do
+Revisão feita em 22/10/2026 sobre o commit `7617c12`, no formato de "conselho" do
 [claude-council](https://github.com/hex/claude-council): revisores independentes, cada um com uma lente,
 respondem sem ver os outros; numa segunda rodada cada um lê as respostas dos outros, confere no código
 as afirmações centrais e revisa a própria lista. As lentes:
@@ -18,7 +18,7 @@ entre eles é sinal fraco: o valor está nos ângulos, não no consenso. O que t
 **conferido no código** por mais de um revisor; essas afirmações estão marcadas com ✅. Nenhum treino nem
 reconstrução foi rodado; os testes (176, sem GPU) passaram.
 
-**Caminhos.** Os `arquivo:linha` citados são do commit `8f83d5a`, antes da reorganização das pastas: as
+**Caminhos.** Os `arquivo:linha` citados são do commit `7617c12`, antes da reorganização das pastas: as
 etapas que estavam em `src/` (`train_ridgeonly.py`, `recon_inference.py`, `enhanced_recon_inference.py`,
 `recon_embeddings.py`, `final_evaluations.py`, `verify_retrieval.py`, `run_frr.py`, `run_frr_ms.py`)
 estão hoje em `src/etapas/`, e `src/generative_models/` e `src/autoencoder/` em `vendor/`.
@@ -188,10 +188,10 @@ ME2 por dentro (ridge do FRR antes do backbone congelado) antes do resto; encaix
   avaliadores (78,29 e 78,41).
 - ✅ **`fonte()` troca para `repro_` em silêncio.** `report/config.py:64-88` lê `repro_<mid>` assim que
   a tabela existe, com o mesmo id e o mesmo rótulo. A tabela pode mudar sem mudança de código.
-- **`BENCHMARK.md` editado à mão depois de gerado.** O cabeçalho diz "commit `7e331f1`", mas o commit
-  `28148bf` mudou linhas de tabela sem regenerar. Rodar o gerador hoje desfaria a edição.
-- **Originais substituídos.** O commit `28148bf` apagou 30 tabelas `subj01_*`; elas continuam em
-  `git show 28148bf^`, mas nada no site aponta para elas. Os dicionários dos originais foram escritos
+- **`BENCHMARK.md` editado à mão depois de gerado.** O cabeçalho diz "commit `1aec3b2`", mas o commit
+  `bc85145` mudou linhas de tabela sem regenerar. Rodar o gerador hoje desfaria a edição.
+- **Originais substituídos.** O commit `bc85145` apagou 30 tabelas `subj01_*`; elas continuam em
+  `git show bc85145^`, mas nada no site aponta para elas. Os dicionários dos originais foram escritos
   depois (`REEXECUTAR.md:112-114`).
 - **Conclusões à mão.** O resumo em `src/report/texts.py:18-19` é texto fixo ("revisar se os números
   mudarem"); os adjetivos ("à frente", "empata") não acompanham os números.
@@ -316,7 +316,7 @@ separada sobre o 1024; o plano de encaixes da seção 1, que se apoia nos itens 
 ## 7. Conferência da revisão (23/10/2026)
 
 Cada afirmação central das seções 1 a 6 foi conferida no código, nas tabelas de `results/tables/` e, quando
-deu, nos dados, já depois da reorganização das pastas (commit `877d4f1`).
+deu, nos dados, já depois da reorganização das pastas (commit `1dc8643`).
 
 ### 7.1 Confirmadas
 
@@ -366,8 +366,8 @@ deu, nos dados, já depois da reorganização das pastas (commit `877d4f1`).
   `src/experimentos.py:106-134`, de 20 a 60 épocas com 40 sessões) não definem `ckpt_interval` e herdam o
   999 do shell: uma queda perde a corrida inteira. O pragmático estava certo para eles.
 - **"`BENCHMARK.md` editado à mão; o gerador desfaria a edição"** (seções 2.5 e 3): sem base. O commit
-  `28148bf` mudou o `BENCHMARK.md` junto com o gerador (`src/report/data.py`, `page.py`, `config.py`), na
-  mesma direção. O que está defasado é o cabeçalho ("commit `7e331f1`"), porque o `make_benchmark.py` não
+  `bc85145` mudou o `BENCHMARK.md` junto com o gerador (`src/report/data.py`, `page.py`, `config.py`), na
+  mesma direção. O que está defasado é o cabeçalho ("commit `1aec3b2`"), porque o `make_benchmark.py` não
   roda sem os tensores de `results/evals/` e `~/mindeyev2/evals/all_captions.pt` (conferido: falha nesta
   máquina sem escrever nada).
 - **"Colisão de nomes à espera de acontecer"** (seção 2.6): risco baixo. O `mindeye_ridge` importa
@@ -391,7 +391,7 @@ deu, nos dados, já depois da reorganização das pastas (commit `877d4f1`).
 | Fatorial 2³ com o blurry como cabeça nova sobre o 1024 | Trocar por **4096 com e sem a perda blurry, a partir do mesmo checkpoint**. Separa o blurry da dimensão sem treinar uma peça nova (que seria treinada só com os dados do subj01, enquanto a do 4096 veio do pré-treino). Hoje o script escolhe o checkpoint pelo `BLURRY` (`run_ridgeonly_prior.sh:21-36`), então isso pede uma mudança pequena: aceitar o 4096 com `--no-blurry_recon` |
 | 7. Site fora do git | **Retirada.** O site fica no git. Se o diff a cada etapa incomodar, a alternativa é regenerar só sob demanda, não tirar o site |
 | 7. `ckpt_interval` | **Sobe de prioridade**: definir `ckpt_interval` (1 ou 5) como padrão do mindeye2 no `treina.py` antes de rodar os experimentos de 40 sessões |
-| 7. `NOVO_COMPUTADOR.md`, `pyproject.toml`, aposentar `run_benchmark.sh`, isolar o `sys.path` | **Feito** na reorganização (commits `b158151`, `fdb4e6f`): branch, tempos e `frr_ms` corrigidos; `pip install -e .`; o `scripts/README.md` marca o `run_benchmark.sh` como o lote original |
+| 7. `NOVO_COMPUTADOR.md`, `pyproject.toml`, aposentar `run_benchmark.sh`, isolar o `sys.path` | **Feito** na reorganização (commits `2b09312`, `308f186`): branch, tempos e `frr_ms` corrigidos; `pip install -e .`; o `scripts/README.md` marca o `run_benchmark.sh` como o lote original |
 | 7. Registro único de modelos, lockfile + sha256 | Seguem pendentes |
 
 ### 7.4 Prioridades, depois da conferência
