@@ -882,6 +882,24 @@
     ]
    }
   },
+  "subj01_me1_20sess": {
+   "unclip": {
+    "arquivo": "subj01_me1_20sess__unclip.webp",
+    "sig": [
+     786433413,
+     1793275841114035402
+    ]
+   }
+  },
+  "subj01_me1_20sess_semlowlevel": {
+   "unclip": {
+    "arquivo": "subj01_me1_20sess_semlowlevel__unclip.webp",
+    "sig": [
+     786433473,
+     1793279042962283707
+    ]
+   }
+  },
   "subj01_me1_40sess": {
    "unclip": {
     "arquivo": "subj01_me1_40sess__unclip.webp",
@@ -1061,7 +1079,7 @@
   "arquivo": "vista.webp",
   "sig": [
    602113195,
-   1792428920155851560
+   1793191597475731325
   ]
  }
 }
