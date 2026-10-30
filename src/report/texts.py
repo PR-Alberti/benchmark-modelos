@@ -1,6 +1,11 @@
 """As conclusoes do benchmark: as escritas a mao e a do FRR, montada dos numeros medidos."""
 
+from .config import REPO_URL
 from .fmt import fmt, virg
+
+# R² de validacao do pre-treino do FRR multi-sujeito nos sujeitos 2 a 8 (docs/FRR_MULTISUJEITO.md); nao esta
+# nos registros dos modelos, entao fica aqui. Revisar se o pre-treino for refeito.
+FRR_MS_R2_PRETREINO = "0,036"
 
 
 FRR_NOTA_HUBNESS = (
@@ -116,6 +121,45 @@ def leitura_frr(dados):
             f"{virg(f40['cv']['cv_r2_escolhida'] * 100, 1)}% para {virg(r2_ext * 100, 1)}% e {verbo} o Img→cér "
             f"de {pc(v['40']['f'])} para {pc(f_ext)}" + (": o erro quadrático não é o critério do retrieval."
                                                        if piora else "."))
+
+    # 4. multi-sujeito: A (o FRR de sempre), B (posto reduzido, o controle) e C (leitura pre-treinada nos
+    # sujeitos 2 a 8). So afirma o que os numeros sustentam: se mudarem, o texto some em vez de ficar errado.
+    try:
+        ms = {s: {l: {"f": por_id[i]["frr_dados"]["retrieval"]["fwd"], "u": por_id[i]["tabelas"]["base"]}
+                  for l, i in (("A", f"subj01_frr_{s}sess"), ("B", f"subj01_frr_postoreduzido_{s}sess"),
+                               ("C", f"subj01_frr_multisujeito_{s}sess"))}
+              for s in ("1", "20", "40")}
+        g = lambda s, l, k: ms[s][l]["u"][k]
+        r = lambda s, l: ms[s][l]["f"]["media"]
+        meia = max([(x["f"]["ic95"][1] - x["f"]["ic95"][0]) / 2 for x in ms["1"].values() if x["f"].get("ic95")],
+                   default=0.01)
+        gargalo = all(g(s, "B", "CLIP") > g(s, "A", "CLIP") for s in ms) and g("1", "B", "PixCorr") > g("1", "A", "PixCorr")
+        outros = (r("1", "C") - r("1", "B") > 2 * meia and g("1", "C", "CLIP") <= g("1", "B", "CLIP")
+                  and all(abs(g(s, "C", "CLIP") - g(s, "A", "CLIP")) < 0.01 for s in ("20", "40")))
+    except (KeyError, TypeError, IndexError):
+        return textos
+    if gargalo and outros:
+        pix = lambda s, l: virg(g(s, l, "PixCorr"), 3)
+        textos.append(
+            f"<b>FRR multi-sujeito.</b> Três FRR sobre os mesmos dados do subj01: o de sempre (A); um que passa os "
+            f"voxels por um espaço de 1.024 dimensões antes do CLIP, com a leitura aprendida só no subj01 (B, o "
+            f"controle de posto reduzido); e o mesmo espaço com a leitura pré-treinada nos sujeitos 2 a 8 (C, "
+            f"multi-sujeito). Os números de imagem são os da tabela unCLIP. "
+            f"<b>O gargalo é o que ajuda a imagem</b> (B contra A): com 1 sessão, PixCorr {pix('1', 'B')} contra "
+            f"{pix('1', 'A')} e CLIP {pc(g('1', 'B', 'CLIP'))} contra {pc(g('1', 'A', 'CLIP'))}; com 20 e 40 sessões o "
+            f"CLIP é {pc(g('20', 'B', 'CLIP'))} contra {pc(g('20', 'A', 'CLIP'))} e "
+            f"{pc(g('40', 'B', 'CLIP'))} contra {pc(g('40', 'A', 'CLIP'))}. "
+            f"<b>Os outros sujeitos só ajudam o retrieval, e só com pouco dado</b> (C contra B): com 1 sessão o Img→cér "
+            f"sobe de {pc(r('1', 'B'))} para {pc(r('1', 'C'))}, bem além do intervalo de 95% (±{virg(meia * 100, 1)} "
+            f"ponto), mas a imagem não melhora (PixCorr {pix('1', 'C')} contra {pix('1', 'B')}, CLIP "
+            f"{pc(g('1', 'C', 'CLIP'))} contra {pc(g('1', 'B', 'CLIP'))}); com 20 e 40 sessões C fica no nível de A "
+            f"(CLIP {pc(g('20', 'C', 'CLIP'))} e {pc(g('40', 'C', 'CLIP'))} contra {pc(g('20', 'A', 'CLIP'))} e "
+            f"{pc(g('40', 'A', 'CLIP'))}). "
+            f"<b>Duas ressalvas.</b> O pré-treino linear parou na 2ª iteração e explicou pouco da validação (R² de "
+            f"{FRR_MS_R2_PRETREINO} nos sujeitos 2 a 8): a conclusão vale para esse pré-treino, não para dados de outros "
+            f"sujeitos em geral. E é uma semente só, sem intervalo nas métricas de imagem: diferenças de poucos "
+            f"milésimos, como A contra C com 40 sessões, não valem como ordem. Detalhes em "
+            f'<a href="{REPO_URL}/blob/main/docs/FRR_MULTISUJEITO.md">docs/FRR_MULTISUJEITO.md</a>.')
     return textos
 
 

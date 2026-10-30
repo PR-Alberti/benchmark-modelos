@@ -172,11 +172,35 @@ class Descricoes(unittest.TestCase):
         self.assertIn("id: 'res-' + mt.slug", js)
 
     def test_presets_e_pares_apontam_para_modelos_do_benchmark(self):
-        conhecidos = set(catalogo.ROTULOS)
+        from experimentos import EXPERIMENTOS
+        conhecidos = set(catalogo.ROTULOS) | set(EXPERIMENTOS)       # os de sessoes intermediarias sao experimentos
         for _, _, _, ids in site.PRESETS:
             self.assertLessEqual(set(ids), conhecidos)
         for _, a, b in site.PARES:
             self.assertLessEqual({a, b}, conhecidos)
+
+    def test_series_juntam_a_mesma_configuracao_em_cada_numero_de_sessoes(self):
+        m = lambda mid, s, rot: {"id": mid, "sessoes": s, "rotulo": rot}
+        ms = [m("subj01_me1_40sess", 40, "MindEye1 · 40 sessões"), m("subj01_me1_5sess", 5, "MindEye1 · 5 sessões"),
+              m("subj01_me1_1sess", 1, "MindEye1 · 1 sessão"),
+              m("subj01_me1_1sess_semlowlevel", 1, "MindEye1 sem low-level · 1 sessão"),
+              m("subj01_ridgeonly_1sess", 1, "Ridge 1024 sem prior · 1 sessão"),            # sozinho: sem serie
+              m("final_subj01_pretrained_1sess_24bs", 1, "Artigo · 1 sessão"),
+              m("final_subj01_pretrained_40sess_24bs", 40, "Artigo · 40 sessões")]
+        self.assertEqual(site.series(ms), [
+            {"nome": "MindEye1", "ids": ["subj01_me1_1sess", "subj01_me1_5sess", "subj01_me1_40sess"]},
+            {"nome": "Artigo", "ids": ["final_subj01_pretrained_1sess_24bs", "final_subj01_pretrained_40sess_24bs"]}])
+
+    def test_secao_da_lista(self):
+        bench = {"subj01_me1", "subj01_frr"}
+        m = lambda mid, grupo, fam, modelo=None: {"id": mid, "grupo": grupo, "familia": fam,
+                                                  "config": {"modelo": modelo} if modelo else None}
+        self.assertEqual(site._secao(m("subj01_me1_20sess", "experimento", "mindeye1"), bench), "mindeye1")
+        self.assertEqual(site._secao(m("subj01_frr_20sess", "experimento", "frr"), bench), "frr")
+        self.assertEqual(site._secao(m("subj01_frr_multisujeito_1sess", "experimento", "frr", "frr_ms"), bench), "frr_ms")
+        self.assertEqual(site._secao(m("subj01_frr_controlado", "experimento", "frr", "frr"), bench), "experimento")
+        self.assertEqual(site._secao(m("subj01_me1_1sess", "benchmark", "mindeye1"), bench), "mindeye1")
+        self.assertEqual({g["id"] for g in site.GRUPOS_SELECAO} - {f["id"] for f in site.FAMILIAS}, set())  # toda secao tem cor
 
 
 class Pagina(Arvore):

@@ -15,7 +15,7 @@
       <p class="lede">O <code>src/treina.py</code> lê o dicionário, monta o subconjunto de treino, grava a configuração
         junto do modelo e chama o script de treino certo. O que não estiver no dicionário fica no padrão, e um dataset
         vazio é o do benchmark: as exibições completas das N primeiras sessões.</p>
-      <pre><code>{"modelo": "frr",                         <span class="com"># frr | mindeye2 | mindeye1</span>
+      <pre><code>{"modelo": "frr",                         <span class="com"># frr | frr_ms | mindeye2 | mindeye1</span>
  "hiper": {"seed": 42},                   <span class="com"># o que faltar fica no padrão do modelo</span>
  "dataset": {"sessoes": 40,               <span class="com"># o pool: as 40 primeiras sessões</span>
              "classes": {"animal": ["sup_animal"]},
@@ -68,6 +68,46 @@
           </dl>
         </article>
       </div>
+
+      <h3 id="uso-frr-ms">FRR multi-sujeito: três versões do FRR</h3>
+      <p>Uma extensão linear do FRR no molde do MindEye2: um pré-treino nos outros 7 sujeitos do NSD e, no subj01, o
+        ajuste só da ridge dele. Tudo em forma fechada, sem rede. Os voxels de cada sujeito passam por uma ridge própria
+        até um espaço de <b>k = 1.024</b> dimensões (o <code>hidden_dim</code> do MindEye2 de 1.024), e uma leitura
+        compartilhada leva esse espaço ao embedding CLIP bigG. É a leitura que carrega o que vem dos outros sujeitos.
+        Como o gargalo de k já muda o resultado, o experimento tem um controle:</p>
+      <div class="rolagem"><table class="tab">
+        <thead><tr><th></th><th>Versão</th><th>Leitura compartilhada</th><th>Ajuste no subj01</th><th>Experimentos</th></tr></thead>
+        <tbody>
+          <tr><td><b>A</b></td><td>FRR de sempre</td><td>nenhuma: voxels → CLIP direto</td><td>tudo</td>
+            <td><code>subj01_frr_{1,20,40}sess</code></td></tr>
+          <tr><td><b>B</b></td><td>posto reduzido (controle)</td><td>só o próprio subj01</td><td>só a ridge dele</td>
+            <td><code>subj01_frr_postoreduzido_{1,20,40}sess</code></td></tr>
+          <tr><td><b>C</b></td><td>multi-sujeito</td><td>sujeitos 2 a 8, todas as sessões</td><td>só a ridge dele</td>
+            <td><code>subj01_frr_multisujeito_{1,20,40}sess</code></td></tr>
+        </tbody>
+      </table></div>
+      <ul>
+        <li><b>C contra B</b> mede o efeito dos outros sujeitos; <b>B contra A</b>, o do gargalo sozinho. Sem B, um C
+          melhor que A não diria se o ganho veio do pré-treino ou da mudança de arquitetura.</li>
+        <li>O pré-treino ajusta as ridges e a leitura por mínimos quadrados alternados, com peso igual por sujeito, e para
+          pela validação de 10% das imagens de cada sujeito. Antes de qualquer conta, o <code>run_frr_ms.py</code> confere
+          que nenhuma das 1.000 imagens de teste está no treino dos outros sujeitos.</li>
+        <li>O espaço compartilhado não é o do MindEye2: aqui ele é moldado por erro quadrático até o CLIP, de forma
+          linear; lá, pelo backbone não linear e pela perda contrastiva. O encolhimento do FRR continua, então o unCLIP
+          segue gerando imagens acinzentadas; a pergunta é quanto melhoram. Os resultados e as ressalvas estão em
+          Resultados, na seção "Leitura do benchmark".</li>
+        <li><b>Código:</b> <code>src/mindeye_ridge/multisujeito.py</code> · <code>src/etapas/run_frr_ms.py</code> ·
+          <code>scripts/run_frr_ms.sh</code>. <b>Recursos</b> (RTX A4500): os sujeitos 2 a 8 pedem 12,1 GB de dados,
+          ~49 GB de alvos CLIP e 7,1 GB de pré-treino; RAM de pico de 15 a 27 GB; o treino de C com 1 sessão leva 43 min
+          e a reconstrução (unCLIP, refino e métricas), ~3 h 15 por modelo.</li>
+      </ul>
+      <pre><code>setup/bootstrap.sh --multisujeito                       # baixa os sujeitos 2 a 8 (12,1 GB)
+cd src
+~/envs/fmri/bin/python treina.py subj01_frr_multisujeito_1sess subj01_frr_multisujeito_40sess    # C
+~/envs/fmri/bin/python treina.py subj01_frr_postoreduzido_1sess subj01_frr_postoreduzido_40sess  # B
+~/envs/fmri/bin/python treina.py subj01_frr_multisujeito_1sess --reconstrucao refino             # + unCLIP, refino e métricas</code></pre>
+      <p class="nota">O guia completo, com a tabela de resultados e os recursos medidos, está em
+        <a href="{{repo}}/blob/main/docs/FRR_MULTISUJEITO.md">docs/FRR_MULTISUJEITO.md</a>.</p>
     </section>
 
     <section class="secao" id="uso-avaliacao">
@@ -227,6 +267,8 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
         <p>Os padrões são os do <code>treina.py</code>; uma chave fora destas é recusada.</p></header>
       <h3>FRR</h3>
       {{hiper:frr}}
+      <h3>FRR multi-sujeito</h3>
+      {{hiper:frr_ms}}
       <h3>MindEye2 ridge-only</h3>
       {{hiper:mindeye2}}
       <h3>MindEye1</h3>
@@ -261,6 +303,10 @@ scripts/me1_run.sh recon &amp;&amp; scripts/me1_run.sh metrics</code></pre>
           Para tirar um modelo, apague o registro dele.</li>
         <li>Os experimentos de <code>src/experimentos.py</code> que ainda não rodaram aparecem em Fichas, como
           planejados, com o comando para treinar.</li>
+        <li>Na lista de modelos, um experimento que é uma configuração do benchmark com outro número de sessões (o
+          nome igual tirando o <code>_&lt;N&gt;sess</code>, como <code>subj01_me1_20sess</code>) fica na família dele, e
+          no Resumo entra na mesma linha, de 1 a 40 sessões. O FRR multi-sujeito tem seção própria; os outros
+          experimentos ficam em Experimentos.</li>
       </ul>
     </section>
   </div>

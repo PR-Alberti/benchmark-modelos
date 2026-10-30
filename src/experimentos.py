@@ -164,6 +164,20 @@ for _s in (1, 20, 40):
     }
 
 
+# MindEye1 em 5, 10 e 20 sessoes (as N primeiras, o dataset completo delas), entre os 1 e 40 do benchmark,
+# com e sem o low-level (scripts/run_me1_sessoes.sh). O alto nivel e treinado uma vez por tamanho: o
+# "_semlowlevel" e o mesmo checkpoint, so a reconstrucao muda (sem o img2img a partir da borrada), e por
+# isso nao tem treino proprio -- nao rode o treina.py com ele.
+for _n in (5, 10, 20):
+    _hiper = {"save_every": 5} if _n == 5 else {}
+    EXPERIMENTOS[f"subj01_me1_{_n}sess"] = {
+        "modelo": "mindeye1", "hiper": dict(_hiper), "dataset": {"sessoes": _n},
+        "rotulo": f"MindEye1 · {_n} sessões"}
+    EXPERIMENTOS[f"subj01_me1_{_n}sess_semlowlevel"] = {
+        "modelo": "mindeye1", "hiper": dict(_hiper), "dataset": {"sessoes": _n},
+        "rotulo": f"MindEye1 sem low-level · {_n} sessões"}
+
+
 # =============================================================================================
 # MindEye2 ridge-only com 2, 5, 10 e 20 sessoes, com e sem low-level (branch ME2-intermediate_sessions).
 # As pontas, 1 e 40 sessoes, ja estao no benchmark (repro_subj01_ridgeonly_{1,40}sess_prior e

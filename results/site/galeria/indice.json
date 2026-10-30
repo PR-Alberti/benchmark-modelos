@@ -1140,6 +1140,24 @@
     ]
    }
   },
+  "subj01_me1_10sess": {
+   "unclip": {
+    "arquivo": "subj01_me1_10sess__unclip.webp",
+    "sig": [
+     786433413,
+     1792801766786789929
+    ]
+   }
+  },
+  "subj01_me1_10sess_semlowlevel": {
+   "unclip": {
+    "arquivo": "subj01_me1_10sess_semlowlevel__unclip.webp",
+    "sig": [
+     786433473,
+     1792804952816985535
+    ]
+   }
+  },
   "subj01_me1_1sess": {
    "unclip": {
     "arquivo": "subj01_me1_1sess__unclip.webp",
@@ -1158,6 +1176,24 @@
     ]
    }
   },
+  "subj01_me1_20sess": {
+   "unclip": {
+    "arquivo": "subj01_me1_20sess__unclip.webp",
+    "sig": [
+     786433413,
+     1793275841114035402
+    ]
+   }
+  },
+  "subj01_me1_20sess_semlowlevel": {
+   "unclip": {
+    "arquivo": "subj01_me1_20sess_semlowlevel__unclip.webp",
+    "sig": [
+     786433473,
+     1793279042962283707
+    ]
+   }
+  },
   "subj01_me1_40sess": {
    "unclip": {
     "arquivo": "subj01_me1_40sess__unclip.webp",
@@ -1173,6 +1209,24 @@
     "sig": [
      786433503,
      1792574052172839636
+    ]
+   }
+  },
+  "subj01_me1_5sess": {
+   "unclip": {
+    "arquivo": "subj01_me1_5sess__unclip.webp",
+    "sig": [
+     786433408,
+     1792741679682791306
+    ]
+   }
+  },
+  "subj01_me1_5sess_semlowlevel": {
+   "unclip": {
+    "arquivo": "subj01_me1_5sess_semlowlevel__unclip.webp",
+    "sig": [
+     786433468,
+     1792744868306174162
     ]
    }
   },
