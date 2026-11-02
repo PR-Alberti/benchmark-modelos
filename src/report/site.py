@@ -12,7 +12,7 @@ import json
 import pathlib
 import re
 
-from . import texts
+from . import tempos, texts
 from .catalogo import PUBLICADA
 from .config import REPO_URL
 from .fmt import commit, duracao
@@ -426,6 +426,9 @@ def dados_pagina(modelos, planejados, galeria, semantica):
             "params", "receita", "notas", "fontes", "commit", "frr")},
             "valores": valores or None, "retrieval": ret, "curva": curva,
             "config": m.get("config") if m.get("config_descritiva") else _ordena_config(m.get("config"))})
+    medidas = tempos.carrega()
+    for m in ms:
+        m["tempos"] = tempos.etapas(m, medidas)
     ids = {m["id"] for m in ms if m["valores"] or m["curva"]}
     do_benchmark = {_serie(m["id"]) for m in ms if m["grupo"] == "benchmark"} - {None}
     for m in ms:
@@ -452,6 +455,7 @@ def dados_pagina(modelos, planejados, galeria, semantica):
         "benchmark_ids": list(BENCHMARK), "galeria": galeria, "semantica": semantica, "leitura": leitura,
         "teto_legendas": {k: teto.get(f"{k}_img_ref") for k, *_ in _LEG} if teto else None,
         "textos": {"frr_hubness": texts.FRR_NOTA_HUBNESS},
+        "tempos": {k: medidas.get(k) for k in ("data", "gpu", "imagens_teste", "imagens_total")} if medidas else None,
     }
 
 
@@ -493,7 +497,7 @@ RESULTADOS = """
   </div>
 </section>
 """
-ABAS = ["resumo", "tabela", "graficos", "dispersao", "treino", "galeria", "frr", "fichas"]
+ABAS = ["resumo", "tabela", "tempos", "graficos", "dispersao", "treino", "galeria", "frr", "fichas"]
 
 
 def monta(modelos, planejados, galeria, semantica):

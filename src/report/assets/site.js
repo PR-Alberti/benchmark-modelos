@@ -117,7 +117,7 @@
   }
 
   // ------------------------------------------------------------------ estado
-  var ABAS = [['resumo', 'Resumo'], ['tabela', 'Tabela'], ['graficos', 'Gráficos'], ['dispersao', 'Dispersão'],
+  var ABAS = [['resumo', 'Resumo'], ['tabela', 'Tabela'], ['tempos', 'Tempos'], ['graficos', 'Gráficos'], ['dispersao', 'Dispersão'],
               ['treino', 'Treino'], ['galeria', 'Galeria'], ['frr', 'FRR'], ['fichas', 'Fichas']];
   var NOMES_ABAS = {};
   ABAS.forEach(function (a) { NOMES_ABAS[a[0]] = a[1]; });
@@ -133,6 +133,7 @@
     curva: salvo.curva || 'teste_bwd', eixoCurva: salvo.eixoCurva || 'epoca',
     galTipo: salvo.galTipo || 'refinada', galLeg: salvo.galLeg !== false, galTam: salvo.galTam || 'm',
     resumoMet: salvo.resumoMet || 'BwdRetrieval', ordem: salvo.ordem || null, ordemDesc: salvo.ordemDesc !== false,
+    ordemTempo: salvo.ordemTempo || null, ordemTempoDesc: salvo.ordemTempoDesc !== false,
     fichas: salvo.fichas || 'selecionados', busca: '',
     fechados: Array.isArray(salvo.fechados) ? salvo.fechados : []
   };
@@ -528,6 +529,7 @@
       return D.series.some(function (s) { return s.ids.indexOf(m.id) >= 0; }) ? null : 'sem outro número de sessões';
     },
     tabela: function (m) { return m.valores ? null : 'sem métricas'; },
+    tempos: function (m) { return m.tempos && (m.tempos.treino || m.tempos.avaliacao) ? null : 'sem tempos'; },
     graficos: function (m) {
       return m.valores && METRICAS.some(function (mt) { return mt.grupo === E.grupo && valor(m, mt.id) != null; }) ? null : 'sem métricas deste grupo';
     },
@@ -773,6 +775,93 @@
     botaoCopia.addEventListener('click', function () {
       var linhas = [['Modelo', 'id'].concat(cols.map(function (c) { return c.rotulo; })).join('\t')];
       ms.forEach(function (m) { linhas.push([m.rotulo, m.id].concat(cols.map(function (c) { var x = valor(m, c.id); return x == null ? '' : fmt(x, c.fmt); })).join('\t')); });
+      copia(linhas.join('\n'), botaoCopia);
+    });
+  }
+
+  // ------------------------------------------------------------------ vista: tempos
+  var ETAPAS_TEMPO = [['treino', 'Treino'], ['reconstrucao', 'Reconstrução'], ['refino', 'Refino'],
+                      ['avaliacao', 'Avaliação'], ['total', 'Total']];
+  function tempoDe(m, c) {
+    if (c !== 'total') return m.tempos[c] ? m.tempos[c].s : null;
+    return m.tempos.total_s;
+  }
+  function tempoEstimado(m, c) {
+    if (c === 'total') return m.tempos.total_s != null && m.tempos.reconstrucao != null;
+    return !!m.tempos[c] && m.tempos[c].origem === 'estimado';
+  }
+  function tempoTxt(m, c) { return (tempoEstimado(m, c) ? '≈ ' : '') + duracao(tempoDe(m, c)); }
+  function renderTempos(v) {
+    var meta = D.tempos;
+    v.appendChild(cabecalho('Tempos', 'Quanto cada modelo custa, etapa por etapa' + (meta && meta.gpu ? ', numa ' + meta.gpu : '') +
+      '. <b>≈</b> marca o que é estimativa; o resto foi medido. Clique em ↕ para ordenar.'));
+    var botaoCopia = h('button', {class: 'botao leve', type: 'button', texto: 'Copiar tabela'});
+    v.appendChild(h('div', {class: 'controles'}, botaoCopia));
+    var ms = selecionados().filter(function (m) { return !FORA.tempos(m); });
+    if (!ms.length) { v.appendChild(vazio('Nenhum modelo com tempos na seleção. Escolha modelos na lista.')); return; }
+    if (E.ordemTempo) {
+      var o = E.ordemTempo, s = E.ordemTempoDesc ? -1 : 1;
+      ms = ms.slice().sort(function (a, b) {
+        if (o === 'rotulo') return s * a.rotulo.localeCompare(b.rotulo, 'pt');
+        var va = tempoDe(a, o), vb = tempoDe(b, o);
+        if (va == null) return 1;
+        if (vb == null) return -1;
+        return s * (va - vb);
+      });
+    }
+    var est = {};
+    ETAPAS_TEMPO.forEach(function (c) {
+      var todos = ms.map(function (m) { return tempoDe(m, c[0]); }).filter(function (x) { return x != null; });
+      var vs = ms.filter(function (m) { return !m.publicada; }).map(function (m) { return tempoDe(m, c[0]); }).filter(function (x) { return x != null; });
+      var menor = Math.min.apply(null, vs);          // diferenca menor que 5% e empate: nenhum em destaque
+      est[c[0]] = {lo: Math.min.apply(null, todos), hi: Math.max.apply(null, todos),
+        melhor: vs.length > 1 && Math.max.apply(null, vs) > menor * 1.05 ? menor : null};
+    });
+    function ordena(id, nome) {       // 1o clique: decrescente; 2o: crescente; 3o: volta a ordem da lista
+      var ativo = E.ordemTempo === id;
+      var b = h('button', {class: 'ordena' + (ativo ? ' ativo' : ''), type: 'button', title: 'Ordenar por ' + nome,
+        'aria-label': 'Ordenar por ' + nome, texto: ativo ? (E.ordemTempoDesc ? '▾' : '▴') : '↕'});
+      b.addEventListener('click', function () {
+        if (E.ordemTempo === id) { if (E.ordemTempoDesc) E.ordemTempoDesc = false; else E.ordemTempo = null; } else { E.ordemTempo = id; E.ordemTempoDesc = true; }
+        guarda(); renderAba();
+      });
+      return b;
+    }
+    var tab = h('table', {class: 'tm'}), thead = h('thead'), col = h('tr', {class: 'col'});
+    col.appendChild(h('th', {class: 'mod', scope: 'col'}, 'Modelo', ordena('rotulo', 'nome')));
+    ETAPAS_TEMPO.forEach(function (c) { col.appendChild(h('th', {scope: 'col'}, c[1], ordena(c[0], c[1]))); });
+    thead.appendChild(col); tab.appendChild(thead);
+    var tbody = h('tbody');
+    ms.forEach(function (m) {
+      var tr = h('tr');
+      var sub = [m.sessoes ? (m.sessoes === 1 ? '1 sessão' : m.sessoes + ' sessões') : null, m.status_txt].filter(Boolean).join(' · ');
+      tr.appendChild(h('td', {class: 'mod'}, h('div', {class: 'nome'}, h('span', {class: 'amostra', style: '--c:' + m.cor}), h('span', {texto: m.rotulo})),
+        h('small', {texto: sub})));
+      ETAPAS_TEMPO.forEach(function (c) {
+        var x = tempoDe(m, c[0]);
+        if (x == null) { tr.appendChild(h('td', {class: 'falta', texto: '—'})); return; }
+        var e = est[c[0]], p = e.hi > e.lo ? 1 - (x - e.lo) / (e.hi - e.lo) : 1;
+        var melhor = !m.publicada && e.melhor != null && Math.abs(x - e.melhor) < 1e-9;
+        tr.appendChild(h('td', {class: 'v' + (melhor ? ' melhor' : '')}, tempoTxt(m, c[0]),
+          h('span', {class: 'db'}, h('i', {style: '--p:' + Math.round(p * 100) + '%'}))));
+      });
+      tbody.appendChild(tr);
+    });
+    tab.appendChild(tbody);
+    v.appendChild(h('div', {class: 'tm-caixa'}, tab));
+    var notas = ['<b>Treino</b>: o tempo gravado quando o modelo treinou, sem refazer nada. No MindEye2 inclui o teste de cada época; no FRR, a previsão do teste; no MindEye1, o alto nível e o low-level. Não conta pré-treino: o MindEye2 parte de ~280 h dos autores nos outros sujeitos.'];
+    if (meta) notas.push('<b>≈ Reconstrução e refino</b>: testes de ' + meta.imagens_teste + ' imagens em ' + meta.data.split('-').reverse().join('/') + ', em regra de 3 para as ' + milhar(meta.imagens_total) + ' do teste, com a carga dos modelos contada uma vez. O custo depende do tipo de modelo, então há uma medida por tipo, não por modelo.');
+    if (meta) notas.push('<b>Avaliação</b>: retrieval e tabelas de métricas (unCLIP e refinada) rodados inteiros, porque o retrieval sorteia 300 imagens e não dá para reduzir; também uma medida por tipo de modelo.');
+    if (ms.some(function (m) { return m.familia === 'frr'; })) notas.push('O FRR só precisa de ajuste e retrieval: reconstrução e refino são opcionais nele.');
+    if (ms.some(function (m) { return !m.tempos.treino && !m.publicada; })) notas.push('Sem treino (—): os modelos do artigo foram treinados pelos autores, em 8 × A100.');
+    var pre = ms.filter(function (m) { return m.tempos.pretreino_s; })[0];
+    if (pre) notas.push('O FRR multi-sujeito depende ainda de ' + duracao(pre.tempos.pretreino_s) + ' de pré-treino compartilhado, feito uma vez só.');
+    v.appendChild(h('p', {class: 'nota', html: notas.join(' ')}));
+    botaoCopia.addEventListener('click', function () {
+      var linhas = [['Modelo', 'id'].concat(ETAPAS_TEMPO.map(function (c) { return c[1]; })).join('\t')];
+      ms.forEach(function (m) {
+        linhas.push([m.rotulo, m.id].concat(ETAPAS_TEMPO.map(function (c) { return tempoDe(m, c[0]) == null ? '' : tempoTxt(m, c[0]); })).join('\t'));
+      });
       copia(linhas.join('\n'), botaoCopia);
     });
   }
@@ -1256,7 +1345,7 @@
     });
   }
 
-  var RENDER = {resumo: renderResumo, tabela: renderTabela, graficos: renderGraficos, dispersao: renderDispersao,
+  var RENDER = {resumo: renderResumo, tabela: renderTabela, tempos: renderTempos, graficos: renderGraficos, dispersao: renderDispersao,
                 treino: renderTreino, galeria: renderGaleria, frr: renderFrr, fichas: renderFichas};
 
   // ------------------------------------------------------------------ simulador de dataset (Como usar)
