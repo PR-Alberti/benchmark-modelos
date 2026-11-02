@@ -1,6 +1,6 @@
 """O decoding muda ao longo da sessao? Selecao dos trials, metricas e agregacao, sem GPU.
 
-O protocolo (src/etapas/tiredness_por_run.py roda o modelo):
+O protocolo, explicado em docs/TIREDNESS.md (src/etapas/tiredness_por_run.py roda o modelo):
 - treino nas N primeiras sessoes; teste trial a trial, sem media de repeticoes, nas sessoes seguintes;
 - entra no teste so o trial cuja imagem o modelo nao viu no treino (o que ele viu vem do manifesto
   train_logs/<modelo>/dataset.json). Os trials das imagens compartilhadas dessas sessoes entram, com

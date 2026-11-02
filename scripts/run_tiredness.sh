@@ -1,7 +1,7 @@
 #!/bin/bash
 # O decoding muda ao longo da sessao? MindEye2 ridge-only treinado nas 10 primeiras sessoes e avaliado,
-# trial a trial e por run, nas 30 seguintes, sem os trials de imagens vistas no treino. O protocolo esta
-# em src/mindeye_ridge/tiredness.py; os resultados, em results/tables/tiredness/.
+# trial a trial e por run, nas 30 seguintes, sem os trials de imagens vistas no treino. O protocolo e a
+# leitura dos resultados estao em docs/TIREDNESS.md; os resultados, em results/tables/tiredness/.
 #
 #   scripts/run_tiredness.sh                                  treina (~4 h numa A4500) e avalia
 #   scripts/run_tiredness.sh subj01_ridgeonly_20sess_prior    outro modelo de src/experimentos.py
