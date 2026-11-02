@@ -244,7 +244,7 @@ class Reconstrucao(unittest.TestCase):
     def test_dry_run_mostra_sem_rodar(self):
         out, cmds, _ = self.roda(self.FRR, reconstrucao="unclip", dry_run=True)
         self.assertEqual(cmds, [])
-        self.assertIn("run_recon_embeddings.sh exp unclip", out)
+        self.assertRegex(out, r"run_recon_embeddings\.sh'? exp unclip")   # com aspas se o caminho do repositorio tem espaco
 
     def test_so_o_frr_e_modo_valido(self):
         with self.assertRaisesRegex(ValueError, "so vale para o FRR"):

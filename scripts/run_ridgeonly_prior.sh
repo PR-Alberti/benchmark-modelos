@@ -75,7 +75,7 @@ BATCH_SIZE=${BATCH_SIZE:-$DEFAULT_BATCH}   # 16 no 1024; 8 no 4096+blurry
 # save_ckpt grava sempre em last.pth, entao um CKPT_INTERVAL menor custa um
 # arquivo so e protege contra perder a corrida inteira (a maquina e resetada
 # sem aviso -- ja aconteceu tres vezes).
-mkdir -p $TRAIN_LOGS/$MODEL_NAME
+mkdir -p "$TRAIN_LOGS/$MODEL_NAME"
 confere_dataset "$TRAIN_LOGS/$MODEL_NAME" "$([ "$RESUME" = 1 ] && [ -f "$TRAIN_LOGS/$MODEL_NAME/last.pth" ] && echo 1 || echo 0)"
 
 $ENVP/bin/python etapas/train_ridgeonly.py \
@@ -91,6 +91,6 @@ $ENVP/bin/python etapas/train_ridgeonly.py \
     --max_lr=${MAX_LR:-3e-4} --mixup_pct=.33 --num_epochs=${NUM_EPOCHS:-150} \
     --no-use_image_aug --new_test --embedder_fp16 --seed=${SEED:-42} \
     --ckpt_interval=${CKPT_INTERVAL:-999} --ckpt_saving --no-wandb_log $RESUME_FLAG \
-    --metrics_csv=$TRAIN_LOGS/$MODEL_NAME/metrics.csv ${DATASET:+--dataset="$DATASET"} \
-    2>&1 | tee $TEE_FLAGS $TRAIN_LOGS/$MODEL_NAME/train.log
+    --metrics_csv="$TRAIN_LOGS/$MODEL_NAME/metrics.csv" ${DATASET:+--dataset="$DATASET"} \
+    2>&1 | tee $TEE_FLAGS "$TRAIN_LOGS/$MODEL_NAME/train.log"
 atualiza_site

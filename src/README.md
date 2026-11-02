@@ -29,6 +29,7 @@ rode `--help` (importa tudo) e, de verdade, só na máquina de treino. Veja "Mud
 | `enhanced_recon_inference.py` | refino das reconstruções com a legenda | `_all_enhancedrecons.pt` |
 | `final_evaluations.py` | métricas de imagem e retrieval | `results/tables/<m>_all_{recons,enhancedrecons}.csv` |
 | `verify_retrieval.py` | só o retrieval do MindEye2, sem gerar imagens | `_all_clipvoxels.pt`, `_retrieval.json` |
+| `tiredness_por_run.py` | métricas por run de cada sessão, trial a trial, nas sessões depois do treino | `results/tables/tiredness/<m>_{por_run,por_trial}.csv`, `_contraste.json` |
 
 ## `mindeye_ridge/`: a biblioteca
 
@@ -38,6 +39,7 @@ O código reutilizável, com testes em `tests/`.
 |---|---|
 | `paths.py` | todos os caminhos (repositório, dados, resultados) num lugar só |
 | `nsd_data.py` | lê as exibições e os betas do NSD |
+| `tiredness.py` | efeito do tempo na sessão: seleção dos trials sem imagens do treino, retrieval por trial, agregação por run e contraste |
 | `dataset_controlado.py` | recortes do treino: sessões, imagens, repetições, classes semânticas |
 | `agregacao.py` | como as repetições de uma imagem viram amostras de treino |
 | `semantica.py` | que fração da tela cada categoria do COCO ocupa em cada imagem |
