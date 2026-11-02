@@ -729,6 +729,32 @@
    "a baseball player is holding a bat.",
    "a large room with a lot of furniture."
   ],
+  "subj01_ridgeonly_20sess_prior": [
+   "a surfer on a surfboard in the ocean.",
+   "a man is holding a cell phone.",
+   "a man holding a frisbee in a field.",
+   "a plate of food",
+   "a glass door with a window.",
+   "a man on a skateboard in the water.",
+   "a man sitting down next to a table.",
+   "a large tree in a field.",
+   "a man is holding a tennis racket.",
+   "a couple of animals standing together.",
+   "a clock tower with a tower in the background.",
+   "a baseball player is standing on a field.",
+   "a boat on a body of water",
+   "a street with a lot of traffic.",
+   "a woman sitting on a bench.",
+   "a few of the many things that make up the entire island.",
+   "a baseball field",
+   "a group of people on a beach.",
+   "a horse and a horse in a field.",
+   "a boat is parked on the side of the road.",
+   "a snow covered ski slope.",
+   "a plane is parked on the runway.",
+   "a man playing a game of tennis.",
+   "a group of people standing around each other."
+  ],
   "subj01_ridgeonly_40sess_4096blurry": [
    "a surfer riding a wave.",
    "a man is holding a cell phone.",
@@ -1444,6 +1470,22 @@
     ]
    }
   },
+  "subj01_ridgeonly_20sess_prior": {
+   "refinada": {
+    "arquivo": "subj01_ridgeonly_20sess_prior__refinada.webp",
+    "sig": [
+     786433513,
+     1793629781223171503
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_ridgeonly_20sess_prior__unclip.webp",
+    "sig": [
+     786433473,
+     1793626880978038614
+    ]
+   }
+  },
   "subj01_ridgeonly_40sess_4096blurry": {
    "borrada": {
     "arquivo": "subj01_ridgeonly_40sess_4096blurry__borrada.webp",
@@ -1555,7 +1597,7 @@
   "arquivo": "vista.webp",
   "sig": [
    602113195,
-   1793191597475731325
+   1793314586349165537
   ]
  }
 }
