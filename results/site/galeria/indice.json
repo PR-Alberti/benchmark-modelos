@@ -729,6 +729,32 @@
    "a baseball player is holding a bat.",
    "a large room with a lot of furniture."
   ],
+  "subj01_ridgeonly_20sess_4096blurry": [
+   "a surfer riding a wave.",
+   "a man is holding a cell phone.",
+   "a tennis player holding a racket in his hand.",
+   "a plate of food with a bunch of food on it.",
+   "a large area with a lot of windows.",
+   "a surfer on a surfboard in the ocean.",
+   "a man sitting down in a chair.",
+   "a giraffe standing in the grass.",
+   "a tennis player is holding a racket.",
+   "a large elephant.",
+   "a clock on a building",
+   "a baseball player standing on a field.",
+   "a table with a vase and a vase on it.",
+   "a street with a lot of traffic.",
+   "a man sitting down in a chair.",
+   "a large group of people standing around a table.",
+   "a view of a small area.",
+   "a beach with a bunch of people on it",
+   "a couple of horses standing next to each other.",
+   "a large boat in a body of water.",
+   "a snow covered hill with a lot of people.",
+   "a large jetliner sitting on top of a water way.",
+   "a man standing on a tennis court.",
+   "a group of people standing around each other."
+  ],
   "subj01_ridgeonly_20sess_prior": [
    "a surfer on a surfboard in the ocean.",
    "a man is holding a cell phone.",
@@ -1470,6 +1496,29 @@
     ]
    }
   },
+  "subj01_ridgeonly_20sess_4096blurry": {
+   "borrada": {
+    "arquivo": "subj01_ridgeonly_20sess_4096blurry__borrada.webp",
+    "sig": [
+     786433528,
+     1793673260809184968
+    ]
+   },
+   "refinada": {
+    "arquivo": "subj01_ridgeonly_20sess_4096blurry__refinada.webp",
+    "sig": [
+     786433538,
+     1793676179307535013
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_ridgeonly_20sess_4096blurry__unclip.webp",
+    "sig": [
+     786433498,
+     1793673261070188978
+    ]
+   }
+  },
   "subj01_ridgeonly_20sess_prior": {
    "refinada": {
     "arquivo": "subj01_ridgeonly_20sess_prior__refinada.webp",
@@ -1597,7 +1646,7 @@
   "arquivo": "vista.webp",
   "sig": [
    602113195,
-   1793314586349165537
+   1793566107207656484
   ]
  }
 }
