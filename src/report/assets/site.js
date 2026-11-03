@@ -989,7 +989,7 @@
     var ms = selecionados(), comCurva = ms.filter(function (m) { return m.curva; });
     var series = D.curvas.filter(function (c) { return comCurva.some(function (m) { return m.curva.series[c.id]; }); });
     if (!series.length) {
-      v.appendChild(vazio('Nenhum modelo selecionado tem curva de treino.', presetBotao('sementes', 'Ver as sementes do Ridge 1024')));
+      v.appendChild(vazio('Nenhum modelo selecionado tem curva de treino.', presetBotao('sementes', 'Ver as sementes do MindEye2 sem low-level')));
       return;
     }
     if (!series.some(function (c) { return c.id === E.curva; })) E.curva = series[0].id;
@@ -1434,7 +1434,7 @@
     var am = Simulador.amostras(r, cfg);
     var t = h('table', {class: 'tab'}, h('thead', null, h('tr', null, h('th', {texto: 'Modelo'}), h('th', {texto: 'Amostras por época'}), h('th', {texto: 'Lotes por época'}))));
     var tb = h('tbody');
-    [['FRR', am.frr, null], ['MindEye2 (batch 16; 8 no 4096 + blurry)', am.mindeye2, [16, 8]], ['MindEye1 (batch 16)', am.mindeye1, [16]]].forEach(function (l) {
+    [['FRR', am.frr, null], ['MindEye2 (batch 8; 16 sem low-level)', am.mindeye2, [16, 8]], ['MindEye1 (batch 16)', am.mindeye1, [16]]].forEach(function (l) {
       var a = l[1];
       tb.appendChild(h('tr', null, h('td', {texto: l[0]}),
         h('td', {class: 'num', texto: a.erro ? a.erro : aprox + milhar(a.amostras) + (l[0] === 'FRR' ? ' linhas (sem épocas)' : '')}),

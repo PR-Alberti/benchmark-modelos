@@ -49,16 +49,16 @@ ROTULOS = {
     "subj01_frr_40sess": "FRR · 40 sessões",
     "subj01_frr_40sess_global": "FRR fração global · 40 sessões",
     "subj01_frr_40sess_ext": "FRR grade estendida · 40 sessões",
-    "subj01_ridgeonly_1sess_prior": "Ridge 1024 + prior · 1 sessão",
-    "subj01_ridgeonly_1sess": "Ridge 1024 sem prior · 1 sessão",
-    "subj01_ridgeonly_1sess_4096blurry": "Ridge 4096 + blurry · 1 sessão",
-    "subj01_ridgeonly_1sess_prior_seed42": "Ridge 1024 + prior · 1 sessão · semente 42",
-    "subj01_ridgeonly_1sess_prior_seed1": "Ridge 1024 + prior · 1 sessão · semente 1",
-    "subj01_ridgeonly_1sess_prior_seed2": "Ridge 1024 + prior · 1 sessão · semente 2",
-    "subj01_ridgeonly_1sess_noprior_seed42": "Ridge 1024 sem prior · 1 sessão · semente 42",
-    "subj01_ridgeonly_1sess_prior_rseed7": "Ridge 1024 + prior · 1 sessão · reconstrução semente 7",
-    "subj01_ridgeonly_40sess_prior": "Ridge 1024 + prior · 40 sessões",
-    "subj01_ridgeonly_40sess_4096blurry": "Ridge 4096 + blurry · 40 sessões",
+    "subj01_ridgeonly_1sess_prior": "MindEye2 sem low-level · 1 sessão",
+    "subj01_ridgeonly_1sess": "MindEye2 sem low-level nem prior · 1 sessão",
+    "subj01_ridgeonly_1sess_4096blurry": "MindEye2 · 1 sessão",
+    "subj01_ridgeonly_1sess_prior_seed42": "MindEye2 sem low-level · 1 sessão · semente 42",
+    "subj01_ridgeonly_1sess_prior_seed1": "MindEye2 sem low-level · 1 sessão · semente 1",
+    "subj01_ridgeonly_1sess_prior_seed2": "MindEye2 sem low-level · 1 sessão · semente 2",
+    "subj01_ridgeonly_1sess_noprior_seed42": "MindEye2 sem low-level nem prior · 1 sessão · semente 42",
+    "subj01_ridgeonly_1sess_prior_rseed7": "MindEye2 sem low-level · 1 sessão · reconstrução semente 7",
+    "subj01_ridgeonly_40sess_prior": "MindEye2 sem low-level · 40 sessões",
+    "subj01_ridgeonly_40sess_4096blurry": "MindEye2 · 40 sessões",
     "subj01_me1_1sess": "MindEye1 · 1 sessão",
     "subj01_me1_1sess_semlowlevel": "MindEye1 sem low-level · 1 sessão",
     "subj01_me1_40sess": "MindEye1 · 40 sessões",
@@ -95,7 +95,7 @@ CONHECIDOS = {
         "Os tensores de reconstrução divulgados pelos autores, avaliados com as mesmas métricas: "
         "conferem o pipeline de reconstrução deste repositório."]},
     "subj01_ridgeonly_1sess_prior_rseed7": {"base": "subj01_ridgeonly_1sess_prior", "notas": [
-        "O mesmo checkpoint do Ridge 1024 + prior de 1 sessão, reconstruído com a semente 7 em vez da 42: "
+        "O mesmo checkpoint do MindEye2 sem low-level de 1 sessão, reconstruído com a semente 7 em vez da 42: "
         "mede quanto as métricas de imagem mudam só por reamostrar a reconstrução."]},
     "subj01_me1_1sess_semlowlevel": {"base": "subj01_me1_1sess", "notas": [
         "O alto nível foi treinado de novo com a mesma receita do MindEye1 de 1 sessão (o retrieval saiu "
@@ -113,12 +113,12 @@ NOTAS = {
         "treinado com uma versão anterior do código; os dois diferem em até 0,7 ponto percentual nas "
         "métricas de imagem (docs/REEXECUTAR.md)."],
     "subj01_ridgeonly_1sess": [
-        "Retreino com o código atual (semente 42), o mesmo script do Ridge 1024 + prior, só sem a loss "
+        "Retreino com o código atual (semente 42), o mesmo script do MindEye2 sem low-level, só sem a loss "
         "do prior. Substitui o checkpoint do release checkpoints-v1, treinado com uma versão anterior do "
         "código e outro script; os dois diferem em até 1,24 ponto percentual nas métricas de imagem "
         "(docs/REEXECUTAR.md)."],
     "subj01_ridgeonly_1sess_prior_seed42": [
-        "Retreino do Ridge 1024 + prior com o código atual. Junto das sementes 1 e 2, mede o ruído do treino."],
+        "Retreino do MindEye2 sem low-level com o código atual. Junto das sementes 1 e 2, mede o ruído do treino."],
     "subj01_ridgeonly_1sess_noprior_seed42": [
         "O mesmo script e a mesma semente do retreino com prior, só sem a loss do prior: isola o efeito "
         "do prior no treino da ridge."],
@@ -279,8 +279,11 @@ def rotulo_automatico(cfg):
         if h.get("k", 1024) != 1024:
             nome += f" k = {h['k']}"
     elif m == "mindeye2":
-        nome = f"Ridge {h.get('hidden_dim', 1024)}" + (" + blurry" if h.get("blurry") else "")
-        nome += " sem prior" if h.get("prior") is False else (" + prior" if not h.get("blurry") else "")
+        # o MindEye2 e o 4096 com low-level; o sem low-level usa 1024, e outra dimensao aparece no nome
+        padrao = 4096 if h.get("blurry") else 1024
+        nome = "MindEye2" if h.get("hidden_dim", 1024) == padrao else f"MindEye2 {h['hidden_dim']}"
+        faltam = [x for x, sem in (("low-level", not h.get("blurry")), ("prior", h.get("prior") is False)) if sem]
+        nome += " sem " + " nem ".join(faltam) if faltam else ""
     else:
         nome = "MindEye1"
     partes = [nome]
@@ -365,7 +368,9 @@ def extrai(mid, antigo=None, d=None, benchmark=None, experimentos=None, resumos=
     rotulo_cfg = None
     if exp_json:
         cfg = {k: exp_json[k] for k in ("modelo", "hiper", "dataset") if k in exp_json}
-        fonte, rotulo_cfg = "train_logs/%s/experimento.json" % mid, exp_json.get("rotulo")
+        fonte = "train_logs/%s/experimento.json" % mid
+        # o nome atual do dicionario vale mais que o gravado quando o modelo treinou
+        rotulo_cfg = (benchmark.get(mid) or experimentos.get(mid) or {}).get("rotulo") or exp_json.get("rotulo")
         r["commit"] = exp_json.get("commit")
         r["resumo_dataset"] = exp_json.get("resumo_dataset")
     elif mid in benchmark or mid in experimentos:

@@ -1294,7 +1294,7 @@
   "Sentence_relative": 0.3927529454231262
  },
  "notas": [
-  "Retreino com o código atual (semente 42), o mesmo script do Ridge 1024 + prior, só sem a loss do prior. Substitui o checkpoint do release checkpoints-v1, treinado com uma versão anterior do código e outro script; os dois diferem em até 1,24 ponto percentual nas métricas de imagem (docs/REEXECUTAR.md)."
+  "Retreino com o código atual (semente 42), o mesmo script do MindEye2 sem low-level, só sem a loss do prior. Substitui o checkpoint do release checkpoints-v1, treinado com uma versão anterior do código e outro script; os dois diferem em até 1,24 ponto percentual nas métricas de imagem (docs/REEXECUTAR.md)."
  ],
  "params": {
   "backbone": 453360280,
@@ -1330,7 +1330,7 @@
   }
  },
  "retrieval_centrado": null,
- "rotulo": "Ridge 1024 sem prior · 1 sessão",
+ "rotulo": "MindEye2 sem low-level nem prior · 1 sessão",
  "sessoes": 1,
  "status": "completo",
  "status_txt": "métricas completas",

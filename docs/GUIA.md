@@ -224,6 +224,9 @@ benchmark).
   `<m>` quando a tabela dele existe (`report/config.py`, `fonte()`).
 - **Dois espaços CLIP.** O MindEye1 prevê ViT-L, os outros bigG: o retrieval dele não se compara direto com o
   dos outros, nem a saída dele passa pelo unCLIP.
+- **Nomes antigos do MindEye2.** O site e o BENCHMARK.md chamam de MindEye2 o que os documentos mais antigos e as
+  galerias `results/benchmark/galeria_*.jpg` chamam de Ridge 4096 + blurry; de MindEye2 sem low-level, o Ridge 1024
+  + prior; e de MindEye2 sem low-level nem prior, o Ridge 1024 sem prior. Os ids dos modelos não mudaram.
 - **"1 sessão" do MindEye2 não é pouco dado.** O backbone e o prior foram pré-treinados em ~280 h dos outros
   sujeitos; só a ridge vê a 1 sessão do sujeito 1.
 - **Semente fixa.** Todo experimento usa a semente 42 (`src/experimentos.py`): uma corrida por configuração.

@@ -278,7 +278,7 @@
     </svg>
     <div class="params fam-me2">{{barra:mindeye2}}</div>
     <figcaption>Tracejado e com cadeado: congelado. O artigo, em vez disso, retreina tudo em 8 × A100; aqui cabe numa
-      GPU de 20 GB. A variante 4096 + blurry usa uma ridge de {{mi:subj01_ridgeonly_1sess_4096blurry:ridge}} num modelo de
+      GPU de 20 GB. A variante com low-level (4096) usa uma ridge de {{mi:subj01_ridgeonly_1sess_4096blurry:ridge}} num modelo de
       {{total:subj01_ridgeonly_1sess_4096blurry}}, com o caminho da imagem borrada.</figcaption>
   </figure>
 </section></div>
@@ -578,8 +578,7 @@
     <div><h3>Pronto</h3>
       <ul class="itens">
         <li><span>Teste fixo nas 1.000 imagens compartilhadas; treino nas N primeiras sessões, sem nenhuma delas</span></li>
-        <li><span>Os três modelos com 1 e 40 sessões, e as variantes <small>com e sem prior, 4096 + blurry, grades do FRR,
-          com e sem low-level</small></span></li>
+        <li><span>Os três modelos com 1 e 40 sessões, e as variantes <small>com e sem prior, com e sem low-level, grades do FRR</small></span></li>
         <li><span>As mesmas métricas para todos, num site que se atualiza ao fim de cada treino
           <small>{{n_modelos}} modelos com resultado</small></span></li>
         <li><span>Reexecução do benchmark pelo <code>treina.py</code>, com configuração, commit e curva de cada treino

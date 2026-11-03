@@ -172,7 +172,7 @@ class ConclusaoDoFrr(unittest.TestCase):
     def test_usa_os_numeros_medidos(self):
         t = self.texto_todo(self.dados(frr1=True, frr40=True))
         self.assertIn("50,0%", t)        # FRR fwd (fake)
-        self.assertIn("92,8%", t)        # ridge 1024 + prior, 1 sessao
+        self.assertIn("92,8%", t)        # MindEye2 sem low-level, 1 sessao
         self.assertIn("99,9%", t)        # ridge, 40 sessoes
         self.assertIn("hubness", t)
         self.assertIn("0,21", t)         # cosseno centrado (fake)

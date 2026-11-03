@@ -113,7 +113,7 @@ def markdown(dados, args):
     r = dados["ruido"]
     L += ["## Ruído", "",
           "O treino é determinístico com a mesma semente, então a régua troca só a semente, na "
-          "configuração 1024 + prior.", "",
+          "configuração MindEye2 sem low-level.", "",
           "| Semente do treino | Img→cér ↑ | Cér→img ↑ |", "|---|---:|---:|"]
     for rot, f, bb in r["treino"]:
         L.append(f"| {rot} | {fmt(f, 'pct') or '—'} | {fmt(bb, 'pct') or '—'} |")

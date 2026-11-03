@@ -153,23 +153,23 @@ def coleta(args):
     antes = le_curva(paths.METRICS / "subj01_ridgeonly_1sess_4096blurry.csv")
     mesma = bool(atual and antes and all(atual[k] == antes[k] for k in ("epocas", "fwd", "bwd")))
     dados["curva_repetida"] = mesma
-    curvas = [("Ridge 4096 + blurry",
+    curvas = [("MindEye2",
                "idêntica, época por época, à corrida anterior do repositório" if mesma else "esta corrida",
                atual)]
     if antes and not mesma:
-        curvas.append(("Ridge 4096 + blurry", "corrida anterior (repositório)", antes))
-    curvas.append(("Ridge 1024 + prior · 40 sessões", "esta corrida",
+        curvas.append(("MindEye2", "corrida anterior (repositório)", antes))
+    curvas.append(("MindEye2 sem low-level · 40 sessões", "esta corrida",
                    le_curva(paths.TRAIN_LOGS / fonte("subj01_ridgeonly_40sess_prior") / "metrics.csv")))
-    curvas.append(("Ridge 4096 + blurry · 40 sessões", "esta corrida",
+    curvas.append(("MindEye2 · 40 sessões", "esta corrida",
                    le_curva(paths.TRAIN_LOGS / fonte("subj01_ridgeonly_40sess_4096blurry") / "metrics.csv")))
     for sem, sub in [(42, "retreino com o código atual"), (1, "outra semente"), (2, "outra semente")]:
-        curvas.append((f"Ridge 1024 + prior · semente {sem}", sub,
+        curvas.append((f"MindEye2 sem low-level · semente {sem}", sub,
                        le_curva(paths.TRAIN_LOGS / fonte(f"subj01_ridgeonly_1sess_prior_seed{sem}") / "metrics.csv")))
-    curvas.append(("Ridge 1024 sem prior · semente 42", "retreino com o código atual",
+    curvas.append(("MindEye2 sem low-level nem prior · semente 42", "retreino com o código atual",
                    le_curva(paths.TRAIN_LOGS / fonte("subj01_ridgeonly_1sess_noprior_seed42") / "metrics.csv")))
     dados["curvas"] = [{"titulo": t, "sub": sub, "dados": c} for t, sub, c in curvas]
 
-    # ruido de referencia: so a semente muda, na config 1024 + prior
+    # ruido de referencia: so a semente muda, na config MindEye2 sem low-level
     # os retreinos de semente 42 sao a mesma corrida das reproducoes do 1sess_prior e do 1sess; as de 1 e 2, as
     # reproducoes das sementes
     mesma42 = {"subj01_ridgeonly_1sess_prior_seed42": "repro_subj01_ridgeonly_1sess_prior",

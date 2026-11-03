@@ -125,7 +125,7 @@ PRESETS = [
     ("s40", "40 sessões", "Todos os modelos de referência treinados com as 40 sessões.",
      ["subj01_frr_40sess", "subj01_ridgeonly_40sess_prior", "subj01_ridgeonly_40sess_4096blurry", "subj01_me1_40sess",
       "final_subj01_pretrained_40sess_24bs"]),
-    ("prior", "Efeito do prior", "Ridge 1024 de 1 sessão com e sem a loss do prior, treinados com o mesmo script e a "
+    ("prior", "Efeito do prior", "MindEye2 sem low-level de 1 sessão, com e sem a loss do prior, treinados com o mesmo script e a "
      "mesma semente.",
      ["subj01_ridgeonly_1sess_prior", "subj01_ridgeonly_1sess"]),
     ("lowlevel", "MindEye1 e o low-level", "O MindEye1 com e sem a imagem borrada do low-level guiando a reconstrução.",
@@ -141,8 +141,8 @@ PRESETS = [
       "final_subj01_pretrained_40sess_24bs", "final_subj01_pretrained_40sess_24bs" + P]),
 ]
 PARES = [("FRR", "subj01_frr_1sess", "subj01_frr_40sess"),
-         ("Ridge 1024 + prior", "subj01_ridgeonly_1sess_prior", "subj01_ridgeonly_40sess_prior"),
-         ("Ridge 4096 + blurry", "subj01_ridgeonly_1sess_4096blurry", "subj01_ridgeonly_40sess_4096blurry"),
+         ("MindEye2 sem low-level", "subj01_ridgeonly_1sess_prior", "subj01_ridgeonly_40sess_prior"),
+         ("MindEye2", "subj01_ridgeonly_1sess_4096blurry", "subj01_ridgeonly_40sess_4096blurry"),
          ("MindEye1", "subj01_me1_1sess", "subj01_me1_40sess"),
          ("MindEye1 sem low-level", "subj01_me1_1sess_semlowlevel", "subj01_me1_40sess_semlowlevel"),
          ("Artigo (fine-tune completo)", "final_subj01_pretrained_1sess_24bs", "final_subj01_pretrained_40sess_24bs")]
@@ -214,11 +214,11 @@ HIPER_DESC = {
     "mindeye2": {
         "hidden_dim": "1024 (parte de multisubject_subj01_1024hid_nolow_300ep) ou 4096 (parte de final_multisubject_subj01)",
         "num_epochs": "épocas; pelo menos 2 (o OneCycleLR usa pct_start = 2/num_epochs)",
-        "batch_size": "None: 16 no 1024 e 8 no 4096 + blurry, o que cabe em 20 GB",
+        "batch_size": "None: 16 sem low-level e 8 com low-level, o que cabe em 20 GB",
         "max_lr": "taxa de aprendizado máxima do OneCycleLR",
         "prior": "treina com a loss do diffusion prior, que supervisiona a saída inteira do backbone (256 × 1.664)",
         "blurry": "liga o ramo da imagem borrada; exige hidden_dim 4096",
-        "frozen_fp16": "guarda os módulos congelados em fp16 (~1,4 GB a menos); None: ligado no 4096 + blurry, "
+        "frozen_fp16": "guarda os módulos congelados em fp16 (~1,4 GB a menos); None: ligado com low-level, "
                        "desligado no 1024",
         "seed": "semente",
         "ckpt_interval": "grava o last.pth a cada N épocas, para retomar; None: só na primeira época e no fim",
