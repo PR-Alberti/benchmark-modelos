@@ -787,7 +787,7 @@
     return m.tempos.total_s;
   }
   function tempoEstimado(m, c) {
-    if (c === 'total') return m.tempos.total_s != null && m.tempos.reconstrucao != null;
+    if (c === 'total') return m.tempos.total_s != null && (tempoEstimado(m, 'reconstrucao') || tempoEstimado(m, 'refino'));
     return !!m.tempos[c] && m.tempos[c].origem === 'estimado';
   }
   function tempoTxt(m, c) { return (tempoEstimado(m, c) ? '≈ ' : '') + duracao(tempoDe(m, c)); }
@@ -850,8 +850,8 @@
     tab.appendChild(tbody);
     v.appendChild(h('div', {class: 'tm-caixa'}, tab));
     var notas = ['<b>Treino</b>: o tempo gravado quando o modelo treinou, sem refazer nada. No MindEye2 inclui o teste de cada época; no FRR, a previsão do teste; no MindEye1, o alto nível e o low-level. Não conta pré-treino: o MindEye2 parte de ~280 h dos autores nos outros sujeitos.'];
-    if (meta) notas.push('<b>≈ Reconstrução e refino</b>: testes de ' + meta.imagens_teste + ' imagens em ' + meta.data.split('-').reverse().join('/') + ', em regra de 3 para as ' + milhar(meta.imagens_total) + ' do teste, com a carga dos modelos contada uma vez. O custo depende do tipo de modelo, então há uma medida por tipo, não por modelo.');
-    if (meta) notas.push('<b>Avaliação</b>: retrieval e tabelas de métricas (unCLIP e refinada) rodados inteiros, porque o retrieval sorteia 300 imagens e não dá para reduzir; também uma medida por tipo de modelo.');
+    if (meta) notas.push('<b>≈ Reconstrução e refino</b>: testes de ' + meta.imagens_teste + ' imagens em ' + meta.data.split('-').reverse().join('/') + ', em regra de 3 para as ' + milhar(meta.imagens_total) + ' do teste, com a carga dos modelos contada uma vez. O custo depende do tipo de modelo, então há uma medida por tipo, não por modelo. Os modelos rodados depois de 04/11/2026 gravam o tempo de cada etapa: neles vale o da própria corrida, sem ≈.');
+    if (meta) notas.push('<b>Avaliação</b>: retrieval e tabelas de métricas (unCLIP e refinada) rodados inteiros, porque o retrieval sorteia 300 imagens e não dá para reduzir; também uma medida por tipo de modelo, a menos que o modelo tenha gravado a sua.');
     if (ms.some(function (m) { return m.familia === 'frr'; })) notas.push('O FRR só precisa de ajuste e retrieval: reconstrução e refino são opcionais nele.');
     if (ms.some(function (m) { return !m.tempos.treino && !m.publicada; })) notas.push('Sem treino (—): os modelos do artigo foram treinados pelos autores, em 8 × A100.');
     var pre = ms.filter(function (m) { return m.tempos.pretreino_s; })[0];

@@ -24,6 +24,7 @@ from pathlib import Path
 
 from mindeye_ridge import paths
 
+from . import tempos
 from .config import CHAVES_LEGENDA, MODELOS as MODELOS_BENCHMARK, fonte as fonte_de
 
 PUBLICADA = "__publicada"      # sufixo das reconstrucoes divulgadas pelos autores do artigo
@@ -469,6 +470,10 @@ def extrai(mid, antigo=None, d=None, benchmark=None, experimentos=None, resumos=
         r["frr"] = {k: frr.get(k) for k in ("config", "parametros_lineares", "custo", "cv", "hubness", "embedding")}
 
     # custo e tamanho
+    proprios = None if publicada else tempos.le_registro(d["train_logs"] / mid / "tempos.jsonl", familia)
+    if proprios:
+        fontes.append(f"train_logs/{mid}/tempos.jsonl")
+    r["tempos_medidos"] = proprios
     tempo = None
     if frr:
         tempo = frr["custo"].get("segundos_ajuste")
@@ -486,6 +491,10 @@ def extrai(mid, antigo=None, d=None, benchmark=None, experimentos=None, resumos=
         else:
             etapas = [base] if exp_json else [base, f"subj01_me1_lowlevel_{sessoes}sess"]
             tempo = (_tempo_me1([base, baixo], log) if exp_json else None) or _tempo_me1(etapas, log)
+        if tempo is None and curva and curva["segundos"] is not None:     # treinado fora do run_me1_benchmark.sh
+            # o low-level que comecou e nao se sabe quanto levou deixa o treino sem numero: so o alto nivel enganaria
+            lowlevel = (proprios or {}).get("treino_lowlevel", 0)
+            tempo = None if lowlevel is None else curva["segundos"] + lowlevel
     r["tempo_s"] = tempo
     if not publicada and familia != "frr":
         pasta = d["me1"] if familia == "mindeye1" else d["train_logs"]
@@ -571,6 +580,8 @@ def mescla(antigo, novo):
                       for t in set(v) | set(antigo.get(k) or {})}
         elif k == "fontes":
             out[k] = sorted(set(antigo.get(k) or []) | set(v))
+        elif k == "tempos_medidos":       # numa maquina sem o tempos.jsonl de uma etapa, fica o que ja estava
+            out[k] = {**(antigo.get(k) or {}), **{e: s for e, s in v.items() if s is not None}}
         else:
             out[k] = v
     return out

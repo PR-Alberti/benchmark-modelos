@@ -162,7 +162,9 @@ def main():
     torch.cuda.empty_cache()
 
     # ------------------------------------------------------------ avaliacao (a do run_frr.py)
+    t3 = time.time()
     aval = run_frr.avalia(args.model_name, prev, all_images, alvos.media_ponderada(groups), args.seed, device, saida)
+    seg_retrieval = time.time() - t3
     relatorio = {
         "modelo": args.model_name,
         "config": {"modelo": "frr_ms", "variante": "posto reduzido (so o proprio sujeito)" if proprio else "multi-sujeito",
@@ -178,7 +180,7 @@ def main():
         # a leitura (k_ef x D) e compartilhada; do subj01 so sai a ridge (voxels x k_ef)
         "parametros_lineares": n_voxels * k_ef + k_ef * D_ALVO,
         "parametros_ajustados_sujeito": n_voxels * k_ef,
-        "custo": {"segundos_ajuste": seg_ajuste, "segundos_pretreino": modelo.segundos,
+        "custo": {"segundos_ajuste": seg_ajuste, "segundos_retrieval": seg_retrieval, "segundos_pretreino": modelo.segundos,
                   "segundos_embedding_alvos": seg_embedding, "embeddings_calculados_nesta_corrida": int(n_novos),
                   "pico_gpu_gib": pico_gpu, "gpu": torch.cuda.get_device_name(0) if device == "cuda" else "cpu",
                   "pico_ram_gib": pico_ram, "segundos_total": time.time() - t_inicio},

@@ -120,6 +120,11 @@ O que importa para mexer:
 - `results/evals/` e `train_logs/` são grandes e ficam **fora do git**; `results/tables/` (as métricas) e o
   site ficam **no git**.
 - Cada etapa é retomável: rodar o mesmo comando de novo pula o que já terminou.
+- **O tempo de cada etapa é gravado ao rodar** e vai para a aba Tempos do site sozinho. O treino fica no
+  `metrics.csv` (MindEye) ou no `<m>_frr.json` (FRR); o resto, em `train_logs/<m>/tempos.jsonl`, pela função
+  `cronometra` de `scripts/common.sh`. O site copia esses tempos para `results/site/modelos/<m>.json`, que está no
+  git. O que o modelo não gravou (os mais antigos, ou uma etapa que morreu sem aviso e foi retomada) continua
+  vindo da estimativa por tipo de modelo, com ≈ (`results/tables/tempos_etapas.json`, `scripts/mede_tempos.sh`).
 
 ## 5. Onde fica cada coisa
 
@@ -209,7 +214,8 @@ benchmark).
 
 **Acrescentar um modelo novo** (o caminho mais curto é imitar o FRR):
 1. a etapa em `src/etapas/<modelo>.py`, gravando `results/evals/<m>/<m>_all_clipvoxels.pt` (n, 256, 1664) e o retrieval;
-2. o script `scripts/run_<modelo>.sh`, que faz `source common.sh` e chama a etapa;
+2. o script `scripts/run_<modelo>.sh`, que faz `source common.sh` e chama a etapa (`cronometra <m> <etapa> <comando>`
+   grava o tempo; no treino, basta o `time/epoch_s` do `metrics.csv` ou o `custo.segundos_ajuste` do `<m>_frr.json`);
 3. a entrada em `MODELOS` (`src/treina.py`): o script, as variáveis de ambiente que ele lê e os hiperparâmetros
    padrão (`tests/test_treina.py` confere que as duas listas batem);
 4. com `reconstrucao="run_recon_embeddings.sh"` nessa entrada, como no FRR, `--reconstrucao unclip|refino`

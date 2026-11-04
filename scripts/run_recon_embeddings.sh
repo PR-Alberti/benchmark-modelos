@@ -30,7 +30,7 @@ if [ -f "${OUT}_all_recons.pt" ] && [ ! -f "${OUT}_recon_partial.pt" ]; then
     echo "=== recon_embeddings: $MODEL_NAME ja feito, pulando ==="
 else
     echo "=== recon_embeddings: $MODEL_NAME ==="
-    $ENVP/bin/python etapas/recon_embeddings.py --model_name="$MODEL_NAME" --cache_dir="$DATA" --seed="${SEED:-42}" \
+    cronometra "$MODEL_NAME" reconstrucao $ENVP/bin/python etapas/recon_embeddings.py --model_name="$MODEL_NAME" --cache_dir="$DATA" --seed="${SEED:-42}" \
         2>&1 | tee -a "$LOGDIR/recon.log"
 fi
 "$SCRIPTS/run_evals.sh" "$MODEL_NAME" base
@@ -40,7 +40,7 @@ if [ -f "${OUT}_all_enhancedrecons.pt" ]; then
     echo "=== enhanced_recon_inference: $MODEL_NAME ja feito, pulando ==="
 else
     echo "=== enhanced_recon_inference: $MODEL_NAME ==="
-    $ENVP/bin/python etapas/enhanced_recon_inference.py --model_name="$MODEL_NAME" \
+    cronometra "$MODEL_NAME" refino $ENVP/bin/python etapas/enhanced_recon_inference.py --model_name="$MODEL_NAME" \
         --data_path=$DATA --cache_dir=$DATA --subj=1 --seed="${SEED:-42}" \
         2>&1 | tee -a "$LOGDIR/enhanced.log"
 fi

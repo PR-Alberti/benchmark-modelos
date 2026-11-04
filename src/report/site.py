@@ -423,7 +423,7 @@ def dados_pagina(modelos, planejados, galeria, semantica):
         ms.append({**{k: m.get(k) for k in (
             "id", "rotulo", "familia", "grupo", "sessoes", "status", "status_txt", "espaco_clip", "publicada", "config",
             "config_fonte", "config_erro", "config_descritiva", "resumo_dataset", "retrieval_centrado", "tempo_s",
-            "params", "receita", "notas", "fontes", "commit", "frr")},
+            "params", "receita", "notas", "fontes", "commit", "frr", "tempos_medidos")},
             "valores": valores or None, "retrieval": ret, "curva": curva,
             "config": m.get("config") if m.get("config_descritiva") else _ordena_config(m.get("config"))})
     medidas = tempos.carrega()
