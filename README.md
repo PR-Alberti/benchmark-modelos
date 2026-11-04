@@ -1,232 +1,57 @@
-# benchmark-modelos
+# Efeito do tempo na sessão sobre o decoding (branch `tiredness-assessment`)
 
-Decodificação da imagem vista a partir do fMRI (NSD, sujeito 1): MindEye2, FRR e MindEye1, com o
-mesmo treino, o mesmo teste (1.000 imagens compartilhadas) e as mesmas métricas.
+> **Esta branch é à parte e NÃO deve ser mesclada na `main`.** Ela guarda só o experimento do tempo na sessão.
+> O README geral do projeto está na `main` (`git show main:README.md`).
 
-| Modelo | Código | Saída |
-|---|---|---|
-| **MindEye2** ridge-only ([Scotti et al., 2024](https://arxiv.org/abs/2403.11207)) | `src/etapas/train_ridgeonly.py` | embedding CLIP ViT-bigG + imagem (SDXL unCLIP) |
-| **FRR**, ridge fracionária ([Rokem & Kay, 2020](https://doi.org/10.1093/gigascience/giaa133)) | `src/etapas/run_frr.py` | embedding CLIP ViT-bigG |
-| **FRR multi-sujeito**: espaço compartilhado linear, pré-treino nos sujeitos 2–8 ([docs/FRR_MULTISUJEITO.md](docs/FRR_MULTISUJEITO.md)) | `src/etapas/run_frr_ms.py` | embedding CLIP ViT-bigG |
-| **MindEye1** ([Scotti et al., 2023](https://arxiv.org/abs/2305.18274)) | `mindeye1/src/Train_MindEye.py` | embedding CLIP ViT-L/14 + imagem (Versatile Diffusion) |
+**Pergunta:** o decoding de fMRI piora do início para o fim de uma sessão de scanner (motivação: cansaço)?
 
-Novo no código? Comece pelo [docs/GUIA.md](docs/GUIA.md): o problema em uma página, o glossário, o
-pipeline de ponta a ponta e onde fica cada coisa. O índice da documentação está em [docs/README.md](docs/README.md).
+## Protocolo
 
-Site com início, uso e resultados interativos de todos os modelos: [`results/site/index.html`](results/site/index.html);
-apresentação do trabalho em slides: [`results/site/apresentacao.html`](results/site/apresentacao.html) (os dois abrem
-direto do disco e são regenerados ao fim de cada treino e avaliação).
-
-## Instalação
-
-```bash
-git clone https://github.com/PR-Alberti/benchmark-modelos.git && cd benchmark-modelos
-setup/bootstrap.sh --check        # diagnóstico, não baixa nada
-setup/bootstrap.sh                # tudo
-setup/bootstrap.sh --minimo       # só ridge-only e FRR de 1 sessão
-setup/bootstrap.sh --ckpts        # + checkpoints ridge-only do release (repositório privado)
-~/envs/fmri/bin/python -m unittest discover -s tests
-```
-
-O setup instala o código de `src/` no ambiente em modo editável (`pip install -e .`, configurado no
-[`pyproject.toml`](pyproject.toml)): `import mindeye_ridge`, `import treina` e `import report` funcionam
-de qualquer pasta, e uma mudança no código vale na hora. Num ambiente criado antes disso, rode
-`setup/bootstrap.sh` de novo, ou só `~/envs/fmri/bin/pip install --no-deps --no-build-isolation -e .`.
-
-| Preparação | Download | Disco |
-|---|---|---|
-| `--minimo` | ~35 GB | 40 GB |
-| FRR + MindEye2 nas 40 sessões (`setup_env.sh --with-extras` + `download_data.py --stage finetune --subj 1`) | ~43 GB | 60 GB |
-| completo | ~130 GB | 200 GB |
-
-| Requisito | |
+| Item | Escolha |
 |---|---|
-| GPU | NVIDIA, 20 GB (16 GB para FRR e MindEye2) |
-| RAM | 30 GB |
-| Python | conda ou python3.11 (3.12+ não serve) |
-| Dados | [termos do NSD](https://cvnlab.slite.page/p/IB6BSeW_7o/Terms-and-Conditions) + [formulário](https://forms.gle/xue2bCdM9LaFNMeb7) |
+| Modelo | MindEye2 ridge-only 1024 + prior, `subj01_ridgeonly_10sess_prior` (40 épocas), treinado nas 10 primeiras sessões do subj01 |
+| Teste | sessões 11–40, trial a trial, sem média das 3 repetições |
+| Exclusão | trials de imagens vistas no treino: 22.500 trials, 5.416 excluídos, **17.084 avaliados** (5.851 imagens) |
+| Métricas | retrieval cérebro → imagem (top-1 entre 300), a principal; cosseno com a imagem certa |
+| Contraste | runs 1–3 (início) menos runs 10–12 (fim), dentro de cada sessão; média das 30 sessões |
+| IC 95% | bootstrap de percentis (10.000 reamostras, semente 42) sorteando as **sessões** com reposição |
+| Confusão tratada | cada métrica sai com todos os trials e só com os **inéditos** (imagens ainda não vistas na sessão) |
 
-| Variável | Padrão |
+## Resultados
+
+Diferença = início − fim; positiva significa pior no fim. A variância e o EP são da diferença entre as 30 sessões.
+
+| Métrica | Trials | Início | Fim | Diferença (IC 95%) | Variância | EP | Sessões com dif > 0 |
+|---|---|---|---|---|---|---|---|
+| Retrieval | todos | 92,3% | 90,8% | **+1,5 pt (0,5 a 2,6)** | 8,5·10⁻⁴ | 0,53 pt | 22/30 |
+| Retrieval | inéditos | 92,9% | 91,4% | **+1,5 pt (0,2 a 2,7)** | 1,2·10⁻³ | 0,64 pt | 20/30 |
+| Cosseno | todos | 0,0879 | 0,0868 | +0,0011 (0,0001 a 0,0021) | 8·10⁻⁶ | 0,0005 | 20/30 |
+| Cosseno | inéditos | 0,0884 | 0,0876 | +0,0008 (−0,0004 a 0,0020) | 1,2·10⁻⁵ | 0,0006 | 16/30 |
+
+Retrieval por run (média das 30 sessões): 93,3 · 92,0 · 91,6 · 90,1 · 91,3 · 91,5 · 90,9 · 89,5 · 91,0 · 90,7 · 90,1 · 91,6 (%).
+
+## Leitura
+
+- O retrieval cai cerca de 1,5 ponto do início para o fim, com IC que exclui zero, com todos os trials e só com os
+  inéditos. A repetição de imagens não parece explicá-la.
+- Não há queda contínua: a diferença vem em boa parte do run 1 ser o melhor, e o run 12 volta a 91,6%.
+- O efeito é pequeno: abaixo da diferença mínima detectável do protocolo (~3 pontos) e metade do DP entre sessões
+  (2,9 pontos). Só a média de 30 sessões o torna detectável.
+- O cosseno aponta a mesma direção, mas é apoio fraco: com inéditos o IC inclui zero, e sem correção para os 4
+  contrastes o intervalo de "todos" não resistiria.
+
+## Limites
+
+- Mede o efeito do tempo na sessão, não o cansaço em si (adaptação ao scanner, movimento da cabeça e sonolência
+  também diferem entre início e fim).
+- Só o subj01 e uma semente de treino. O IC cobre só a variação entre sessões.
+- Os valores absolutos não são comparáveis com o benchmark; só a diferença início − fim importa.
+
+## Onde está tudo
+
+| | |
 |---|---|
-| `MINDEYE_ENV` | `~/envs/fmri` |
-| `MINDEYE_DATA` | `~/mindeyev2` |
-| `ME1_DATA` | `~/mindeye1` |
-
-Máquina só com terminal, passo a passo: [docs/NOVO_COMPUTADOR.md](docs/NOVO_COMPUTADOR.md).
-
-## Uso
-
-### Treino por dicionário
-
-```bash
-cd src
-python treina.py --lista                  # experimentos de src/experimentos.py
-python treina.py <nome> --so_dataset      # monta e resume o dataset
-python treina.py <nome> --dry_run         # mostra o comando
-python treina.py <nome> [<nome> ...]      # treina
-python treina.py <nome> --retoma          # MindEye2: continua do last.pth
-python treina.py <nome> --reconstrucao unclip|refino   # FRR: depois do treino, reconstrói (padrão: none)
-```
-
-No FRR, `--reconstrucao` passa o embedding previsto pelo próprio modelo direto para o unCLIP
-(`unclip`) e, com `refino`, também pelo refinamento SDXL guiado pela legenda que o GIT tira do mesmo
-embedding; as métricas saem das duas. Nada vem do MindEye2 treinado: unCLIP, conversor bigG→ViT-L,
-GIT e SDXL foram treinados só com imagens e texto. Com o treino já concluído, só a reconstrução roda.
-
-```python
-import treina                               # de dentro de src/
-treina.roda("meu_modelo", {
-    "modelo": "frr",                        # frr | mindeye2 | mindeye1
-    "hiper": {"seed": 42},
-    "dataset": {"sessoes": 40, "classes": {"animal": ["sup_animal"]}, "minimo": 10},
-    "rotulo": "FRR · só animais",           # opcional: o nome no site
-}, dry_run=True)
-```
-
-Notebook: [notebooks/treino.ipynb](notebooks/treino.ipynb) (kernel `~/envs/fmri/bin/python`).
-
-### Scripts
-
-```bash
-# MindEye2 ridge-only
-scripts/run_ridgeonly_prior.sh                                        # 1 sessão
-MODEL_NAME=subj01_ridgeonly_40sess_prior NUM_SESSIONS=40 NUM_EPOCHS=20 FROZEN=1 scripts/run_ridgeonly_prior.sh
-scripts/run_recon.sh <nome> 1024 noblurry                             # reconstrução + refinamento
-scripts/run_evals.sh <nome> enhanced                                  # métricas
-
-# FRR
-scripts/run_frr.sh                                                    # 1 sessão
-NUM_SESSIONS=40 scripts/run_frr.sh                                    # 40 sessões
-NUM_SESSIONS=1 MODEL_NAME=<nome> scripts/run_frr_ms.sh                # FRR multi-sujeito (sujeitos 2-8: bootstrap.sh --multisujeito)
-scripts/run_recon_embeddings.sh <nome> unclip|refino                  # reconstrução a partir do embedding + métricas
-
-# MindEye1
-scripts/run_me1_benchmark.sh                                          # 1 e 40 sessões, treino → métricas
-SESSOES=1 scripts/run_me1_benchmark.sh                                # só 1 sessão
-LOWLEVEL=0 scripts/run_me1_benchmark.sh                               # sem low-level
-NUM_SESSIONS=1 scripts/me1_run.sh train|lowlevel|recon|metrics        # uma etapa
-
-# Dataset controlado direto nos scripts
-MODEL_NAME=<nome> DATASET=train_logs/<nome>/dataset.json NUM_SESSIONS=40 scripts/run_frr.sh
-
-# Benchmark
-scripts/run_benchmark.sh                                              # MindEye2 + FRR, tudo
-python src/make_benchmark.py                                          # remonta BENCHMARK.md e a página
-python src/make_site.py                                               # regenera o site e a apresentação (results/site)
-python src/make_site.py --exemplos                                    # refaz os exemplos semânticos da apresentação
-```
-
-### Resultado de um modelo
-
-```bash
-python -c "from mindeye_ridge import resultados; print(resultados.retrieval('<nome>'))"
-```
-
-| Onde | O quê |
-|---|---|
-| `train_logs/<nome>/` | checkpoint, logs, `dataset.json`, `experimento.json` (MindEye1: `mindeye1/train_logs/<nome>/`) |
-| `results/tables/` | métricas finais |
-| `results/evals/<nome>/` | tensores de embedding e reconstrução |
-| `results/site/index.html` | o site: todos os modelos, com tabelas, gráficos, curvas, galeria e fichas |
-| `results/site/apresentacao.html` | a apresentação: a pergunta, os modelos ilustrados, os resultados e o controle semântico, com exemplos de imagens por classe e % da tela (`results/site/exemplos/`) |
-| `results/site/modelos/<nome>.json` | o registro do modelo no site (o que foi extraído de cada resultado) |
-| [BENCHMARK.md](BENCHMARK.md), `results/benchmark/index.html` | tabelas e página do benchmark |
-
-## Combinações possíveis
-
-### Dataset (`"dataset"`)
-
-| Campo | Valores | Padrão |
-|---|---|---|
-| `sessoes` | 1 a 40 | 40 |
-| `n_imagens` | inteiro (por classe com `balanceado`) | todas |
-| `repeticoes` | 1, 2, 3 | todas as do pool |
-| `classes` | `{nome: [colunas sup_*/cat_*]}` (exclusiva) ou lista de `pessoa`, `animal`, `outro` (prioridade) | nenhuma |
-| `regra` | `exclusiva`, `prioridade` | `exclusiva` |
-| `minimo` | % da tela da classe | 10 |
-| `maximo_outros` | % da tela das outras classes listadas | 2 |
-| `balanceado` | `True`, `False` | `False` |
-| `semente` | inteiro | 0 |
-| `agregacao` | `exibicoes`, `media`, `sorteio`, `combinacao` | `None` (nativo do modelo) |
-
-`{}` = dataset completo (40 sessões), igual ao benchmark.
-
-### Agregação × modelo
-
-| `agregacao` | FRR | MindEye2 | MindEye1 |
-|---|---|---|---|
-| `None` | = `exibicoes` | = `exibicoes` | rodízio das repetições |
-| `exibicoes` | ✓ | ✓ | ✓ |
-| `media` | ✓ | ✓ | ✓ |
-| `sorteio` | — | ✓ | ✓ |
-| `combinacao` | — | ✓ | ✓ |
-
-### Hiperparâmetros (`"hiper"`)
-
-| Modelo | Chave e padrão |
-|---|---|
-| `frr` | `folds=5`, `grid="doerig"` (ou `"extended"`), `fracs=None`, `global_fraction=False`, `seed=42`, `chunk=8192` |
-| `mindeye2` | `hidden_dim=1024` (ou 4096), `num_epochs=150`, `batch_size=None`, `max_lr=3e-4`, `prior=True`, `blurry=False`, `frozen_fp16=None`, `seed=42`, `ckpt_interval=None` |
-| `mindeye1` | `num_epochs=240`, `max_lr=3e-4`, `seed=42`, `mixup_pct=0.33`, `batch_size=None` (16), `paper=False`, `save_every=1` |
-
-| Restrição | |
-|---|---|
-| `mindeye2`, `mindeye1` | `num_epochs >= 2` |
-| `mindeye2` | `blurry=True` só com `hidden_dim=4096` |
-| `mindeye1` | imagens únicas >= `batch_size` |
-| `frr` | `agregacao` só `exibicoes` ou `media` |
-| todos | sujeito 1; nome já treinado é recusado |
-
-## Combinações testadas
-
-Treinadas e avaliadas (retrieval top-1 imagem → cérebro / cérebro → imagem, em %). Todas com o
-dataset completo das N primeiras sessões; os dicionários estão em `BENCHMARK` (`src/experimentos.py`).
-
-| Modelo | Nome | Sessões | Hiperparâmetros | fwd | bwd |
-|---|---|---|---|---|---|
-| FRR | `subj01_frr_1sess` | 1 | padrão | 55,0 | 3,1 |
-| FRR | `subj01_frr_1sess_global` | 1 | `global_fraction` | 33,2 | 1,3 |
-| FRR | `subj01_frr_1sess_ext` | 1 | `grid="extended"` | 55,7 | 2,0 |
-| FRR | `subj01_frr_40sess` | 40 | padrão | 96,4 | 37,7 |
-| FRR | `subj01_frr_40sess_global` | 40 | `global_fraction` | 96,3 | 37,7 |
-| FRR | `subj01_frr_40sess_ext` | 40 | `grid="extended"` | 92,4 | 21,3 |
-| MindEye2 | `subj01_ridgeonly_1sess_prior` | 1 | padrão | 92,8 | 88,1 |
-| MindEye2 | `subj01_ridgeonly_1sess` | 1 | `prior=False` | 78,5 | 72,1 |
-| MindEye2 | `subj01_ridgeonly_1sess_4096blurry` | 1 | `hidden_dim=4096`, `blurry` | 95,5 | 92,0 |
-| MindEye2 | `subj01_ridgeonly_1sess_prior_seed42` | 1 | `seed=42` | 92,9 | 88,1 |
-| MindEye2 | `subj01_ridgeonly_1sess_prior_seed1` | 1 | `seed=1` | 93,1 | 87,8 |
-| MindEye2 | `subj01_ridgeonly_1sess_prior_seed2` | 1 | `seed=2` | 93,2 | 88,1 |
-| MindEye2 | `subj01_ridgeonly_1sess_noprior_seed42` | 1 | `prior=False`, `seed=42` | 78,4 | 72,6 |
-| MindEye2 | `subj01_ridgeonly_40sess_prior` | 40 | `num_epochs=20`, `frozen_fp16` | 99,9 | 99,5 |
-| MindEye2 | `subj01_ridgeonly_40sess_4096blurry` | 40 | `hidden_dim=4096`, `blurry`, `num_epochs=20` | 100,0 | 99,4 |
-| MindEye1 | `subj01_me1_1sess` | 1 | padrão + low-level | 30,6 | 23,2 |
-| MindEye1 | `subj01_me1_1sess_semlowlevel` | 1 | padrão, sem low-level | 30,6 | 23,2 |
-| MindEye1 | `subj01_me1_40sess` | 40 | padrão + low-level | 94,5 | 87,6 |
-| MindEye1 | `subj01_me1_40sess_semlowlevel` | 40 | padrão, sem low-level | 94,5 | 87,6 |
-| MindEye2 (artigo) | `final_subj01_pretrained_1sess_24bs` | 1 | fine-tune completo, baixado | 93,9 | 77,6 |
-| MindEye2 (artigo) | `final_subj01_pretrained_40sess_24bs` | 40 | fine-tune completo, baixado | 100 | 99,9 |
-
-Definidas e ainda não rodadas (`EXPERIMENTOS`): 5 classes semânticas, pessoa + animal, 1.000 imagens × 3
-repetições nos quatro modos de agregação, e 3.000 × 1, 1.500 × 2, 1.000 × 3 imagens × repetições.
-
-## Estrutura
-
-| Pasta | |
-|---|---|
-| `setup/` | preparar a máquina (`bootstrap.sh` faz tudo) |
-| `scripts/` | os comandos de cada etapa, em bash ([scripts/README.md](scripts/README.md)) |
-| `src/` | `treina.py` e `experimentos.py` (o ponto de entrada), `make_site.py` e `make_benchmark.py` ([src/README.md](src/README.md)) |
-| `src/etapas/` | as etapas do pipeline: treino, reconstrução, refino, métricas |
-| `src/mindeye_ridge/` | biblioteca: dados, FRR, métricas, semântica, dataset controlado, agregação, resultados |
-| `src/report/` | o código do site e do `BENCHMARK.md` |
-| `vendor/` | código de terceiros (os geradores de imagem), como veio ([vendor/README.md](vendor/README.md)) |
-| `mindeye1/` | MindEye1 adaptado ([mindeye1/README.md](mindeye1/README.md)) |
-| `notebooks/` | `treino.ipynb`, `classificacao_semantica.ipynb`, originais do MindEye2 |
-| `results/` | tabelas, site e página (no git); tensores e logs (fora) |
-| `train_logs/` | checkpoints (fora do git) |
-| `tests/` | testes, sem GPU |
-| `docs/` | documentação, com índice em [docs/README.md](docs/README.md) |
-
-## Licença
-
-MIT. O código de terceiros em `vendor/` (`generative_models/`, `autoencoder/`) mantém as licenças próprias.
+| Protocolo detalhado, confusões e como ler | [docs/TIREDNESS.md](docs/TIREDNESS.md) |
+| Resultados | `results/tables/tiredness/` (`_por_run.csv`, `_por_trial.csv`, `_contraste.json`) |
+| Código | `scripts/run_tiredness.sh`, `src/etapas/tiredness_por_run.py`, `src/mindeye_ridge/tiredness.py` |
+| Testes | `PYTHONPATH=src ~/envs/fmri/bin/python -m unittest discover -s tests -p "test_tiredness.py"` |

@@ -15,3 +15,8 @@
 
 Comece por [docs/README.md](docs/README.md) e [docs/GUIA.md](docs/GUIA.md). Testes:
 `~/envs/fmri/bin/python -m unittest discover -s tests`.
+
+## Branch `tiredness-assessment`
+
+Esta branch é à parte e **nunca** deve ser mesclada na `main` (nem por PR, nem por merge/cherry-pick). Os commits
+dela ficam nela mesma, não na `main`. O README.md daqui é o sumário do experimento; o do projeto está na `main`.

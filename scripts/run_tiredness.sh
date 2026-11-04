@@ -4,7 +4,7 @@
 # leitura dos resultados estao em docs/TIREDNESS.md; os resultados, em results/tables/tiredness/.
 #
 #   scripts/run_tiredness.sh                                  treina (~4 h numa A4500) e avalia
-#   scripts/run_tiredness.sh subj01_ridgeonly_20sess_prior    outro modelo de src/experimentos.py
+#   scripts/run_tiredness.sh <modelo>                         outro modelo de src/experimentos.py
 #
 # Pode ser interrompido e rodado de novo: o treino retoma do last.pth, e um modelo ja treinado so e avaliado.
 set -o pipefail

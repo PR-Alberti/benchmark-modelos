@@ -4,8 +4,7 @@
 cansaço do participante.
 
 **Situação:** código pronto na branch `tiredness-assessment`. O protocolo abaixo, com 10 sessões de treino,
-**ainda não rodou**. Só houve uma validação do fluxo com o modelo de 20 sessões
-([seção 7](#7-validação-do-fluxo)).
+está rodando.
 
 Código: `scripts/run_tiredness.sh` (ponto de entrada), `src/etapas/tiredness_por_run.py` (roda o modelo) e
 `src/mindeye_ridge/tiredness.py` (seleção dos trials, métricas e agregação, com testes em
@@ -135,7 +134,7 @@ são outras. Só a diferença entre início e fim importa.
 ```bash
 cd "benchmark-modelos (tiredness)"
 scripts/run_tiredness.sh                                 # treina (~4 h, estimativa) e avalia
-scripts/run_tiredness.sh subj01_ridgeonly_20sess_prior   # outro modelo de src/experimentos.py
+scripts/run_tiredness.sh <modelo>                        # outro modelo de src/experimentos.py
 ```
 
 O script pode ser interrompido e rodado de novo: o treino retoma do `last.pth`, e um modelo já treinado só é
@@ -160,28 +159,7 @@ significa pior no fim. A comparação principal é a dos trials inéditos, porqu
 do repositório. Os scripts já resolvem isso, mas os testes precisam de
 `PYTHONPATH="$PWD/src" ~/envs/fmri/bin/python -m unittest discover -s tests`.
 
-## 7. Validação do fluxo
-
-Em 02/11/2026, o fluxo rodou com o `subj01_ridgeonly_20sess_prior`, testando nas sessões 21–40. Foi só uma
-validação, não o protocolo, e os arquivos não foram versionados.
-
-| Controle | Resultado |
-|---|---|
-| Média das 3 repetições contra o `_all_clipvoxels.pt` salvo | cosseno 1,000 |
-| Retrieval dessa média contra o `_retrieval.json` salvo | 98,93% contra 98,94% |
-| Imagens embaralhadas | 0,41% (acaso: 0,33%) |
-| Contagens | 240 linhas (20 sessões × 12 runs); 15.000 trials = 6.615 excluídos + 8.385 avaliados |
-
-| Retrieval no modelo de 20 sessões | Início | Fim | Diferença (IC 95%) |
-|---|---|---|---|
-| Todos os trials | 93,4% | 92,2% | +1,2 pontos (−0,2 a +2,5) |
-| Só imagens inéditas na sessão | 94,1% | 93,5% | +0,6 pontos (−0,9 a +2,2) |
-
-Não há diferença clara, mas com acerto acima de 90% sobra pouca margem para ver uma queda. O modelo de 10 sessões
-deve acertar menos, o que ajuda. O cosseno de ~0,09 é baixo, mas é sinal: com as imagens embaralhadas ele cai
-para ~0,002.
-
-## 8. O que o resultado pode e não pode dizer
+## 7. O que o resultado pode e não pode dizer
 
 - **Mede o efeito do tempo na sessão, não o cansaço em si.** Início e fim também diferem em adaptação ao scanner,
   movimento da cabeça, sonolência e deriva do equipamento. Atribuir ao cansaço exigiria uma medida independente,
