@@ -20,6 +20,7 @@ experimento. Chamá-los direto também funciona, com variáveis de ambiente (vej
 | `run_reexecutar.sh` | refaz os modelos do benchmark com o `treina.py` (prefixo `repro_`), do treino às métricas; é o lote em uso |
 | `run_me1_benchmark.sh` | MindEye1 com 1 e 40 sessões, do treino às métricas |
 | `run_sessoes_intermediarias.sh` | MindEye2 ridge-only com 2, 5, 10 e 20 sessões, com e sem low-level, do treino às métricas |
+| `run_agregacao_media_me2.sh`, `run_agregacao_media_me1.sh` | duas filas (uma por vez na GPU): MindEye2 e MindEye1 com a média das repetições no treino, com e sem low-level, em 5, 10, 20 e 40 sessões |
 | `run_benchmark.sh` | o lote original do benchmark, com os nomes antigos (sem `repro_`). Os resultados dele foram substituídos pelas reproduções; fica como registro de como o benchmark foi montado |
 | **Utilitários** | |
 | `me1_setup.sh` | prepara o MindEye1 sobre o ambiente do MindEye2 |

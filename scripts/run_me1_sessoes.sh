@@ -4,6 +4,7 @@
 #
 #   scripts/run_me1_sessoes.sh                  5, 10 e 20 sessoes
 #   SESSOES="5" scripts/run_me1_sessoes.sh      so alguns tamanhos
+#   SUFIXO=_media SESSOES="5 40" ...            os experimentos de nome subj01_me1_<N>sess$SUFIXO
 #
 # Por tamanho N, nesta ordem (as entradas estao em src/experimentos.py, EXPERIMENTOS):
 #   1. alto nivel, pelo src/treina.py (configuracao, commit, manifesto e curva em train_logs/)
@@ -34,7 +35,7 @@ roda() {   # roda <marcador> <descricao> <comando...>
 }
 
 for N in ${SESSOES:-5 10 20}; do
-    M=subj01_me1_${N}sess; S=${M}_semlowlevel; AE=subj01_me1_lowlevel_${N}sess
+    M=subj01_me1_${N}sess${SUFIXO:-}; S=${M}_semlowlevel; AE=subj01_me1_lowlevel_${N}sess${SUFIXO:-}
     roda "$ME1_LOGS/$M/.completo"         "$M: treino do alto nivel (240 epocas)" \
         "$ENVP/bin/python" treina.py "$M"
     roda "$ME1_LOGS/models/$AE/.completo" "$AE: treino do low-level (120 epocas)" \
