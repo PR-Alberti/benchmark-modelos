@@ -148,7 +148,9 @@ for _n, _r in ((3000, 1), (1500, 2), (1000, 3)):
 # treino so, para as duas quantidades de dados); o B, o controle de posto reduzido, a aprende so com o
 # proprio subj01. C contra B mede o efeito dos outros sujeitos; B contra o FRR, o do gargalo de k (o FRR
 # de 20 sessoes entra para essa comparacao ter par nas tres quantidades de dados).
-EXPERIMENTOS["subj01_frr_20sess"] = {"modelo": "frr", "hiper": {}, "dataset": {"sessoes": 20}}
+# o FRR padrao nas sessoes intermediarias (5 e 10), para completar a curva com o 20
+for _s in (5, 10, 20):
+    EXPERIMENTOS[f"subj01_frr_{_s}sess"] = {"modelo": "frr", "hiper": {}, "dataset": {"sessoes": _s}}
 for _s in (1, 20, 40):
     EXPERIMENTOS[f"subj01_frr_multisujeito_{_s}sess"] = {
         "modelo": "frr_ms",
