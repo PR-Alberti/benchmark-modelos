@@ -37,7 +37,7 @@ refinada) e 3 min para o retrieval.
 
 | Modelo | Maior diferença nas métricas de imagem |
 |---|---|
-| FRR, as seis variantes | 0 (idêntico, inclusive o R² da validação cruzada) |
+| FRR, as seis variantes | 0 (idêntico, inclusive o R² da validação cruzada); refeitas em 09/11/2026 para ganhar reconstrução e métricas de imagem, as de 1 sessão saíram idênticas e as de 40 sessões (fração global e grade estendida) diferem em até 0,0004 no retrieval e na 6ª casa no R² |
 | Ridge 4096 + blurry, 1 sessão | 0 (idêntico, época por época) |
 | MindEye1, 1 sessão | 0 (idêntico em todos os dígitos das métricas e do retrieval) |
 | MindEye1, 40 sessões | 0,14 p.p. (Incep); retrieval idêntico; 0,0007 nas demais |
