@@ -1,5 +1,5 @@
 #!/bin/bash
-# Media das repeticoes no treino (branch agregation), fila do ME1: 5, 10, 20 e 40 sessoes, com e sem low-level.
+# Media das repeticoes no treino (branch agregation), fila do ME1: 1, 5, 10, 20 e 40 sessoes, com e sem low-level.
 # Experimentos em src/experimentos.py (sufixo _media). A GPU de 20 GB so comporta uma fila por vez:
 # rode a do ME1 (run_agregacao_media_me1.sh) depois que a do ME2 terminar.
 #
@@ -14,8 +14,8 @@ export SUFIXO=_media
 LOG="$LOGS/agregacao_media_me1.log"; mkdir -p "$LOGS"
 FALHAS=0
 etapa() { echo "[$(date '+%F %T')] $*" | tee -a "$LOG"; }
-etapa "=== inicio ME1: sessoes [${SESSOES:-5 10 20 40}] ==="
-for n in ${SESSOES:-5 10 20 40}; do
+etapa "=== inicio ME1: sessoes [${SESSOES:-1 5 10 20 40}] ==="
+for n in ${SESSOES:-1 5 10 20 40}; do
     livre=$(df -BG --output=avail "$REPO" | tail -1 | tr -dc '0-9')
     [ "$livre" -ge "${MIN_LIVRE_GB:-60}" ] || { etapa "PARADO antes de $n sessoes: $livre GB livres"; exit 1; }
     etapa "$n sessoes ($livre GB livres)"
