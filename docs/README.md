@@ -13,6 +13,7 @@ Quem chega agora: [GUIA.md](GUIA.md) primeiro (o problema, o glossário e o mapa
 | [EXPERIMENTO.md](EXPERIMENTO.md) | o MindEye2 ridge-only: onde a ridge entra, como o artigo treina e como este treina, os resultados | MindEye2 |
 | [FRR_MULTISUJEITO.md](FRR_MULTISUJEITO.md) | o FRR multi-sujeito: os modelos A, B e C, como é ajustado, resultados | FRR |
 | [MINDEYE1.md](MINDEYE1.md) | o MindEye1: instalação, o que mudou no código original, o protocolo no benchmark | MindEye1 |
+| [AGREGACAO_MEDIA.md](AGREGACAO_MEDIA.md) | o protocolo da branch `agregation`: média das repetições no treino, ME1 e ME2, 1 a 40 sessões | quem roda as filas |
 | **Registro do trabalho** (retratos datados) | | |
 | [ESTAGIO.md](ESTAGIO.md) | o plano de estágio e o que já está no repositório | orientação |
 | [REEXECUTAR.md](REEXECUTAR.md) | o que foi refeito para o benchmark ficar completo e quanto as reproduções se afastam dos originais | quem confere os números |
