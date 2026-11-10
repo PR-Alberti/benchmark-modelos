@@ -911,6 +911,32 @@
    "a baseball player is on the field.",
    "a group of people standing around a building."
   ],
+  "subj01_ridgeonly_5sess_4096blurry_media": [
+   "a surfer riding a wave.",
+   "a man is sitting down.",
+   "a tennis player holding a racket.",
+   "a close up of a plate of food",
+   "a large glass window.",
+   "a person standing on a sidewalk.",
+   "a man sitting down next to a woman.",
+   "a tree in a field",
+   "a woman standing in front of a wall.",
+   "a group of animals standing on top of a grass covered field.",
+   "a clock on a building",
+   "a baseball player is standing on a field.",
+   "a small table with a plant on it.",
+   "a large parking lot with a lot of cars.",
+   "a man standing next to a woman.",
+   "a close up of a plate of food",
+   "a motorcycle parked on the side of a road.",
+   "a horse is walking on the beach.",
+   "a couple of horses standing next to each other.",
+   "a boat on a body of water.",
+   "a large body of water.",
+   "a plane is parked on the runway.",
+   "a baseball player is standing on a field.",
+   "a group of people standing around each other."
+  ],
   "subj01_ridgeonly_5sess_prior": [
    "a surfer on a surfboard",
    "a man sitting down in a chair.",
@@ -935,6 +961,32 @@
    "a large body of water.",
    "a large boat on a body of water.",
    "a baseball player is standing in front of a ball.",
+   "a group of people standing around each other."
+  ],
+  "subj01_ridgeonly_5sess_prior_media": [
+   "a surfer on a surfboard in the ocean.",
+   "a man sitting on a chair.",
+   "a baseball player holding a bat.",
+   "a plate of food with a bowl of food on it.",
+   "a display of items.",
+   "a skateboarder is standing on a skateboard.",
+   "a man standing next to a woman.",
+   "a large tree in a field.",
+   "a man standing in a room.",
+   "a group of animals standing on top of a grass covered field.",
+   "a clock tower with a tower in the background.",
+   "a baseball player is standing on a field.",
+   "a large display of a building.",
+   "a bus driving down a street.",
+   "a man and a woman standing on a beach.",
+   "a bunch of food on a table",
+   "a car parked on the side of a road.",
+   "a horse riding on a beach next to a beach.",
+   "a horse standing on a field.",
+   "a boat on a lake with a boat in the water.",
+   "a large body of water.",
+   "a large passenger jet sitting on top of a tarmac.",
+   "a baseball player is standing in front of a baseball.",
    "a group of people standing around each other."
   ]
  },
@@ -1688,6 +1740,29 @@
     ]
    }
   },
+  "subj01_ridgeonly_5sess_4096blurry_media": {
+   "borrada": {
+    "arquivo": "subj01_ridgeonly_5sess_4096blurry_media__borrada.webp",
+    "sig": [
+     786433617,
+     1794342188223511463
+    ]
+   },
+   "refinada": {
+    "arquivo": "subj01_ridgeonly_5sess_4096blurry_media__refinada.webp",
+    "sig": [
+     786433627,
+     1794345151575669323
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_ridgeonly_5sess_4096blurry_media__unclip.webp",
+    "sig": [
+     786433523,
+     1794342188515514570
+    ]
+   }
+  },
   "subj01_ridgeonly_5sess_prior": {
    "refinada": {
     "arquivo": "subj01_ridgeonly_5sess_prior__refinada.webp",
@@ -1701,6 +1776,22 @@
     "sig": [
      786433468,
      1793402158875377753
+    ]
+   }
+  },
+  "subj01_ridgeonly_5sess_prior_media": {
+   "refinada": {
+    "arquivo": "subj01_ridgeonly_5sess_prior_media__refinada.webp",
+    "sig": [
+     786433538,
+     1794314669575453528
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_ridgeonly_5sess_prior_media__unclip.webp",
+    "sig": [
+     786433498,
+     1794311759506392349
     ]
    }
   }

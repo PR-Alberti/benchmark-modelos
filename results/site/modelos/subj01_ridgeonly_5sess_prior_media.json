@@ -4,7 +4,7 @@
   1794303238078984137
  ],
  "commit": "4ec15887ebff7b511657fbede83c168a635141aa+alteracoes",
- "concluido": null,
+ "concluido": true,
  "config": {
   "dataset": {
    "agregacao": "media",
@@ -963,12 +963,40 @@
  "espaco_clip": "ViT-bigG/14",
  "familia": "mindeye2",
  "fontes": [
+  "results/evals/subj01_ridgeonly_5sess_prior_media/subj01_ridgeonly_5sess_prior_media_retrieval.json",
+  "results/tables/subj01_ridgeonly_5sess_prior_media_all_enhancedrecons.csv",
+  "results/tables/subj01_ridgeonly_5sess_prior_media_all_recons.csv",
   "train_logs/subj01_ridgeonly_5sess_prior_media/metrics.csv"
  ],
  "grupo": "experimento",
  "id": "subj01_ridgeonly_5sess_prior_media",
  "iniciado": true,
- "legendas": null,
+ "legendas": {
+  "CLIP-B_brain_img": 0.7284305095672607,
+  "CLIP-B_brain_ref": 0.712937593460083,
+  "CLIP-B_img_ref": 0.8392383456230164,
+  "CLIP-B_relative": 0.8679661750793457,
+  "CLIP-L_brain_img": 0.6377305388450623,
+  "CLIP-L_brain_ref": 0.6050107479095459,
+  "CLIP-L_img_ref": 0.7765910625457764,
+  "CLIP-L_relative": 0.82119220495224,
+  "Meteor_brain_img": 0.3190601794983011,
+  "Meteor_brain_ref": 0.2310972168620715,
+  "Meteor_img_ref": 0.4196759954156638,
+  "Meteor_relative": 0.7602535836777875,
+  "Rouge1_brain_img": 0.4252405636131502,
+  "Rouge1_brain_ref": 0.3324781353537022,
+  "Rouge1_img_ref": 0.5066996914549835,
+  "Rouge1_relative": 0.8392358842612986,
+  "RougeL_brain_img": 0.40041550289815164,
+  "RougeL_brain_ref": 0.30861878922247815,
+  "RougeL_img_ref": 0.46368458943691104,
+  "RougeL_relative": 0.8635514572188132,
+  "Sentence_brain_img": 0.46893733739852905,
+  "Sentence_brain_ref": 0.4283939599990845,
+  "Sentence_img_ref": 0.7190179228782654,
+  "Sentence_relative": 0.6521914601325989
+ },
  "notas": [],
  "params": {
   "backbone": 453360280,
@@ -988,28 +1016,63 @@
  },
  "retrieval": {
   "bwd": {
-   "media": 0.96667
+   "ic95": [
+    0.9739183478431997,
+    0.9805261400464079
+   ],
+   "media": 0.9772222439448038
   },
-  "epoca": 90,
-  "fonte": "treino",
+  "fonte": "verify_retrieval",
   "fwd": {
-   "media": 0.98667
+   "ic95": [
+    0.9885688027513505,
+    0.9927645483839035
+   ],
+   "media": 0.990666675567627
   }
  },
  "retrieval_centrado": null,
  "rotulo": "Ridge 1024 + prior · 5 sessões · média",
  "sessoes": 5,
- "status": "treino",
- "status_txt": "em treino · época 90",
+ "status": "completo",
+ "status_txt": "métricas completas",
  "tempo_s": 11030.711945295334,
  "valores": {
   "refinada": {
-   "BwdRetrieval": 0.96667,
-   "FwdRetrieval": 0.98667
+   "AlexNet(2)": 0.9229649649649649,
+   "AlexNet(5)": 0.9735555555555555,
+   "Brain Corr. V1": 0.34127843379974365,
+   "Brain Corr. V2": 0.3495398461818695,
+   "Brain Corr. V3": 0.34622541069984436,
+   "Brain Corr. V4": 0.32519805431365967,
+   "Brain Corr. higher_vis": 0.3556610643863678,
+   "Brain Corr. nsd_general": 0.3638857901096344,
+   "BwdRetrieval": 0.9786666870117188,
+   "CLIP": 0.8913283283283283,
+   "EffNet-B": 0.7072967114774773,
+   "FwdRetrieval": 0.9900000095367432,
+   "InceptionV3": 0.9092952952952953,
+   "PixCorr": 0.23601150729439782,
+   "SSIM": 0.373224798503884,
+   "SwAV": 0.3973718651938159
   },
   "unclip": {
-   "BwdRetrieval": 0.96667,
-   "FwdRetrieval": 0.98667
+   "AlexNet(2)": 0.9093433433433433,
+   "AlexNet(5)": 0.9741671671671671,
+   "Brain Corr. V1": 0.3614060878753662,
+   "Brain Corr. V2": 0.36697182059288025,
+   "Brain Corr. V3": 0.35916802287101746,
+   "Brain Corr. V4": 0.3310803472995758,
+   "Brain Corr. higher_vis": 0.3558793365955353,
+   "Brain Corr. nsd_general": 0.37133681774139404,
+   "BwdRetrieval": 0.9786666870117188,
+   "CLIP": 0.8921861861861862,
+   "EffNet-B": 0.7267263902738393,
+   "FwdRetrieval": 0.9900000095367432,
+   "InceptionV3": 0.9249059059059059,
+   "PixCorr": 0.23156056769528227,
+   "SSIM": 0.32025259713506904,
+   "SwAV": 0.41361425031238785
   }
  }
 }
