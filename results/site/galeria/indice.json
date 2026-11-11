@@ -833,6 +833,58 @@
    "a man standing in front of a wall.",
    "a large group of people."
   ],
+  "subj01_me2_6000img_1rep_4096blurry": [
+   "a surfer on a surfboard in the ocean.",
+   "a man is sitting down.",
+   "a tennis player holding a racket.",
+   "a plate of food with a fork.",
+   "a large window with a view.",
+   "a surfer on a surfboard in the water.",
+   "a man sitting down in a chair.",
+   "a giraffe standing in the grass.",
+   "a man standing in front of a wall.",
+   "a large elephant.",
+   "a clock on a building",
+   "a baseball player is standing on a field.",
+   "a small table with a bunch of items on it",
+   "a street with a lot of traffic.",
+   "a man standing next to a man.",
+   "a snowboarder is standing in the snow.",
+   "a large black and white truck.",
+   "a group of people on a beach.",
+   "a couple of dogs standing on top of a building.",
+   "a train driving down a track.",
+   "a snow covered field with a lot of people.",
+   "a plane is parked on the runway.",
+   "a tennis player is playing on a court.",
+   "a group of people standing around a tree."
+  ],
+  "subj01_me2_6000img_1rep_prior": [
+   "a surfer riding a wave.",
+   "a man is holding a cell phone.",
+   "a man holding a frisbee in his hand.",
+   "a plate of food with a fork.",
+   "a glass door with a window.",
+   "a surfer on a surf board",
+   "a man sitting down next to a table.",
+   "a large tree in a field.",
+   "a woman standing in front of a wall.",
+   "a group of sheep standing on top of a grass covered field.",
+   "a clock tower with a tower in the background.",
+   "a baseball player is standing on a field.",
+   "a boat is parked on the side of the road.",
+   "a street with a lot of traffic.",
+   "a woman sitting on a bench next to a man.",
+   "a group of people standing around each other.",
+   "a truck is parked on the side of the road.",
+   "a group of people riding on top of a sandy beach.",
+   "a horse and a horse",
+   "a truck parked next to a truck.",
+   "a snow covered hill with a snow covered hill.",
+   "a large passenger jet.",
+   "a baseball player is standing in front of a ball.",
+   "a group of people standing around each other."
+  ],
   "subj01_ridgeonly_10sess_4096blurry": [
    "a surfer riding a wave.",
    "a man is holding a cell phone.",
@@ -1806,6 +1858,45 @@
     ]
    }
   },
+  "subj01_me2_6000img_1rep_4096blurry": {
+   "borrada": {
+    "arquivo": "subj01_me2_6000img_1rep_4096blurry__borrada.webp",
+    "sig": [
+     786433528,
+     1794402887758024347
+    ]
+   },
+   "refinada": {
+    "arquivo": "subj01_me2_6000img_1rep_4096blurry__refinada.webp",
+    "sig": [
+     786433538,
+     1794405834665743938
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_me2_6000img_1rep_4096blurry__unclip.webp",
+    "sig": [
+     786433498,
+     1794402888019026442
+    ]
+   }
+  },
+  "subj01_me2_6000img_1rep_prior": {
+   "refinada": {
+    "arquivo": "subj01_me2_6000img_1rep_prior__refinada.webp",
+    "sig": [
+     786433513,
+     1794370479007769153
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_me2_6000img_1rep_prior__unclip.webp",
+    "sig": [
+     786433473,
+     1794367532360886500
+    ]
+   }
+  },
   "subj01_ridgeonly_10sess_4096blurry": {
    "borrada": {
     "arquivo": "subj01_ridgeonly_10sess_4096blurry__borrada.webp",
@@ -2066,7 +2157,7 @@
   "arquivo": "vista.webp",
   "sig": [
    602113195,
-   1793314586349165537
+   1794327692886004723
   ]
  }
 }
