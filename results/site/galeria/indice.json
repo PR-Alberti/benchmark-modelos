@@ -1377,6 +1377,24 @@
     ]
    }
   },
+  "subj01_me1_20sess_media": {
+   "unclip": {
+    "arquivo": "subj01_me1_20sess_media__unclip.webp",
+    "sig": [
+     786433443,
+     1794444539721370990
+    ]
+   }
+  },
+  "subj01_me1_20sess_media_semlowlevel": {
+   "unclip": {
+    "arquivo": "subj01_me1_20sess_media_semlowlevel__unclip.webp",
+    "sig": [
+     786433503,
+     1794447841562542079
+    ]
+   }
+  },
   "subj01_me1_20sess_semlowlevel": {
    "unclip": {
     "arquivo": "subj01_me1_20sess_semlowlevel__unclip.webp",
