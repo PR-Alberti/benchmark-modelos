@@ -139,12 +139,28 @@ class Catalogo(Arvore):
             return catalogo.rotulo_automatico(catalogo.config_efetiva(cfg)[0])
         self.assertEqual(rot({"modelo": "frr", "dataset": {"sessoes": 1}}), "FRR · 1 sessão")
         self.assertEqual(rot({"modelo": "mindeye2", "hiper": {"prior": False, "seed": 7}, "dataset": {}}),
-                         "Ridge 1024 sem prior · 40 sessões · semente 7")
+                         "MindEye2 sem low-level nem prior · 40 sessões · semente 7")
         self.assertEqual(rot({"modelo": "mindeye1", "dataset": {"n_imagens": 1000, "repeticoes": 3, "agregacao": "media"}}),
                          "MindEye1 · 1.000 img × 3 · média das repetições · 40 sessões")
         self.assertEqual(rot({"modelo": "frr", "dataset": {"classes": {"animal": ["sup_animal"]}, "n_imagens": 300,
                                                              "balanceado": True}}),
                          "FRR · animal · 300 img/classe · 40 sessões")
+
+
+class NomesDoMindEye2(unittest.TestCase):
+    def test_nome_montado_da_configuracao(self):
+        rot = lambda **h: catalogo.rotulo_automatico({"modelo": "mindeye2", "hiper": h, "dataset": {"sessoes": 5}})
+        self.assertEqual(rot(hidden_dim=4096, blurry=True), "MindEye2 · 5 sessões")
+        self.assertEqual(rot(hidden_dim=1024), "MindEye2 sem low-level · 5 sessões")
+        self.assertEqual(rot(hidden_dim=1024, prior=False), "MindEye2 sem low-level nem prior · 5 sessões")
+        self.assertEqual(rot(hidden_dim=4096, blurry=True, prior=False), "MindEye2 sem prior · 5 sessões")
+        self.assertEqual(rot(hidden_dim=4096), "MindEye2 4096 sem low-level · 5 sessões")
+
+    def test_nomes_antigos_nao_voltam(self):
+        from experimentos import BENCHMARK, EXPERIMENTOS
+        for cfg in [*BENCHMARK.values(), *EXPERIMENTOS.values()]:
+            self.assertNotIn("Ridge ", cfg.get("rotulo") or "")
+        self.assertFalse([r for r in catalogo.ROTULOS.values() if "Ridge " in r])
 
 
 class Descricoes(unittest.TestCase):
@@ -184,7 +200,7 @@ class Descricoes(unittest.TestCase):
         ms = [m("subj01_me1_40sess", 40, "MindEye1 · 40 sessões"), m("subj01_me1_5sess", 5, "MindEye1 · 5 sessões"),
               m("subj01_me1_1sess", 1, "MindEye1 · 1 sessão"),
               m("subj01_me1_1sess_semlowlevel", 1, "MindEye1 sem low-level · 1 sessão"),
-              m("subj01_ridgeonly_1sess", 1, "Ridge 1024 sem prior · 1 sessão"),            # sozinho: sem serie
+              m("subj01_ridgeonly_1sess", 1, "MindEye2 sem low-level nem prior · 1 sessão"),            # sozinho: sem serie
               m("final_subj01_pretrained_1sess_24bs", 1, "Artigo · 1 sessão"),
               m("final_subj01_pretrained_40sess_24bs", 40, "Artigo · 40 sessões")]
         self.assertEqual(site.series(ms), [

@@ -66,6 +66,21 @@ confere_dataset() {
     echo "$atual" > "$dir/dataset.sha1"
 }
 
+# Quanto cada etapa levou, em train_logs/<modelo>/tempos.jsonl (src/report/tempos.py le, e a aba Tempos do
+# site mostra). Uma linha ao comecar e outra ao acabar: uma corrida que morre sem aviso (a maquina resetou)
+# fica sem a segunda, e o site volta para a estimativa em vez de mostrar um tempo que nao e o de verdade.
+#   cronometra <modelo> <etapa> <comando...>      devolve o codigo de saida do comando
+cronometra() {
+    local m=$1 e=$2 t0 rc=0; shift 2
+    mkdir -p "$TRAIN_LOGS/$m"
+    t0=$(date +%s)
+    printf '{"etapa": "%s", "evento": "inicio", "em": %s}\n' "$e" "$t0" >> "$TRAIN_LOGS/$m/tempos.jsonl"
+    "$@" || rc=$?
+    printf '{"etapa": "%s", "evento": "fim", "em": %s, "s": %s, "rc": %s}\n' \
+        "$e" "$(date +%s)" "$(( $(date +%s) - t0 ))" "$rc" >> "$TRAIN_LOGS/$m/tempos.jsonl"
+    return "$rc"
+}
+
 # O site (results/site) com o que houver de resultado: os scripts de treino e de avaliacao chamam
 # isto ao terminar, e um modelo novo entra no site sozinho (src/make_site.py). O site e um extra:
 # se a geracao falhar, o script que chamou continua, so com um aviso.

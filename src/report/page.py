@@ -322,7 +322,7 @@ def ruido_html(dados):
                   f'<tbody>{"".join(linhas)}</tbody></table></div>')
     linhas = [f'<tr><td class="modelo">{esc(rot)}</td>{celula(f, "pct")}{celula(b, "pct")}</tr>'
               for rot, f, b in r["controle"]]
-    controle = ('<div class="rolagem"><table><thead><tr><th>Ridge 1024</th>'
+    controle = ('<div class="rolagem"><table><thead><tr><th>MindEye2 sem low-level</th>'
                 '<th>Img→cér<span class="seta">↑</span></th><th>Cér→img<span class="seta">↑</span></th>'
                 f'</tr></thead><tbody>{"".join(linhas)}</tbody></table></div>')
     return treino, amostragem, controle
@@ -462,13 +462,13 @@ def pagina(dados, args):
 
   <section class="secao" id="ruido">
     <header><h2>Quanto é ruído</h2>
-      <p class="nota">Com a mesma semente e o mesmo código, o treino é determinístico: o 4096 +
-      blurry retreinado aqui repetiu a corrida anterior época por época. Repetir uma corrida não
-      mede ruído, então esta seção troca só a semente, na configuração 1024 + prior. Diferenças
+      <p class="nota">Com a mesma semente e o mesmo código, o treino é determinístico: o MindEye2
+      retreinado aqui repetiu a corrida anterior época por época. Repetir uma corrida não
+      mede ruído, então esta seção troca só a semente, na configuração MindEye2 sem low-level. Diferenças
       entre modelos menores que estas estão dentro do ruído.</p></header>
     <h3>Semente do treino · retrieval top-1 entre 300</h3>
     {ruido_treino}
-    <h3>Semente da reconstrução · o mesmo modelo 1024 + prior amostrado duas vezes</h3>
+    <h3>Semente da reconstrução · o mesmo modelo sem low-level amostrado duas vezes</h3>
     {ruido_amostragem}
     <h3>Com e sem prior · o mesmo script e a mesma semente</h3>
     <p class="nota">O mesmo script e a mesma semente; muda só <code>--use_prior</code>, para isolar o efeito
@@ -481,7 +481,7 @@ def pagina(dados, args):
       <p class="nota">Top-1 entre 300 no teste, medido ao fim de cada época pelo próprio treino
       sempre nas mesmas 300 primeiras imagens de teste. O número das tabelas é a média de 30
       sorteios de 300 entre as 1.000, por isso difere um pouco.
-      Só as corridas que gravaram <code>metrics.csv</code>; as sementes do 1024 + prior mostram a mesma
+      Só as corridas que gravaram <code>metrics.csv</code>; as sementes do MindEye2 sem low-level mostram a mesma
       configuração.</p></header>
     <ul class="legenda-series">
       <li><span class="chave" style="border-color:var(--s1)"></span>Img→cér: dada a imagem, achar o seu cérebro</li>
@@ -554,13 +554,13 @@ def pagina(dados, args):
         <h3>Ressalvas</h3>
         <ul>
           <li>Nos ridge-only, backbone e prior da reconstrução vêm do checkpoint de partida,
-            porque ficaram congelados no treino. Para o 1024 sem prior é o único prior que existe
-            (e é bit a bit o que o 1024 + prior usou: a diferença entre os dois está só em como a
+            porque ficaram congelados no treino. Para o MindEye2 sem low-level nem prior é o único prior que existe
+            (e é bit a bit o que o MindEye2 sem low-level usou: a diferença entre os dois está só em como a
             ridge foi treinada). Para os treinados com congelados em fp16, evita reconstruir com
             pesos arredondados.</li>
-          <li>O 4096 + blurry difere do artigo 1 sessão só no que é treinado e no batch (8 contra
-            24). O 1024 difere também em hidden_dim, ramo blurry e ponto de partida.</li>
-          <li>O ridge de 40 sessões é 1024 sem ramo blurry e treinou 20 épocas; o artigo de 40
+          <li>O MindEye2 difere do artigo 1 sessão só no que é treinado e no batch (8 contra
+            24). O MindEye2 sem low-level difere também em hidden_dim, ramo blurry e ponto de partida.</li>
+          <li>O MindEye2 sem low-level de 40 sessões é 1024 sem ramo blurry e treinou 20 épocas; o artigo de 40
             sessões é 4096 com blurry e treinou 150. A diferença de baixo nível entre os dois
             mistura arquitetura e treino.</li>
           <li>A tabela antiga do artigo no repositório avaliava as reconstruções publicadas sem a
@@ -571,7 +571,7 @@ def pagina(dados, args):
             autocast já faz, para caber em 20 GB.</li>
           <li>Uma corrida por modelo, semente 42. A régua de ruído está na seção
             <a href="#ruido">Quanto é ruído</a>. A diferença de cerca de 1 ponto entre as duas
-            corridas do 4096 + blurry descrita no docs/EXPERIMENTO.md não era ruído: com o mesmo código,
+            corridas do MindEye2 descrita no docs/EXPERIMENTO.md não era ruído: com o mesmo código,
             a corrida se repete exatamente, e entre aquelas duas o código mudou (o conserto do
             ColorJitter em fp16 entrou pouco antes da segunda).</li>
         </ul>
