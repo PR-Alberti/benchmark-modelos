@@ -161,7 +161,7 @@ def _mindeye1(h):
 
 
 # "seed": o padrao e 42 em todos os modelos e deve ficar assim: uma unica semente, a mesma, em todo
-# experimento (so o ruido do Ridge 1024 + prior foi medido com outras; veja experimentos.py)
+# experimento (so o ruido do MindEye2 sem low-level foi medido com outras; veja experimentos.py)
 MODELOS = {
     # src/etapas/run_frr.py: validacao cruzada de 5 dobras sobre as 20 fracoes de Doerig et al.
     "frr": Modelo(["run_frr.sh"], ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "EXTRA"),
@@ -181,7 +181,7 @@ MODELOS = {
                      saida=lambda nome: paths.TABLES / f"{nome}_frr.json",
                      reconstrucao="run_recon_embeddings.sh"),
     # src/etapas/train_ridgeonly.py: so a ridge do subj01, a partir do pre-treino nos outros 7 sujeitos.
-    # batch_size None = o padrao do script (16 no 1024, 8 no 4096 + blurry); frozen_fp16 None = idem
+    # batch_size None = o padrao do script (16 sem low-level, 8 com low-level); frozen_fp16 None = idem
     "mindeye2": Modelo(["run_ridgeonly_prior.sh"],
                        ("MODEL_NAME", "NUM_SESSIONS", "DATASET", "HIDDEN_DIM", "BLURRY", "MSCKPT", "FROZEN",
                         "PRIOR", "RESUME", "GLOBAL_BATCH_SIZE", "BATCH_SIZE", "MAX_LR", "NUM_EPOCHS", "SEED",

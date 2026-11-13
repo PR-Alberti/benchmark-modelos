@@ -23,25 +23,25 @@ FRR_NOTA_HUBNESS = (
 # Conclusoes, escritas a mao a partir das tabelas; aparecem quando todos os
 # modelos estao avaliados. Revisar se os numeros mudarem.
 LEITURA = [
-    "<b>1 sessão, mesma arquitetura do artigo.</b> O ridge 4096 + blurry fica à frente do "
+    "<b>1 sessão, mesma arquitetura do artigo.</b> O MindEye2 fica à frente do "
     "fine-tune completo em 9 das 10 métricas de reconstrução e retrieval (perde só no SSIM: "
     "0,414 contra 0,421), treinando 2,89% dos parâmetros numa GPU de 20 GB. Nas identificações "
     "2-way a vantagem é de 1,5 a 2,2 pontos, acima dos até 0,6 ponto que mudam só por reamostrar "
     "a reconstrução. No retrieval Cér→img a distância é grande: 92,0% contra 77,6%.",
-    "<b>1024 contra 4096 + blurry.</b> A dimensão maior e o ramo blurry pesam sobretudo no baixo "
-    "nível (PixCorr 0,180 → 0,253; Alex(2) 85,4% → 89,6%). No alto nível o 1024 já empata com o "
+    "<b>Sem low-level contra com low-level.</b> A dimensão maior (4096 contra 1024) e o ramo blurry "
+    "pesam sobretudo no baixo nível (PixCorr 0,180 → 0,253; Alex(2) 85,4% → 89,6%). No alto nível o MindEye2 sem low-level já empata com o "
     "artigo: Incep e CLIP a 1,3 e 0,7 ponto, Eff e SwAV a 0,001 e 0,003.",
     "<b>O prior importa no treino da ridge.</b> Com o mesmo script e a mesma semente, tirar a loss "
     "do prior derruba o retrieval (Img→cér / Cér→img) de 92,8% / 88,1% para 78,3% / 72,1%, e todas as métricas de "
     "reconstrução caem junto. O retrieval nem passa pelo prior: o que muda é o sinal de treino, "
     "já que a loss do prior supervisiona a saída inteira do backbone (256 × 1.664), e não só a "
     "projeção contrastiva.",
-    "<b>40 sessões.</b> O ridge 1024 chega a 99,9% / 99,4% de retrieval e fica de 1 a 3 pontos do "
+    "<b>40 sessões.</b> O MindEye2 sem low-level chega a 99,9% / 99,4% de retrieval e fica de 1 a 3 pontos do "
     "artigo nas identificações 2-way (CLIP 92,1% contra 93,6%). A distância maior é no baixo "
     "nível (PixCorr 0,277 contra 0,373), onde o artigo tem o ramo blurry e este não.",
     "<b>MindEye1, treinado do zero.</b> Sem pré-treino, com 1 sessão ele quase não recupera "
-    "(retrieval 30,6% / 23,2%, contra 92,8% / 88,1% do ridge 1024 + prior) e fica atrás do ridge "
-    "4096 + blurry nas identificações 2-way (CLIP 80,8% contra 83,8%, na tabela unCLIP), embora o "
+    "(retrieval 30,6% / 23,2%, contra 92,8% / 88,1% do MindEye2 sem low-level) e fica atrás do MindEye2 "
+    "nas identificações 2-way (CLIP 80,8% contra 83,8%, na tabela unCLIP), embora o "
     "PixCorr (0,252) seja maior. Com 40 sessões o retrieval sobe 64 pontos (94,5% / 87,6%) e o "
     "PixCorr chega a 0,382, acima do artigo reconstruído aqui (0,373 refinada, 0,324 unCLIP). O "
     "retrieval do MindEye1 é no espaço ViT-L/14 dele, não no bigG dos outros, então não é "
@@ -80,9 +80,9 @@ def leitura_frr(dados):
     # 1. contra os modelos com rede, e o valor de escolher uma fracao por dimensao
     t = (f"<b>FRR, o baseline linear.</b> Uma regressão linear dos voxels para o embedding CLIP, sem rede "
          f"nenhuma, acha o cérebro certo de cada imagem (Img→cér) em {pc(v['1']['f'])} dos casos com 1 sessão "
-         f"e {pc(v['40']['f'])} com 40, contra {pc(rf1)} e {pc(rf40)} do ridge 1024 + prior: com poucos dados "
+         f"e {pc(v['40']['f'])} com 40, contra {pc(rf1)} e {pc(rf40)} do MindEye2 sem low-level: com poucos dados "
          f"falta muito, e o ganho de 1 para 40 sessões é de {virg(ganho_frr, 0)} pontos no FRR e "
-         f"{virg(ganho_ridge, 0)} no ridge.")
+         f"{virg(ganho_ridge, 0)} no MindEye2 sem low-level.")
     g1, g40 = variantes.get("subj01_frr_1sess_global"), variantes.get("subj01_frr_40sess_global")
     if g1:
         t += (f" Escolher uma fração para cada dimensão do alvo é o que sustenta o resultado com pouco dado: com "

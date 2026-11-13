@@ -802,7 +802,7 @@
   }
  },
  "retrieval_centrado": null,
- "rotulo": "Ridge 1024 + prior · 10 sessões · média",
+ "rotulo": "MindEye2 sem low-level · 10 sessões · média",
  "sessoes": 10,
  "status": "completo",
  "status_txt": "métricas completas",

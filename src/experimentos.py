@@ -20,7 +20,7 @@ Cada experimento:
 SEMENTE: todo experimento novo usa uma unica semente, sempre a mesma (42, o padrao de "seed" em
 treina.py). Nao se treinam varias sementes por modelo: o benchmark compara configuracoes, e com a
 semente fixa a diferenca entre duas corridas vem so da configuracao. As sementes 1 e 2 abaixo existem
-so para medir o ruido do treino, uma vez, no Ridge 1024 + prior de 1 sessao; nao as repita nem as
+so para medir o ruido do treino, uma vez, no MindEye2 sem low-level de 1 sessao; nao as repita nem as
 estenda a outros modelos. (A "semente" do dataset e outra coisa: fixa em 0.)
 
 "agregacao" diz como o treino usa as repeticoes de cada imagem (src/mindeye_ridge/agregacao.py):
@@ -148,7 +148,9 @@ for _n, _r in ((3000, 1), (1500, 2), (1000, 3)):
 # treino so, para as duas quantidades de dados); o B, o controle de posto reduzido, a aprende so com o
 # proprio subj01. C contra B mede o efeito dos outros sujeitos; B contra o FRR, o do gargalo de k (o FRR
 # de 20 sessoes entra para essa comparacao ter par nas tres quantidades de dados).
-EXPERIMENTOS["subj01_frr_20sess"] = {"modelo": "frr", "hiper": {}, "dataset": {"sessoes": 20}}
+# o FRR padrao nas sessoes intermediarias (5 e 10), para completar a curva com o 20
+for _s in (5, 10, 20):
+    EXPERIMENTOS[f"subj01_frr_{_s}sess"] = {"modelo": "frr", "hiper": {}, "dataset": {"sessoes": _s}}
 for _s in (1, 20, 40):
     EXPERIMENTOS[f"subj01_frr_multisujeito_{_s}sess"] = {
         "modelo": "frr_ms",
@@ -183,8 +185,8 @@ for _n in (5, 10, 20):
 # As pontas, 1 e 40 sessoes, ja estao no benchmark (repro_subj01_ridgeonly_{1,40}sess_prior e
 # _4096blurry) e entram na curva sem treinar de novo.
 #
-# "Sem low-level" e o Ridge 1024 + prior (partida: multisubject_subj01_1024hid_nolow_300ep) e "com" e o
-# Ridge 4096 + blurry (partida: final_multisubject_subj01), os mesmos pares do benchmark: o checkpoint com
+# "Sem low-level" e o MindEye2 sem low-level (hidden_dim 1024; partida: multisubject_subj01_1024hid_nolow_300ep) e "com" e o
+# MindEye2 (hidden_dim 4096; partida: final_multisubject_subj01), os mesmos pares do benchmark: o checkpoint com
 # o ramo blurry e 4096, entao o low-level e o hidden_dim mudam juntos (veja _valida_mindeye2).
 #
 # Epocas: as duas pontas usam receitas diferentes (150 epocas com 1 sessao, 20 com 40), entao as
@@ -200,10 +202,10 @@ for _n, _ep in EPOCAS_POR_SESSOES.items():
     _comum = {"num_epochs": _ep, "frozen_fp16": True, "ckpt_interval": 1}
     EXPERIMENTOS[f"subj01_ridgeonly_{_n}sess_prior"] = {
         "modelo": "mindeye2", "hiper": dict(_comum), "dataset": {"sessoes": _n},
-        "rotulo": f"Ridge 1024 + prior · {_n} sessões"}
+        "rotulo": f"MindEye2 sem low-level · {_n} sessões"}
     EXPERIMENTOS[f"subj01_ridgeonly_{_n}sess_4096blurry"] = {
         "modelo": "mindeye2", "hiper": {**_comum, "hidden_dim": 4096, "blurry": True},
-        "dataset": {"sessoes": _n}, "rotulo": f"Ridge 4096 + blurry · {_n} sessões"}
+        "dataset": {"sessoes": _n}, "rotulo": f"MindEye2 · {_n} sessões"}
 
 
 # =============================================================================================
@@ -228,10 +230,10 @@ for _n, _ep in EPOCAS_MEDIA.items():
     _comum = {"num_epochs": _ep, "frozen_fp16": True, "ckpt_interval": 1}
     EXPERIMENTOS[f"subj01_ridgeonly_{_n}sess_prior_media"] = {
         "modelo": "mindeye2", "hiper": dict(_comum), "dataset": dict(_dados),
-        "rotulo": f"Ridge 1024 + prior · {_n} sessões · média"}
+        "rotulo": f"MindEye2 sem low-level · {_n} sessões · média"}
     EXPERIMENTOS[f"subj01_ridgeonly_{_n}sess_4096blurry_media"] = {
         "modelo": "mindeye2", "hiper": {**_comum, "hidden_dim": 4096, "blurry": True}, "dataset": dict(_dados),
-        "rotulo": f"Ridge 4096 + blurry · {_n} sessões · média"}
+        "rotulo": f"MindEye2 · {_n} sessões · média"}
     _hiper = {"save_every": 10 if _n == 1 else 5} if _n in (1, 5) else {}
     EXPERIMENTOS[f"subj01_me1_{_n}sess_media"] = {
         "modelo": "mindeye1", "hiper": dict(_hiper), "dataset": dict(_dados),
@@ -245,7 +247,7 @@ for _n, _ep in EPOCAS_MEDIA.items():
 # Reproducoes dos modelos do benchmark pelo treina.py (docs/REEXECUTAR.md, scripts/run_reexecutar.sh):
 # o mesmo dicionario com outro nome, ja que o treina.py nao sobrescreve um modelo do benchmark. A
 # corrida refeita fica com o que as originais nao registraram: configuracao, commit do codigo,
-# manifesto do dataset, curva e tempo. As de semente 42 do Ridge 1024 ficam de fora (sao a mesma
+# manifesto do dataset, curva e tempo. As de semente 42 do MindEye2 sem low-level ficam de fora (sao a mesma
 # corrida do 1sess_prior e do 1sess). O MindEye1 e refeito por scripts/run_me1_benchmark.sh com
 # PREFIXO=repro_ (alto nivel pelo treina.py, depois low-level, reconstrucao e metricas).
 # =============================================================================================
@@ -254,13 +256,13 @@ _REPRODUZIR = {
     "subj01_frr_1sess_ext": "FRR grade estendida · 1 sessão", "subj01_frr_40sess": "FRR · 40 sessões",
     "subj01_frr_40sess_global": "FRR fração global · 40 sessões",
     "subj01_frr_40sess_ext": "FRR grade estendida · 40 sessões",
-    "subj01_ridgeonly_1sess_prior": "Ridge 1024 + prior · 1 sessão",
-    "subj01_ridgeonly_1sess": "Ridge 1024 sem prior · 1 sessão",
-    "subj01_ridgeonly_1sess_prior_seed1": "Ridge 1024 + prior · 1 sessão · semente 1",
-    "subj01_ridgeonly_1sess_prior_seed2": "Ridge 1024 + prior · 1 sessão · semente 2",
-    "subj01_ridgeonly_1sess_4096blurry": "Ridge 4096 + blurry · 1 sessão",
-    "subj01_ridgeonly_40sess_prior": "Ridge 1024 + prior · 40 sessões",
-    "subj01_ridgeonly_40sess_4096blurry": "Ridge 4096 + blurry · 40 sessões",
+    "subj01_ridgeonly_1sess_prior": "MindEye2 sem low-level · 1 sessão",
+    "subj01_ridgeonly_1sess": "MindEye2 sem low-level nem prior · 1 sessão",
+    "subj01_ridgeonly_1sess_prior_seed1": "MindEye2 sem low-level · 1 sessão · semente 1",
+    "subj01_ridgeonly_1sess_prior_seed2": "MindEye2 sem low-level · 1 sessão · semente 2",
+    "subj01_ridgeonly_1sess_4096blurry": "MindEye2 · 1 sessão",
+    "subj01_ridgeonly_40sess_prior": "MindEye2 sem low-level · 40 sessões",
+    "subj01_ridgeonly_40sess_4096blurry": "MindEye2 · 40 sessões",
     "subj01_me1_1sess": "MindEye1 · 1 sessão", "subj01_me1_40sess": "MindEye1 · 40 sessões",
 }
 REPRODUCOES = {f"repro_{nome}": {**BENCHMARK[nome], "rotulo": f"{rotulo} · reprodução"}

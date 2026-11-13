@@ -68,7 +68,7 @@
   "Sentence_relative": 0.5226452946662903
  },
  "notas": [
-  "O mesmo checkpoint do Ridge 1024 + prior de 1 sessão, reconstruído com a semente 7 em vez da 42: mede quanto as métricas de imagem mudam só por reamostrar a reconstrução."
+  "O mesmo checkpoint do MindEye2 sem low-level de 1 sessão, reconstruído com a semente 7 em vez da 42: mede quanto as métricas de imagem mudam só por reamostrar a reconstrução."
  ],
  "params": null,
  "publicada": false,
@@ -92,7 +92,7 @@
   }
  },
  "retrieval_centrado": null,
- "rotulo": "Ridge 1024 + prior · 1 sessão · reconstrução semente 7",
+ "rotulo": "MindEye2 sem low-level · 1 sessão · reconstrução semente 7",
  "sessoes": 1,
  "status": "completo",
  "status_txt": "métricas completas",
