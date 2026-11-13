@@ -230,10 +230,10 @@ for _n, _ep in EPOCAS_MEDIA.items():
     _comum = {"num_epochs": _ep, "frozen_fp16": True, "ckpt_interval": 1}
     EXPERIMENTOS[f"subj01_ridgeonly_{_n}sess_prior_media"] = {
         "modelo": "mindeye2", "hiper": dict(_comum), "dataset": dict(_dados),
-        "rotulo": f"Ridge 1024 + prior · {_n} sessões · média"}
+        "rotulo": f"MindEye2 sem low-level · {_n} sessões · média"}
     EXPERIMENTOS[f"subj01_ridgeonly_{_n}sess_4096blurry_media"] = {
         "modelo": "mindeye2", "hiper": {**_comum, "hidden_dim": 4096, "blurry": True}, "dataset": dict(_dados),
-        "rotulo": f"Ridge 4096 + blurry · {_n} sessões · média"}
+        "rotulo": f"MindEye2 · {_n} sessões · média"}
     _hiper = {"save_every": 10 if _n == 1 else 5} if _n in (1, 5) else {}
     EXPERIMENTOS[f"subj01_me1_{_n}sess_media"] = {
         "modelo": "mindeye1", "hiper": dict(_hiper), "dataset": dict(_dados),
