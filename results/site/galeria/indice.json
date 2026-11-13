@@ -1413,6 +1413,24 @@
     ]
    }
   },
+  "subj01_me1_40sess_media": {
+   "unclip": {
+    "arquivo": "subj01_me1_40sess_media__unclip.webp",
+    "sig": [
+     786433443,
+     1794560014372531774
+    ]
+   }
+  },
+  "subj01_me1_40sess_media_semlowlevel": {
+   "unclip": {
+    "arquivo": "subj01_me1_40sess_media_semlowlevel__unclip.webp",
+    "sig": [
+     786433503,
+     1794563292912388747
+    ]
+   }
+  },
   "subj01_me1_40sess_semlowlevel": {
    "unclip": {
     "arquivo": "subj01_me1_40sess_semlowlevel__unclip.webp",
