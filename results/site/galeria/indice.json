@@ -885,6 +885,32 @@
    "a tennis player is holding a racket.",
    "a group of people standing around each other."
   ],
+  "subj01_me2_3000img_2rep_media_4096blurry": [
+   "a surfer riding a wave.",
+   "a man is holding a cell phone.",
+   "a boy is playing with a frisbee.",
+   "a plate of food with a fork.",
+   "a wall with a window and a door.",
+   "a man on a surfboard in the water.",
+   "a person sitting down.",
+   "a tree in a field",
+   "a woman sitting on a bench.",
+   "a large grassy area.",
+   "a clock tower with a clock on it.",
+   "a baseball player is standing on a field.",
+   "a table with a vase and a vase on it.",
+   "a street with a lot of traffic.",
+   "a man sitting on a bench.",
+   "a bunch of vegetables that are on a table.",
+   "a truck parked on a street.",
+   "a group of people riding on top of a sandy beach.",
+   "a couple of horses standing next to each other.",
+   "a car is parked on the street.",
+   "a snow covered slope.",
+   "a plane is parked on the runway.",
+   "a tennis player is holding a racket.",
+   "a group of people standing around each other."
+  ],
   "subj01_me2_3000img_2rep_media_prior": [
    "a surfer on a surfboard in the ocean.",
    "a man holding a cell phone.",
@@ -1972,6 +1998,29 @@
     "sig": [
      786433523,
      1794430106561754188
+    ]
+   }
+  },
+  "subj01_me2_3000img_2rep_media_4096blurry": {
+   "borrada": {
+    "arquivo": "subj01_me2_3000img_2rep_media_4096blurry__borrada.webp",
+    "sig": [
+     786433622,
+     1794530069546032872
+    ]
+   },
+   "refinada": {
+    "arquivo": "subj01_me2_3000img_2rep_media_4096blurry__refinada.webp",
+    "sig": [
+     786433632,
+     1794533033961102957
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_me2_3000img_2rep_media_4096blurry__unclip.webp",
+    "sig": [
+     786433528,
+     1794530069907030803
     ]
    }
   },
