@@ -989,6 +989,32 @@
    "a man holding a tennis racquet.",
    "a group of people standing around each other."
   ],
+  "subj01_ridgeonly_40sess_prior_media": [
+   "a surfer on a surfboard in the ocean.",
+   "a man is holding a cell phone.",
+   "a man holding a tennis racket.",
+   "a plate of food with a fork.",
+   "a wall with a window and a door with a window and a door with a window and a",
+   "a person standing on a skateboard.",
+   "a woman sitting in a chair.",
+   "a large tree in a field.",
+   "a man holding a tennis racket.",
+   "a group of elephants standing around.",
+   "a clock tower with a tower in the background.",
+   "a baseball player standing on a field.",
+   "a boat is parked on the water.",
+   "a street with a lot of traffic.",
+   "a man sitting on a bench.",
+   "a bunch of different types of objects.",
+   "a motorcycle parked on the side of a road.",
+   "a group of people riding on top of a sandy beach.",
+   "a horse and a horse in a field.",
+   "a boat on a body of water.",
+   "a snow covered slope with a ski slope.",
+   "a plane is parked on the runway.",
+   "a woman holding a tennis racket.",
+   "a group of people standing around each other."
+  ],
   "subj01_ridgeonly_5sess_4096blurry": [
    "a surfer riding a wave.",
    "a man is holding a cell phone.",
@@ -1896,6 +1922,22 @@
     "sig": [
      786433503,
      1791965622220867382
+    ]
+   }
+  },
+  "subj01_ridgeonly_40sess_prior_media": {
+   "refinada": {
+    "arquivo": "subj01_ridgeonly_40sess_prior_media__refinada.webp",
+    "sig": [
+     786433607,
+     1794531339675008628
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_ridgeonly_40sess_prior_media__unclip.webp",
+    "sig": [
+     786433503,
+     1794528381349525807
     ]
    }
   },
