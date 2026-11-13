@@ -1,0 +1,160 @@
+{
+ "modelo": "subj01_frr_10sess",
+ "config": {
+  "sujeito": 1,
+  "sessoes": 10,
+  "exibicoes_treino": 6803,
+  "dataset": {
+   "sessoes": 10,
+   "n_imagens": null,
+   "repeticoes": null,
+   "classes": null,
+   "regra": "exclusiva",
+   "minimo": 10,
+   "maximo_outros": 2,
+   "balanceado": false,
+   "semente": 0,
+   "agregacao": null,
+   "subj": 1
+  },
+  "agregacao": "exibicoes",
+  "amostras_treino": 6803,
+  "imagens_treino": 4073,
+  "imagens_teste": 1000,
+  "voxels": 15724,
+  "dim_alvo": 425984,
+  "dobras": 5,
+  "semente": 42,
+  "grade": "doerig",
+  "bias_step": 0.2,
+  "bloco": 8192
+ },
+ "parametros_lineares": 6698172416,
+ "custo": {
+  "segundos_ajuste": 171.07912850379944,
+  "segundos_retrieval": 40.91329264640808,
+  "segundos_embedding_alvos": 51.243359088897705,
+  "embeddings_calculados_nesta_corrida": 1806,
+  "pico_gpu_gib": 3.936354637145996,
+  "gpu": "NVIDIA RTX A4500",
+  "pico_ram_gib": 11.662696838378906,
+  "segundos_total": 268.93546962738037
+ },
+ "cv": {
+  "fracs": [
+   0.05,
+   0.1,
+   0.15,
+   0.2,
+   0.25,
+   0.3,
+   0.35,
+   0.4,
+   0.45,
+   0.5,
+   0.55,
+   0.6,
+   0.65,
+   0.7,
+   0.75,
+   0.8,
+   0.85,
+   0.9,
+   0.95,
+   1.0
+  ],
+  "cv_r2_por_fracao": [
+   0.01326179962700269,
+   -0.013492497594667308,
+   -0.050987323208641744,
+   -0.09701066272466963,
+   -0.15071693381317397,
+   -0.21167526205171905,
+   -0.27955535267296394,
+   -0.35436824275858214,
+   -0.43621317056233244,
+   -0.5253639015210958,
+   -0.6221870038096722,
+   -0.7271442112320796,
+   -0.8405963835434207,
+   -0.9629758583686143,
+   -1.0945956516182336,
+   -1.235604753546709,
+   -1.3863906931201817,
+   -1.5470164131068715,
+   -1.7174803434393433,
+   -1.8975133009872254
+  ],
+  "cv_r2_escolhida": 0.013526071597665279,
+  "histograma_fracoes": [
+   425257,
+   715,
+   12,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "por_alvo": true,
+  "posto_final": 6802,
+  "pares_fracao_alvo_inalcancaveis": 0,
+  "segundos_cv": 145.05863785743713,
+  "segundos_final": 14.511259078979492,
+  "segundos_total": 159.56989693641663
+ },
+ "retrieval": {
+  "fwd": {
+   "media": 0.9268889089425405,
+   "ic95": [
+    0.9217360533961133,
+    0.9320417644889677
+   ]
+  },
+  "bwd": {
+   "media": 0.2970000038544337,
+   "ic95": [
+    0.28235773281843807,
+    0.31164227489042934
+   ]
+  }
+ },
+ "retrieval_centrado": {
+  "fwd": {
+   "media": 0.9123333553473155,
+   "ic95": [
+    0.9070782832530425,
+    0.9175884274415885
+   ]
+  },
+  "bwd": {
+   "media": 0.7985555728276571,
+   "ic95": [
+    0.7906333752904015,
+    0.8064777703649127
+   ]
+  }
+ },
+ "hubness": {
+  "cos_previsao_media_treino": 0.9462136626243591,
+  "cos_alvo_media_treino": 0.4960860311985016
+ },
+ "embedding": {
+  "cosseno_medio": 0.5228738784790039,
+  "pearson_medio": 0.5077173113822937,
+  "cosseno_centrado_medio": 0.18785467743873596,
+  "pearson_mediana": 0.507657527923584
+ }
+}

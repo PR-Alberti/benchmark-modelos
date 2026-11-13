@@ -155,7 +155,9 @@ def main():
     torch.cuda.empty_cache()
 
     # ------------------------------------------------------------ avaliacao
+    t0 = time.time()
     aval = avalia(args.model_name, prev, all_images, alvos.media_ponderada(groups), args.seed, device, saida)
+    seg_retrieval = time.time() - t0
     relatorio = {
         "modelo": args.model_name,
         "config": {"sujeito": args.subj, "sessoes": args.num_sessions, "exibicoes_treino": n_exib,
@@ -166,7 +168,7 @@ def main():
                    "grade": "personalizada" if args.fracs else ("estendida" if args.grid == "extended" else "doerig"),
                    "bias_step": args.bias_step, "bloco": args.chunk},
         "parametros_lineares": n_voxels * D_ALVO,
-        "custo": {"segundos_ajuste": seg_ajuste, "segundos_embedding_alvos": seg_embedding,
+        "custo": {"segundos_ajuste": seg_ajuste, "segundos_retrieval": seg_retrieval, "segundos_embedding_alvos": seg_embedding,
                   "embeddings_calculados_nesta_corrida": int(n_novos),
                   "pico_gpu_gib": pico_gpu,
                   "gpu": torch.cuda.get_device_name(0) if device == "cuda" else "cpu",

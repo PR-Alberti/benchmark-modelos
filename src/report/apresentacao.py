@@ -39,10 +39,10 @@ COLUNAS_GALERIA = [
 CUSTO = [
     ("subj01_frr_1sess", "FRR · 1 sessão", 14, 5, "start"),
     ("subj01_frr_40sess", "FRR · 40", 14, 5, "start"),
-    ("subj01_ridgeonly_1sess_prior", "Ridge 1024 · 1 sessão", -14, 19, "end"),
-    ("subj01_ridgeonly_1sess_4096blurry", "Ridge 4096 + blurry · 1", -14, -9, "end"),
-    ("subj01_ridgeonly_40sess_prior", "Ridge 1024 · 40", 0, -16, "middle"),
-    ("subj01_ridgeonly_40sess_4096blurry", "4096 + blurry · 40", 10, 24, "start"),
+    ("subj01_ridgeonly_1sess_prior", "MindEye2 sem low-level · 1 sessão", -14, 19, "end"),
+    ("subj01_ridgeonly_1sess_4096blurry", "MindEye2 · 1", -14, -9, "end"),
+    ("subj01_ridgeonly_40sess_prior", "MindEye2 sem low-level · 40", 0, -16, "middle"),
+    ("subj01_ridgeonly_40sess_4096blurry", "MindEye2 · 40", 10, 24, "start"),
     ("subj01_me1_1sess", "MindEye1 · 1 sessão", 14, 5, "start"),
     ("subj01_me1_40sess", "MindEye1 · 40", -14, 22, "end"),
 ]
@@ -53,15 +53,15 @@ CUSTO = [
 PREFIXO_REPRO = "repro_"
 DIFERENCAS = [
     ("FRR, as seis variantes", "frr", "0 (idêntico)"),
-    ("Ridge 4096 + blurry · 1", "mindeye2", "0 (idêntico, época por época)"),
+    ("MindEye2 · 1", "mindeye2", "0 (idêntico, época por época)"),
     ("MindEye1 · 1", "mindeye1", "0 (idêntico)"),
     ("MindEye1 sem low-level · 1 e 40", "mindeye1", "0 (idêntico)"),
     ("MindEye1 · 40", "mindeye1", "0,14 p.p. · 0,0007"),
-    ("Ridge 1024 + prior · 1", "mindeye2", "0,70 p.p. · 0,0030"),
-    ("Ridge 1024 sem prior · 1", "mindeye2", "1,24 p.p. · 0,0008"),
-    ("Ridge 1024 + prior · 40", "mindeye2", "0,89 p.p. · 0,0023"),
-    ("Ridge 4096 + blurry · 40", "mindeye2", "0,59 p.p. · 0,0064"),
-    ("Ridge 1024 + prior · sementes 1 e 2", "mindeye2", "1,19 e 0,95 p.p. · 0,0056 e 0,0038"),
+    ("MindEye2 sem low-level · 1", "mindeye2", "0,70 p.p. · 0,0030"),
+    ("MindEye2 sem low-level nem prior · 1", "mindeye2", "1,24 p.p. · 0,0008"),
+    ("MindEye2 sem low-level · 40", "mindeye2", "0,89 p.p. · 0,0023"),
+    ("MindEye2 · 40", "mindeye2", "0,59 p.p. · 0,0064"),
+    ("MindEye2 sem low-level · sementes 1 e 2", "mindeye2", "1,19 e 0,95 p.p. · 0,0056 e 0,0038"),
 ]
 PCT = {m["id"] for m in site.METRICAS if m["fmt"] == "pct"}
 RETRIEVAL = {"FwdRetrieval", "BwdRetrieval"}

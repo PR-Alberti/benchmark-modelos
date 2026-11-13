@@ -1598,7 +1598,7 @@
   "Sentence_relative": 0.5260804891586304
  },
  "notas": [
-  "Retreino do Ridge 1024 + prior com o código atual. Junto das sementes 1 e 2, mede o ruído do treino."
+  "Retreino do MindEye2 sem low-level com o código atual. Junto das sementes 1 e 2, mede o ruído do treino."
  ],
  "params": {
   "backbone": 453360280,
@@ -1635,7 +1635,7 @@
   }
  },
  "retrieval_centrado": null,
- "rotulo": "Ridge 1024 + prior · 1 sessão · semente 42",
+ "rotulo": "MindEye2 sem low-level · 1 sessão · semente 42",
  "sessoes": 1,
  "status": "completo",
  "status_txt": "métricas completas",

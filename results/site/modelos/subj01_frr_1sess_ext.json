@@ -1,5 +1,5 @@
 {
- "commit": "7b65d5ab73c741cd04d43bc6f9f4e464dfb0ce61",
+ "commit": "02433220f228a239ba8ee143a737eb7b5625f429+alteracoes",
  "concluido": true,
  "config": {
   "dataset": {
@@ -32,7 +32,10 @@
  "espaco_clip": "ViT-bigG/14",
  "familia": "frr",
  "fontes": [
-  "results/tables/repro_subj01_frr_1sess_ext_frr.json"
+  "results/tables/repro_subj01_frr_1sess_ext_all_enhancedrecons.csv",
+  "results/tables/repro_subj01_frr_1sess_ext_all_recons.csv",
+  "results/tables/repro_subj01_frr_1sess_ext_frr.json",
+  "train_logs/repro_subj01_frr_1sess_ext/tempos.jsonl"
  ],
  "frr": {
   "config": {
@@ -68,10 +71,11 @@
    "embeddings_calculados_nesta_corrida": 0,
    "gpu": "NVIDIA RTX A4500",
    "pico_gpu_gib": 0.6026468276977539,
-   "pico_ram_gib": 3.220569610595703,
-   "segundos_ajuste": 10.887177228927612,
-   "segundos_embedding_alvos": 0.00018548965454101562,
-   "segundos_total": 54.539265394210815
+   "pico_ram_gib": 3.164386749267578,
+   "segundos_ajuste": 11.090653419494629,
+   "segundos_embedding_alvos": 0.0002110004425048828,
+   "segundos_retrieval": 39.36054086685181,
+   "segundos_total": 55.29296946525574
   },
   "cv": {
    "cv_r2_escolhida": 0.011848462906919544,
@@ -174,9 +178,9 @@
    "pares_fracao_alvo_inalcancaveis": 0,
    "por_alvo": true,
    "posto_final": 687,
-   "segundos_cv": 9.318795680999756,
-   "segundos_final": 0.13076138496398926,
-   "segundos_total": 9.449557065963745
+   "segundos_cv": 9.545338153839111,
+   "segundos_final": 0.12674236297607422,
+   "segundos_total": 9.672080516815186
   },
   "embedding": {
    "cosseno_centrado_medio": 0.11089321970939636,
@@ -193,7 +197,32 @@
  "grupo": "benchmark",
  "id": "subj01_frr_1sess_ext",
  "iniciado": true,
- "legendas": null,
+ "legendas": {
+  "CLIP-B_brain_img": 0.587792158126831,
+  "CLIP-B_brain_ref": 0.5936355590820312,
+  "CLIP-B_img_ref": 0.8392383456230164,
+  "CLIP-B_relative": 0.7003876566886902,
+  "CLIP-L_brain_img": 0.45175325870513916,
+  "CLIP-L_brain_ref": 0.4419229328632355,
+  "CLIP-L_img_ref": 0.7765910625457764,
+  "CLIP-L_relative": 0.5817131996154785,
+  "Meteor_brain_img": 0.17789227273023153,
+  "Meteor_brain_ref": 0.14785050214594656,
+  "Meteor_img_ref": 0.4196759954156638,
+  "Meteor_relative": 0.4238800281012974,
+  "Rouge1_brain_img": 0.29601859385286655,
+  "Rouge1_brain_ref": 0.24756271943201053,
+  "Rouge1_img_ref": 0.5066996914549835,
+  "Rouge1_relative": 0.5842091456634834,
+  "RougeL_brain_img": 0.285029111787244,
+  "RougeL_brain_ref": 0.23747478636210415,
+  "RougeL_img_ref": 0.46368458943691104,
+  "RougeL_relative": 0.6147047330888815,
+  "Sentence_brain_img": 0.15458711981773376,
+  "Sentence_brain_ref": 0.15106627345085144,
+  "Sentence_img_ref": 0.7190179228782654,
+  "Sentence_relative": 0.21499758958816528
+ },
  "notas": [],
  "publicada": false,
  "reproducao": "repro_subj01_frr_1sess_ext",
@@ -243,16 +272,50 @@
  "rotulo": "FRR grade estendida · 1 sessão",
  "sessoes": 1,
  "status": "completo",
- "status_txt": "retrieval e embedding",
- "tempo_s": 10.887177228927612,
+ "status_txt": "métricas completas",
+ "tempo_s": 11.090653419494629,
+ "tempos_medidos": {
+  "metricas_base": 352,
+  "metricas_enhanced": 355,
+  "reconstrucao": 7954,
+  "refino": 2891
+ },
  "valores": {
   "refinada": {
-   "BwdRetrieval": 0.020444444861883918,
-   "FwdRetrieval": 0.5568889021873474
+   "AlexNet(2)": 0.5153673673673673,
+   "AlexNet(5)": 0.5168748748748748,
+   "Brain Corr. V1": 0.022424573078751564,
+   "Brain Corr. V2": 0.017884260043501854,
+   "Brain Corr. V3": 0.02635718137025833,
+   "Brain Corr. V4": 0.038184329867362976,
+   "Brain Corr. higher_vis": 0.017298951745033264,
+   "Brain Corr. nsd_general": 0.011702594347298145,
+   "BwdRetrieval": 0.018444444891065358,
+   "CLIP": 0.5143573573573573,
+   "EffNet-B": 0.9721825398073476,
+   "FwdRetrieval": 0.5631111224492391,
+   "InceptionV3": 0.5203563563563564,
+   "PixCorr": 0.06297725862656388,
+   "SSIM": 0.4735828652978021,
+   "SwAV": 0.6162493209477735
   },
   "unclip": {
-   "BwdRetrieval": 0.020444444861883918,
-   "FwdRetrieval": 0.5568889021873474
+   "AlexNet(2)": 0.5269469469469469,
+   "AlexNet(5)": 0.5191511511511511,
+   "Brain Corr. V1": 0.05691789090633392,
+   "Brain Corr. V2": 0.03840313479304314,
+   "Brain Corr. V3": 0.04086219146847725,
+   "Brain Corr. V4": 0.05240705609321594,
+   "Brain Corr. higher_vis": 0.028690101578831673,
+   "Brain Corr. nsd_general": 0.032848432660102844,
+   "BwdRetrieval": 0.018444444891065358,
+   "CLIP": 0.5033743743743744,
+   "EffNet-B": 0.9835548752662289,
+   "FwdRetrieval": 0.5631111224492391,
+   "InceptionV3": 0.5100170170170171,
+   "PixCorr": 0.08063469489196902,
+   "SSIM": 0.446410746750308,
+   "SwAV": 0.6318259027961497
   }
  }
 }

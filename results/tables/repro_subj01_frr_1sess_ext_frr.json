@@ -31,13 +31,14 @@
  },
  "parametros_lineares": 6698172416,
  "custo": {
-  "segundos_ajuste": 10.887177228927612,
-  "segundos_embedding_alvos": 0.00018548965454101562,
+  "segundos_ajuste": 11.090653419494629,
+  "segundos_retrieval": 39.36054086685181,
+  "segundos_embedding_alvos": 0.0002110004425048828,
   "embeddings_calculados_nesta_corrida": 0,
   "pico_gpu_gib": 0.6026468276977539,
   "gpu": "NVIDIA RTX A4500",
-  "pico_ram_gib": 3.220569610595703,
-  "segundos_total": 54.539265394210815
+  "pico_ram_gib": 3.164386749267578,
+  "segundos_total": 55.29296946525574
  },
  "cv": {
   "fracs": [
@@ -140,9 +141,9 @@
   "por_alvo": true,
   "posto_final": 687,
   "pares_fracao_alvo_inalcancaveis": 0,
-  "segundos_cv": 9.318795680999756,
-  "segundos_final": 0.13076138496398926,
-  "segundos_total": 9.449557065963745
+  "segundos_cv": 9.545338153839111,
+  "segundos_final": 0.12674236297607422,
+  "segundos_total": 9.672080516815186
  },
  "retrieval": {
   "fwd": {

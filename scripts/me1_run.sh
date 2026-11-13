@@ -70,14 +70,18 @@ lowlevel)
     # subj01, batch 8, 120 epocas, como no artigo; retoma sozinho se houver last.pth
     SAIDA="$REPO/mindeye1/train_logs/models/$AE_NAME"; mkdir -p "$SAIDA"
     confere_dataset "$SAIDA" "$([ -f "$SAIDA/last.pth" ] && echo 1 || echo 0)"
-    if [ "$N" -gt 0 ]; then ARGS="--num_sessions=$N --data_path=$DADOS ${DATASET:+--dataset=$DATASET}"; else ARGS=""; fi
-    $PY train_autoencoder.py --model_name="$AE_NAME" $ARGS "$@" 2>&1 | filtra | tee -a "$SAIDA/train.log" ;;
+    if [ "$N" -gt 0 ]; then ARGS="--num_sessions=$N --data_path=$DADOS ${DATASET:+--dataset=$DATASET}"; MEDE="cronometra $MODEL_NAME treino_lowlevel"
+    else ARGS=""; MEDE=""; fi
+    $MEDE $PY train_autoencoder.py --model_name="$AE_NAME" $ARGS "$@" 2>&1 | filtra | tee -a "$SAIDA/train.log" ;;
 retrieval)
     $PY Retrievals_testset.py --data_path="$ME1_DATA" --model_name="$MODEL_NAME" --subj=1 "$@" 2>&1 | filtra ;;
 recon)
     [ -n "$VD" ] || { echo "falta o Versatile Diffusion: mindeye1/download.py --stage vd"; exit 1; }
     if [ "$N" -gt 0 ]; then
-        $PY Reconstructions.py --benchmark --data_path="$DADOS" --model_name="$MODEL_NAME" \
+        # o tempo e de quem recebe as imagens: o _semlowlevel do run_me1_sessoes.sh sai do checkpoint de outro modelo
+        ALVO="$MODEL_NAME"
+        for a in "$@"; do case "$a" in --out_name=*) ALVO="${a#--out_name=}" ;; esac; done
+        cronometra "$ALVO" reconstrucao $PY Reconstructions.py --benchmark --data_path="$DADOS" --model_name="$MODEL_NAME" \
             --autoencoder_name="models/$AE_NAME" --out_name="$MODEL_NAME" --subj=1 --vd_cache_dir="$VD" "$@" 2>&1 | filtra
     else
         $PY Reconstructions.py --data_path="$DADOS" --model_name="$MODEL_NAME" \
