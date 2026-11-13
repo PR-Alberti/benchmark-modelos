@@ -833,6 +833,32 @@
    "a man standing in front of a wall.",
    "a large group of people."
   ],
+  "subj01_me2_2000img_3rep_exibicoes_4096blurry": [
+   "a surfer on a surfboard in the ocean.",
+   "a man sitting down in a chair.",
+   "a tennis player holding a racket.",
+   "a plate of food with a fork.",
+   "a large building with a clock on it.",
+   "a skateboarder is standing on a sidewalk.",
+   "a man sitting down at a table.",
+   "a tree in a field",
+   "a woman standing on a sidewalk.",
+   "a group of elephants.",
+   "a clock tower with a tower in the background.",
+   "a baseball player standing on a field.",
+   "a small room with a lot of furniture.",
+   "a large area of trees.",
+   "a man standing next to a woman.",
+   "a green and white truck",
+   "a parked car is on the street.",
+   "a group of people riding on top of a sandy beach.",
+   "a couple of people that are standing in the grass.",
+   "a truck driving past a parked car.",
+   "a snow covered slope with a ski slope.",
+   "a large passenger jet.",
+   "a man playing tennis on a court.",
+   "a group of people standing around each other."
+  ],
   "subj01_me2_2000img_3rep_exibicoes_prior": [
    "a surfer on a surfboard in the ocean.",
    "a woman holding a cell phone.",
@@ -1985,6 +2011,29 @@
     "sig": [
      786433468,
      1792744868306174162
+    ]
+   }
+  },
+  "subj01_me2_2000img_3rep_exibicoes_4096blurry": {
+   "borrada": {
+    "arquivo": "subj01_me2_2000img_3rep_exibicoes_4096blurry__borrada.webp",
+    "sig": [
+     786433642,
+     1794592837606881416
+    ]
+   },
+   "refinada": {
+    "arquivo": "subj01_me2_2000img_3rep_exibicoes_4096blurry__refinada.webp",
+    "sig": [
+     786433652,
+     1794595789978423000
+    ]
+   },
+   "unclip": {
+    "arquivo": "subj01_me2_2000img_3rep_exibicoes_4096blurry__unclip.webp",
+    "sig": [
+     786433612,
+     1794592837877884631
     ]
    }
   },
