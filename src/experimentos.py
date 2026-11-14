@@ -209,6 +209,41 @@ for _n, _ep in EPOCAS_POR_SESSOES.items():
 
 
 # =============================================================================================
+# Media das repeticoes no treino, com e sem low-level, em 1, 5, 10, 20 e 40 sessoes (branch agregation,
+# scripts/run_agregacao_media.sh): os mesmos modelos das curvas de sessoes acima e do benchmark, so com
+# "agregacao": "media" (uma amostra por imagem unica, a media dos betas das exibicoes dela). O teste nao muda.
+#
+# MindEye2: a epoca acompanha o numero de amostras, entao as epocas sobem na razao exibicoes / imagens
+# unicas para manter os passos das corridas com exibicoes separadas (como nos 1000img_3rep):
+#   1 sessao   150 * 688 / 536     = 193 (a receita de 150 epocas do benchmark)
+#   5 sessoes  60 * 3.410 / 2.267  = 90
+#   10 sessoes 40 * 6.803 / 4.073  = 67
+#   20 sessoes 30 * 13.509 / 6.708 = 60
+#   40 sessoes 20 * 27.000 / 9.000 = 60
+# MindEye1: a amostra ja e a imagem (rodizio das repeticoes), entao as 240 epocas e os passos nao mudam. O
+# "_semlowlevel" e o mesmo checkpoint do alto nivel, reconstruido sem a imagem borrada: nao tem treino proprio.
+# =============================================================================================
+EPOCAS_MEDIA = {1: 193, 5: 90, 10: 67, 20: 60, 40: 60}
+
+for _n, _ep in EPOCAS_MEDIA.items():
+    _dados = {"sessoes": _n, "agregacao": "media"}
+    _comum = {"num_epochs": _ep, "frozen_fp16": True, "ckpt_interval": 1}
+    EXPERIMENTOS[f"subj01_ridgeonly_{_n}sess_prior_media"] = {
+        "modelo": "mindeye2", "hiper": dict(_comum), "dataset": dict(_dados),
+        "rotulo": f"MindEye2 sem low-level · {_n} sessões · média"}
+    EXPERIMENTOS[f"subj01_ridgeonly_{_n}sess_4096blurry_media"] = {
+        "modelo": "mindeye2", "hiper": {**_comum, "hidden_dim": 4096, "blurry": True}, "dataset": dict(_dados),
+        "rotulo": f"MindEye2 · {_n} sessões · média"}
+    _hiper = {"save_every": 10 if _n == 1 else 5} if _n in (1, 5) else {}
+    EXPERIMENTOS[f"subj01_me1_{_n}sess_media"] = {
+        "modelo": "mindeye1", "hiper": dict(_hiper), "dataset": dict(_dados),
+        "rotulo": f"MindEye1 · {_n} sessões · média"}
+    EXPERIMENTOS[f"subj01_me1_{_n}sess_media_semlowlevel"] = {
+        "modelo": "mindeye1", "hiper": dict(_hiper), "dataset": dict(_dados),
+        "rotulo": f"MindEye1 sem low-level · {_n} sessões · média"}
+
+
+# =============================================================================================
 # Reproducoes dos modelos do benchmark pelo treina.py (docs/REEXECUTAR.md, scripts/run_reexecutar.sh):
 # o mesmo dicionario com outro nome, ja que o treina.py nao sobrescreve um modelo do benchmark. A
 # corrida refeita fica com o que as originais nao registraram: configuracao, commit do codigo,
