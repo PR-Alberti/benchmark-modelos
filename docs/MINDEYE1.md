@@ -126,6 +126,8 @@ no formato real (ruído; só servem para medir memória e tempo), e
 
 ## No benchmark: 1 e 40 sessões
 
+(As sessões intermediárias e o MindEye1 multi-sujeito estão nas duas últimas seções.)
+
 Para a comparação com o MindEye2 ridge-only e o FRR ser justa, o MindEye1 é treinado e testado
 nos **mesmos dados** deles, e não no `webdataset_avg_split`:
 
@@ -174,3 +176,56 @@ em `logs/me1_benchmark.log`. Saídas: `mindeye1/train_logs/subj01_me1_<N>sess/` 
 `mindeye1/train_logs/models/subj01_me1_lowlevel_<N>sess/` (baixo nível),
 `results/evals/subj01_me1_<N>sess/` (reconstruções e embeddings) e
 `results/tables/subj01_me1_<N>sess_all_recons.csv` (métricas).
+
+## Sessões intermediárias (5, 10 e 20) e sem low-level
+
+As mesmas condições do benchmark, com as N primeiras sessões (`subj01_me1_<N>sess` em `EXPERIMENTOS`,
+`src/experimentos.py`), para a curva entre 1 e 40:
+
+```bash
+scripts/run_me1_sessoes.sh                 # 5, 10 e 20 sessões
+SESSOES="5" scripts/run_me1_sessoes.sh     # só alguns tamanhos
+```
+
+Por tamanho, o script treina o alto nível pelo `src/treina.py`, o low-level no mesmo manifesto, e faz duas
+reconstruções com métricas: com o low-level (`subj01_me1_<N>sess`) e sem ele (`subj01_me1_<N>sess_semlowlevel`).
+O "sem low-level" **não tem treino próprio**: é o mesmo checkpoint do alto nível, e só a reconstrução muda (o
+Versatile Diffusion sem o img2img a partir da imagem borrada). Por isso o retrieval dos dois é o mesmo, e o
+`treina.py` não deve ser rodado com o nome `_semlowlevel`. Usa o mesmo `results/logs/me1_benchmark.log` do
+`run_me1_benchmark.sh`, de onde o site tira o tempo de treino.
+
+Retrieval (imagem → cérebro / cérebro → imagem, em %): 30,6 / 23,2 com 1 sessão, 63,1 / 48,3 com 5,
+74,7 / 62,8 com 10, 87,0 / 78,4 com 20 e 94,5 / 87,6 com 40.
+
+## MindEye1 multi-sujeito
+
+**Em andamento.** A rede do MindEye1 treinada com o protocolo do MindEye2, para separar o efeito da arquitetura
+do efeito do pré-treino em outros sujeitos. Código em `mindeye1/src/Train_MindEye_multisubject.py` e
+`mindeye1/src/run_me1_multisubject.sh`; ainda não entra no `src/treina.py`, no site nem nas tabelas, e não há
+resultado dele no repositório.
+
+| | |
+|---|---|
+| Modelo | uma ridge por sujeito (voxels → 1.024), depois o `BrainNetwork` e o prior do MindEye1, prevendo o embedding oculto do CLIP ViT-L/14 (257 × 768) |
+| Protocolo | o do `Train.ipynb` e do `accel.slurm` do MindEye2: pré-treino nos 7 sujeitos que não são o de teste (batch 21), depois ajuste no sujeito de teste a partir desse checkpoint (batch 24), trocando a ridge dele e **treinando tudo** (não só a ridge) |
+| Receita | 150 épocas nas duas fases, 750 × 40 amostras por época, OneCycle com `max_lr=3e-4`, BiMixCo no primeiro terço das épocas e SoftCLIP depois, `prior_scale=30`, `clip_scale=1`, sem aumento de imagem, sem low-level, fp16 |
+| Dados | os do MindEye2 (betas `betas_all_subj0<s>_fp32_renorm.hdf5`, tars `wds/subj0<s>/train`, `coco_images_224_float16.hdf5`): no pré-treino, todas as sessões de cada sujeito (30 a 40); no ajuste, as 40 do sujeito de teste (`--num_sessions`); teste em `new_test` |
+| Avaliação | só retrieval, com o sorteio do benchmark (30 × 300) contra o CLIP ViT-L/14 da imagem: `final_retrieval.json` |
+
+Diferenças do código do MindEye2 que não mudam a conta: `image_iters` em fp16 (18 GB → 9 GB de RAM no
+batch 21), teste montado uma vez no início, `last.pth` gravado de forma atômica e retomado sozinho. A opção
+`--fix_multisubj_perm` corrige um detalhe do MindEye2 (as permutações do BiMixCo de cada sujeito são concatenadas
+sem deslocamento, então o rótulo do mixup aponta para uma amostra do primeiro sujeito do lote); o padrão, `False`,
+reproduz o MindEye2 publicado.
+
+```bash
+mindeye1/src/run_me1_multisubject.sh          # sujeito de teste 1: pré-treino e depois ajuste
+mindeye1/src/run_me1_multisubject.sh 2        # outro sujeito de teste
+```
+
+O script roda num ambiente próprio (`PY`, padrão `~/.conda/envs/mindeye1ms/bin/python`), com dados e saídas sob
+`ROOT` (padrão `~/mindeye1_multisubject`: os dados em `$ROOT/data/mindeyev2`, no formato do MindEye2, e as saídas
+em `$ROOT/train_logs/`). Não lê o `scripts/common.sh`. Cada fase é pulada se já tem `final_retrieval.json` e é
+recomeçada até `MAX_RESTARTS` vezes (padrão 5) se cair, retomando do `last.pth`. Saídas por fase, em
+`$ROOT/train_logs/<nome>/`: `args.json`, `log.jsonl` (uma linha por época), `last.pth` e `final_retrieval.json`;
+os nomes são `me1_multisubject_excludingsubj0<s>_40sess` (pré-treino) e `me1_finetuned_subj0<s>_40sess` (ajuste).

@@ -76,6 +76,11 @@ sempre o mesmo para todos os modelos; o treino são as outras fotos das primeira
 | **MindEye2 ridge-only** | a rede do MindEye2 pré-treinada nos outros sujeitos; aqui só a camada de entrada (ridge) do sujeito 1 treina | só a ridge | `src/etapas/train_ridgeonly.py` |
 | **MindEye1** | a versão anterior do MindEye, treinada do zero, com outro CLIP (ViT-L) e outro gerador | tudo | `mindeye1/src/Train_MindEye.py` |
 | MindEye2 do artigo | os modelos publicados pelos autores, baixados prontos, como referência | nada | — |
+| MindEye1 multi-sujeito (em andamento) | a rede do MindEye1 com o protocolo do MindEye2: pré-treino nos sujeitos 2–8 e ajuste no 1. Roda à parte, num ambiente próprio, e ainda não entra no `treina.py` nem no site | tudo | `mindeye1/src/Train_MindEye_multisubject.py` |
+
+O FRR, o MindEye2 ridge-only e o MindEye1 foram treinados com 1, 5, 10, 20 e 40 sessões; o FRR multi-sujeito, com
+1, 20 e 40; os do artigo existem com 1 e 40. Os nomes no site
+seguem o padrão `<modelo> · <N> sessões`; a tabela com os números está no README ("Combinações testadas").
 
 ## 4. O pipeline
 
@@ -88,6 +93,7 @@ Do dado bruto ao site, com o arquivo que cada etapa grava (o nome do modelo é `
    ▼
  TREINO   scripts/run_frr.sh → etapas/run_frr.py          (FRR: já grava o embedding previsto do teste)
           scripts/run_ridgeonly_prior.sh → etapas/train_ridgeonly.py      (MindEye2: train_logs/<m>/last.pth)
+          scripts/run_frr_ms.sh → etapas/run_frr_ms.py    (FRR multi-sujeito: idem)
           scripts/me1_run.sh train → mindeye1/src/Train_MindEye.py        (MindEye1)
    │
    ▼
@@ -96,6 +102,7 @@ Do dado bruto ao site, com o arquivo que cada etapa grava (o nome do modelo é `
    │
    │  MindEye2: scripts/run_recon.sh → etapas/recon_inference.py   (passa pelo prior e pelo unCLIP)
    │  FRR:      scripts/run_recon_embeddings.sh → etapas/recon_embeddings.py   (direto no unCLIP)
+   │  MindEye1: scripts/me1_run.sh recon → mindeye1/src/Reconstructions.py     (Versatile Diffusion; ViT-L, não bigG)
    ▼
  IMAGEM GERADA             results/evals/<m>/<m>_all_recons.pt  (+ _all_predcaptions.pt, _all_blurryrecons.pt)
    │
@@ -143,9 +150,9 @@ benchmark-modelos/
 │   ├── mindeye_ridge/            a biblioteca: dados, FRR, métricas, dataset controlado
 │   └── report/                   o código do site e do BENCHMARK.md
 ├── vendor/                       código de terceiros (geradores): não editar
-├── mindeye1/                     o MindEye1, com ajustes marcados "# benchmark-modelos"
+├── mindeye1/                     o MindEye1, com ajustes marcados "# benchmark-modelos", e o multi-sujeito
 ├── notebooks/                    treino.ipynb: o uso, com exemplos
-├── tests/                        176 testes, sem GPU, ~20 s
+├── tests/                        221 testes, sem GPU, ~35 s
 └── results/                      tabelas e site (no git); tensores e logs (fora)
 ```
 
@@ -163,6 +170,10 @@ pede cuidado:
 ```bash
 ~/envs/fmri/bin/python -m unittest discover -s tests
 ```
+
+**Rodar um lote** (as sessões intermediárias, as reproduções): os `scripts/run_*.sh` de lote encadeiam treino,
+retrieval, reconstrução e métricas, pulam o que já terminou e escrevem uma linha por etapa em `results/logs/`.
+A lista está em [scripts/README.md](../scripts/README.md).
 
 **Ver o que existe e o que um experimento faria**, sem treinar nada:
 

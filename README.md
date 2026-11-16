@@ -10,12 +10,18 @@ mesmo treino, o mesmo teste (1.000 imagens compartilhadas) e as mesmas métricas
 | **FRR multi-sujeito**: espaço compartilhado linear, pré-treino nos sujeitos 2–8 ([docs/FRR_MULTISUJEITO.md](docs/FRR_MULTISUJEITO.md)) | `src/etapas/run_frr_ms.py` | embedding CLIP ViT-bigG |
 | **MindEye1** ([Scotti et al., 2023](https://arxiv.org/abs/2305.18274)) | `mindeye1/src/Train_MindEye.py` | embedding CLIP ViT-L/14 + imagem (Versatile Diffusion) |
 
+Em andamento, ainda fora do `treina.py` e do site: o **MindEye1 multi-sujeito**, a rede do MindEye1 treinada
+com o protocolo do MindEye2 (pré-treino nos outros 7 sujeitos e ajuste no sujeito 1), em
+`mindeye1/src/Train_MindEye_multisubject.py` ([docs/MINDEYE1.md](docs/MINDEYE1.md#mindeye1-multi-sujeito)).
+
 Novo no código? Comece pelo [docs/GUIA.md](docs/GUIA.md): o problema em uma página, o glossário, o
 pipeline de ponta a ponta e onde fica cada coisa. O índice da documentação está em [docs/README.md](docs/README.md).
 
-Site com início, uso e resultados interativos de todos os modelos: [`results/site/index.html`](results/site/index.html);
-apresentação do trabalho em slides: [`results/site/apresentacao.html`](results/site/apresentacao.html) (os dois abrem
-direto do disco e são regenerados ao fim de cada treino e avaliação).
+Site com início, uso e resultados interativos de todos os modelos (abas Resumo, Tabela, Tempos, Gráficos,
+Dispersão, Treino, Galeria, FRR e Fichas): [`results/site/index.html`](results/site/index.html); apresentação do
+trabalho em slides: [`results/site/apresentacao.html`](results/site/apresentacao.html). Os dois abrem direto do
+disco e são regenerados ao fim de cada treino e avaliação, então estão sempre em dia. O [BENCHMARK.md](BENCHMARK.md)
+não: é a foto de 19/10/2026, só com 1 e 40 sessões, e regenerá-lo pede a máquina com `train_logs/` e `results/evals/`.
 
 ## Instalação
 
@@ -65,10 +71,10 @@ python treina.py <nome> --so_dataset      # monta e resume o dataset
 python treina.py <nome> --dry_run         # mostra o comando
 python treina.py <nome> [<nome> ...]      # treina
 python treina.py <nome> --retoma          # MindEye2: continua do last.pth
-python treina.py <nome> --reconstrucao unclip|refino   # FRR: depois do treino, reconstrói (padrão: none)
+python treina.py <nome> --reconstrucao unclip|refino   # FRR e FRR multi-sujeito: depois do treino, reconstrói (padrão: none)
 ```
 
-No FRR, `--reconstrucao` passa o embedding previsto pelo próprio modelo direto para o unCLIP
+No FRR (e no `frr_ms`), `--reconstrucao` passa o embedding previsto pelo próprio modelo direto para o unCLIP
 (`unclip`) e, com `refino`, também pelo refinamento SDXL guiado pela legenda que o GIT tira do mesmo
 embedding; as métricas saem das duas. Nada vem do MindEye2 treinado: unCLIP, conversor bigG→ViT-L,
 GIT e SDXL foram treinados só com imagens e texto. Com o treino já concluído, só a reconstrução roda.
@@ -76,7 +82,7 @@ GIT e SDXL foram treinados só com imagens e texto. Com o treino já concluído,
 ```python
 import treina                               # de dentro de src/
 treina.roda("meu_modelo", {
-    "modelo": "frr",                        # frr | mindeye2 | mindeye1
+    "modelo": "frr",                        # frr | frr_ms | mindeye2 | mindeye1
     "hiper": {"seed": 42},
     "dataset": {"sessoes": 40, "classes": {"animal": ["sup_animal"]}, "minimo": 10},
     "rotulo": "FRR · só animais",           # opcional: o nome no site
@@ -109,12 +115,21 @@ NUM_SESSIONS=1 scripts/me1_run.sh train|lowlevel|recon|metrics        # uma etap
 # Dataset controlado direto nos scripts
 MODEL_NAME=<nome> DATASET=train_logs/<nome>/dataset.json NUM_SESSIONS=40 scripts/run_frr.sh
 
-# Benchmark
-scripts/run_benchmark.sh                                              # MindEye2 + FRR, tudo
-python src/make_benchmark.py                                          # remonta BENCHMARK.md e a página
+# Lotes (retomáveis; uma linha por etapa em results/logs/)
+scripts/run_reexecutar.sh                                             # os modelos do benchmark, 1 e 40 sessões (repro_<nome>)
+scripts/run_sessoes_intermediarias.sh                                 # MindEye2 com 2, 5, 10 e 20 sessões, com e sem low-level
+scripts/run_me1_sessoes.sh                                            # MindEye1 com 5, 10 e 20 sessões, com e sem low-level
+python src/treina.py subj01_frr_5sess --reconstrucao refino           # FRR numa sessão intermediária, com imagens e métricas
+
+# Site e benchmark
 python src/make_site.py                                               # regenera o site e a apresentação (results/site)
 python src/make_site.py --exemplos                                    # refaz os exemplos semânticos da apresentação
+python src/make_benchmark.py                                          # remonta BENCHMARK.md e a página (precisa de train_logs/ e results/evals/)
+scripts/mede_tempos.sh --fonte results/evals/<modelo>                 # estimativa de tempo por etapa, para quem não gravou os próprios
 ```
+
+O `scripts/run_benchmark.sh` é o lote original, com os nomes sem `repro_`; os resultados dele foram
+substituídos pelas reproduções e ele fica só como registro ([docs/REEXECUTAR.md](docs/REEXECUTAR.md)).
 
 ### Resultado de um modelo
 
@@ -127,10 +142,11 @@ python -c "from mindeye_ridge import resultados; print(resultados.retrieval('<no
 | `train_logs/<nome>/` | checkpoint, logs, `dataset.json`, `experimento.json` (MindEye1: `mindeye1/train_logs/<nome>/`) |
 | `results/tables/` | métricas finais |
 | `results/evals/<nome>/` | tensores de embedding e reconstrução |
-| `results/site/index.html` | o site: todos os modelos, com tabelas, gráficos, curvas, galeria e fichas |
+| `results/site/index.html` | o site: todos os modelos, com tabelas, tempos de cada etapa, gráficos, curvas, galeria e fichas |
 | `results/site/apresentacao.html` | a apresentação: a pergunta, os modelos ilustrados, os resultados e o controle semântico, com exemplos de imagens por classe e % da tela (`results/site/exemplos/`) |
 | `results/site/modelos/<nome>.json` | o registro do modelo no site (o que foi extraído de cada resultado) |
-| [BENCHMARK.md](BENCHMARK.md), `results/benchmark/index.html` | tabelas e página do benchmark |
+| `train_logs/<nome>/tempos.jsonl` | o tempo de cada etapa depois do treino (o site o copia para o registro do modelo) |
+| [BENCHMARK.md](BENCHMARK.md), `results/benchmark/index.html` | tabelas e página do benchmark (foto de 19/10/2026, 1 e 40 sessões) |
 
 ## Combinações possíveis
 
@@ -166,6 +182,7 @@ python -c "from mindeye_ridge import resultados; print(resultados.retrieval('<no
 | Modelo | Chave e padrão |
 |---|---|
 | `frr` | `folds=5`, `grid="doerig"` (ou `"extended"`), `fracs=None`, `global_fraction=False`, `seed=42`, `chunk=8192` |
+| `frr_ms` | `k=1024`, `pretreino=[2..8]` (ou `"proprio"`, o controle de posto reduzido), `pesos="sujeito"` (ou `"exibicao"`), `iteracoes=10`, `tolerancia=1e-3`, `validacao=0.1`, `folds=5`, `grid="doerig"`, `fracs=None`, `seed=42`, `chunk=8192` |
 | `mindeye2` | `hidden_dim=1024` (ou 4096), `num_epochs=150`, `batch_size=None`, `max_lr=3e-4`, `prior=True`, `blurry=False`, `frozen_fp16=None`, `seed=42`, `ckpt_interval=None` |
 | `mindeye1` | `num_epochs=240`, `max_lr=3e-4`, `seed=42`, `mixup_pct=0.33`, `batch_size=None` (16), `paper=False`, `save_every=1` |
 
@@ -175,39 +192,40 @@ python -c "from mindeye_ridge import resultados; print(resultados.retrieval('<no
 | `mindeye2` | `blurry=True` só com `hidden_dim=4096` |
 | `mindeye1` | imagens únicas >= `batch_size` |
 | `frr` | `agregacao` só `exibicoes` ou `media` |
+| `frr_ms` | `agregacao` só `exibicoes`; os sujeitos 2–8 baixados (`setup/bootstrap.sh --multisujeito`) |
 | todos | sujeito 1; nome já treinado é recusado |
 
 ## Combinações testadas
 
-Treinadas e avaliadas (retrieval top-1 imagem → cérebro / cérebro → imagem, em %). Todas com o
-dataset completo das N primeiras sessões; os dicionários estão em `BENCHMARK` (`src/experimentos.py`).
+Treinadas e avaliadas, todas com o dataset completo das N primeiras sessões e a semente 42. Retrieval
+top-1 entre 300, em %: imagem → cérebro / cérebro → imagem (média de 30 sorteios). Os números são os do
+site em 14/11/2026; as linhas de 1 e 40 sessões vêm das reproduções `repro_<nome>`, que o site mostra com o
+nome sem prefixo. Os dicionários estão em `src/experimentos.py` (`BENCHMARK`, `EXPERIMENTOS`, `REPRODUCOES`).
 
-| Modelo | Nome | Sessões | Hiperparâmetros | fwd | bwd |
-|---|---|---|---|---|---|
-| FRR | `subj01_frr_1sess` | 1 | padrão | 55,0 | 3,1 |
-| FRR | `subj01_frr_1sess_global` | 1 | `global_fraction` | 33,2 | 1,3 |
-| FRR | `subj01_frr_1sess_ext` | 1 | `grid="extended"` | 55,7 | 2,0 |
-| FRR | `subj01_frr_40sess` | 40 | padrão | 96,4 | 37,7 |
-| FRR | `subj01_frr_40sess_global` | 40 | `global_fraction` | 96,3 | 37,7 |
-| FRR | `subj01_frr_40sess_ext` | 40 | `grid="extended"` | 92,4 | 21,3 |
-| MindEye2 | `subj01_ridgeonly_1sess_prior` | 1 | padrão | 92,8 | 88,1 |
-| MindEye2 | `subj01_ridgeonly_1sess` | 1 | `prior=False` | 78,5 | 72,1 |
-| MindEye2 | `subj01_ridgeonly_1sess_4096blurry` | 1 | `hidden_dim=4096`, `blurry` | 95,5 | 92,0 |
-| MindEye2 | `subj01_ridgeonly_1sess_prior_seed42` | 1 | `seed=42` | 92,9 | 88,1 |
-| MindEye2 | `subj01_ridgeonly_1sess_prior_seed1` | 1 | `seed=1` | 93,1 | 87,8 |
-| MindEye2 | `subj01_ridgeonly_1sess_prior_seed2` | 1 | `seed=2` | 93,2 | 88,1 |
-| MindEye2 | `subj01_ridgeonly_1sess_noprior_seed42` | 1 | `prior=False`, `seed=42` | 78,4 | 72,6 |
-| MindEye2 | `subj01_ridgeonly_40sess_prior` | 40 | `num_epochs=20`, `frozen_fp16` | 99,9 | 99,5 |
-| MindEye2 | `subj01_ridgeonly_40sess_4096blurry` | 40 | `hidden_dim=4096`, `blurry`, `num_epochs=20` | 100,0 | 99,4 |
-| MindEye1 | `subj01_me1_1sess` | 1 | padrão + low-level | 30,6 | 23,2 |
-| MindEye1 | `subj01_me1_1sess_semlowlevel` | 1 | padrão, sem low-level | 30,6 | 23,2 |
-| MindEye1 | `subj01_me1_40sess` | 40 | padrão + low-level | 94,5 | 87,6 |
-| MindEye1 | `subj01_me1_40sess_semlowlevel` | 40 | padrão, sem low-level | 94,5 | 87,6 |
-| MindEye2 (artigo) | `final_subj01_pretrained_1sess_24bs` | 1 | fine-tune completo, baixado | 93,9 | 77,6 |
-| MindEye2 (artigo) | `final_subj01_pretrained_40sess_24bs` | 40 | fine-tune completo, baixado | 100 | 99,9 |
+| Modelo | Nome | 1 | 5 | 10 | 20 | 40 |
+|---|---|---|---|---|---|---|
+| FRR | `subj01_frr_<N>sess` | 55,0 / 3,1 | 88,6 / 20,4 | 92,7 / 29,7 | 94,3 / 53,3 | 96,4 / 37,7 |
+| FRR multi-sujeito (C) | `subj01_frr_multisujeito_<N>sess` | 62,9 / 12,4 | — | — | 94,1 / 50,2 | 96,1 / 38,7 |
+| FRR posto reduzido (B, controle) | `subj01_frr_postoreduzido_<N>sess` | 41,1 / 9,6 | — | — | 94,5 / 54,7 | 97,0 / 43,9 |
+| MindEye2 (4096 + low-level) | `subj01_ridgeonly_<N>sess_4096blurry` | 95,5 / 92,2 | 99,6 / 98,4 | 99,6 / 98,6 | 99,6 / 99,0 | 99,9 / 99,6 |
+| MindEye2 sem low-level (1024 + prior) | `subj01_ridgeonly_<N>sess_prior` | 92,9 / 88,1 | 99,2 / 98,0 | 99,4 / 98,7 | 99,4 / 98,9 | 99,9 / 99,2 |
+| MindEye1 | `subj01_me1_<N>sess` | 30,6 / 23,2 | 63,1 / 48,3 | 74,7 / 62,8 | 87,0 / 78,4 | 94,5 / 87,6 |
+| MindEye2 do artigo (fine-tune completo, baixado) | `final_subj01_pretrained_<N>sess_24bs` | 94,1 / 78,2 | — | — | — | 100,0 / 99,9 |
 
-Definidas e ainda não rodadas (`EXPERIMENTOS`): 5 classes semânticas, pessoa + animal, 1.000 imagens × 3
-repetições nos quatro modos de agregação, e 3.000 × 1, 1.500 × 2, 1.000 × 3 imagens × repetições.
+O MindEye1 sem low-level (`subj01_me1_<N>sess_semlowlevel`) usa o mesmo checkpoint do alto nível e só muda a
+reconstrução (sem o img2img a partir da imagem borrada), então o retrieval é o mesmo. Variantes só com 1 e 40
+sessões:
+
+| Modelo | Nome | Hiperparâmetros | 1 | 40 |
+|---|---|---|---|---|
+| FRR, uma fração para todas as dimensões | `subj01_frr_<N>sess_global` | `global_fraction` | 33,2 / 1,3 | 96,3 / 37,7 |
+| FRR, grade estendida | `subj01_frr_<N>sess_ext` | `grid="extended"` | 55,7 / 2,0 | 92,3 / 21,3 |
+| MindEye2 sem low-level nem prior | `subj01_ridgeonly_1sess` | `prior=False` | 78,4 / 72,6 | — |
+| MindEye2 sem low-level, sementes 1 e 2 | `subj01_ridgeonly_1sess_prior_seed{1,2}` | `seed` | 93,1 / 87,8 e 93,2 / 88,1 | — |
+
+Definidas e ainda não rodadas (`EXPERIMENTOS`): o MindEye2 com 2 sessões (com e sem low-level) e os de dataset
+controlado: 5 classes semânticas, pessoa + animal, 1.000 imagens × 3 repetições nos quatro modos de agregação, e
+3.000 × 1, 1.500 × 2, 1.000 × 3 imagens × repetições. O site os mostra em Fichas como planejados.
 
 ## Estrutura
 
@@ -220,11 +238,11 @@ repetições nos quatro modos de agregação, e 3.000 × 1, 1.500 × 2, 1.000 ×
 | `src/mindeye_ridge/` | biblioteca: dados, FRR, métricas, semântica, dataset controlado, agregação, resultados |
 | `src/report/` | o código do site e do `BENCHMARK.md` |
 | `vendor/` | código de terceiros (os geradores de imagem), como veio ([vendor/README.md](vendor/README.md)) |
-| `mindeye1/` | MindEye1 adaptado ([mindeye1/README.md](mindeye1/README.md)) |
+| `mindeye1/` | MindEye1 adaptado, e o MindEye1 multi-sujeito ([mindeye1/README.md](mindeye1/README.md)) |
 | `notebooks/` | `treino.ipynb`, `classificacao_semantica.ipynb`, originais do MindEye2 |
 | `results/` | tabelas, site e página (no git); tensores e logs (fora) |
 | `train_logs/` | checkpoints (fora do git) |
-| `tests/` | testes, sem GPU |
+| `tests/` | 221 testes, sem GPU, ~35 s |
 | `docs/` | documentação, com índice em [docs/README.md](docs/README.md) |
 
 ## Licença

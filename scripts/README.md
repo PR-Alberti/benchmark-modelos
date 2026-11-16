@@ -20,6 +20,7 @@ experimento. Chamá-los direto também funciona, com variáveis de ambiente (vej
 | `run_reexecutar.sh` | refaz os modelos do benchmark com o `treina.py` (prefixo `repro_`), do treino às métricas; é o lote em uso |
 | `run_me1_benchmark.sh` | MindEye1 com 1 e 40 sessões, do treino às métricas |
 | `run_sessoes_intermediarias.sh` | MindEye2 ridge-only com 2, 5, 10 e 20 sessões, com e sem low-level, do treino às métricas |
+| `run_me1_sessoes.sh` | MindEye1 com 5, 10 e 20 sessões, do treino às métricas; o sem low-level reaproveita o checkpoint do alto nível e só refaz a reconstrução |
 | `run_agregacao_media_me2.sh`, `run_agregacao_media_me1.sh` | duas filas (uma por vez na GPU): MindEye2 e MindEye1 com a média das repetições no treino, com e sem low-level, em 1, 5, 10, 20 e 40 sessões |
 | `run_benchmark.sh` | o lote original do benchmark, com os nomes antigos (sem `repro_`). Os resultados dele foram substituídos pelas reproduções; fica como registro de como o benchmark foi montado |
 | **Utilitários** | |
@@ -30,3 +31,6 @@ experimento. Chamá-los direto também funciona, com variáveis de ambiente (vej
 | `remapeia_commits.py` | troca hashes de commit de antes da reescrita do histórico (29/10/2026) pelos novos, em `train_logs/` ou outros arquivos |
 
 Todos são retomáveis: se interromper, rode o mesmo comando de novo.
+
+O MindEye1 multi-sujeito tem o próprio lançador, `mindeye1/src/run_me1_multisubject.sh`, fora daqui: ele não lê
+o `common.sh` e roda num ambiente à parte (veja [docs/MINDEYE1.md](../docs/MINDEYE1.md#mindeye1-multi-sujeito)).

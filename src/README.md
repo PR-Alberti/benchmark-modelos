@@ -9,7 +9,7 @@ O pipeline está explicado em [docs/GUIA.md](../docs/GUIA.md). O código fica in
 | Arquivo | O que faz |
 |---|---|
 | `treina.py` | treina um experimento: monta o dataset, grava a configuração e chama o script do modelo (`--lista`, `--dry_run`, `--so_dataset`, `--reconstrucao`) |
-| `experimentos.py` | os experimentos, um dicionário cada: `BENCHMARK` (os modelos do benchmark), `REPRODUCOES`, `EXPERIMENTOS` (os novos) |
+| `experimentos.py` | os experimentos, um dicionário cada: `BENCHMARK` (os modelos do benchmark), `REPRODUCOES`, `EXPERIMENTOS` (os novos: sessões intermediárias, FRR multi-sujeito e os de dataset controlado) |
 | `make_site.py` | gera o site (`results/site/index.html` e `apresentacao.html`); os scripts o chamam sozinhos |
 | `make_benchmark.py` | gera o `BENCHMARK.md` e `results/benchmark/index.html` |
 | `make_comparison.py` | figura imagem vista × reconstruções de vários modelos |
@@ -29,6 +29,7 @@ rode `--help` (importa tudo) e, de verdade, só na máquina de treino. Veja "Mud
 | `enhanced_recon_inference.py` | refino das reconstruções com a legenda | `_all_enhancedrecons.pt` |
 | `final_evaluations.py` | métricas de imagem e retrieval | `results/tables/<m>_all_{recons,enhancedrecons}.csv` |
 | `verify_retrieval.py` | só o retrieval do MindEye2, sem gerar imagens | `_all_clipvoxels.pt`, `_retrieval.json` |
+| `mede_tempos.py` | testes curtos do custo de cada etapa, para os modelos que não gravaram os próprios tempos (`scripts/mede_tempos.sh`) | `results/tables/tempos_etapas.json` |
 
 ## `mindeye_ridge/`: a biblioteca
 
@@ -59,5 +60,6 @@ O código reutilizável, com testes em `tests/`.
 | `data.py`, `rows.py`, `fmt.py` | leitura dos resultados, linhas das tabelas, formatação |
 | `page.py`, `markdown.py`, `texts.py` | a página do benchmark, o `BENCHMARK.md` e as conclusões escritas |
 | `galeria_site.py`, `exemplos_site.py`, `semantica_site.py` | galeria de imagens, exemplos e simulador do site |
+| `tempos.py` | a aba Tempos: o custo de cada etapa por modelo, do que ele gravou ao rodar ou, na falta, da estimativa por tipo |
 | `conteudo/` | o texto fixo do site e da apresentação (HTML) |
 | `assets/` | CSS e JavaScript |

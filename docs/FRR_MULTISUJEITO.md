@@ -18,8 +18,8 @@ voxels do sujeito s ──Rₛ──▶ k números ──Q──▶ embedding CL
 | | Experimento | Pré-treino da leitura Q | Ajuste no subj01 |
 |---|---|---|---|
 | A | `repro_subj01_frr_{1,40}sess` e `subj01_frr_20sess` (o FRR de sempre) | — (voxels → CLIP direto) | tudo |
-| **B** | `subj01_frr_postoreduzido_{1,40}sess` | só o próprio subj01 (controle de posto reduzido) | só R₁ |
-| **C** | `subj01_frr_multisujeito_{1,40}sess` | sujeitos 2–8, todas as sessões | só R₁ |
+| **B** | `subj01_frr_postoreduzido_{1,20,40}sess` | só o próprio subj01 (controle de posto reduzido) | só R₁ |
+| **C** | `subj01_frr_multisujeito_{1,20,40}sess` | sujeitos 2–8, todas as sessões | só R₁ |
 
 C contra B mede o efeito dos outros sujeitos; B contra A, o efeito do gargalo de k sozinho. Sem B, um C
 melhor que A não diz se o ganho veio do pré-treino ou da mudança de arquitetura.
@@ -45,7 +45,7 @@ validação (máximo de 10; para quando o ganho relativo cai abaixo de 10⁻³).
 **Ajuste fino**: com Q congelada, R₁ é o FRR comum (5 dobras agrupadas por imagem) dos voxels do subj01
 para T₁ = (Y₁ − ȳ₁) Q'; a previsão é ȳ₁ + x R₁ Q. Mesmo treino, teste, alvo e avaliação do `run_frr.py`.
 
-O pré-treino dos outros sujeitos é um só para 1 e 40 sessões do subj01: fica em
+O pré-treino dos outros sujeitos é um só para 1, 20 e 40 sessões do subj01: fica em
 `train_logs/_pretreino_frr_ms/<assinatura>/` (a base espectral de cada sujeito, a leitura `Q_melhor.npy` e o
 histórico em `estado.json`) e retoma da última iteração. O do controle B fica em `train_logs/<modelo>/pretreino/`.
 
@@ -65,8 +65,8 @@ histórico em `estado.json`) e retoma da última iteração. O do controle B fic
 ```bash
 setup/bootstrap.sh --multisujeito                       # sujeitos 2-8: 12,1 GB (betas + 258 tars)
 cd src
-python treina.py subj01_frr_multisujeito_1sess subj01_frr_multisujeito_40sess      # C
-python treina.py subj01_frr_postoreduzido_1sess subj01_frr_postoreduzido_40sess    # B
+python treina.py subj01_frr_multisujeito_{1,20,40}sess        # C
+python treina.py subj01_frr_postoreduzido_{1,20,40}sess       # B
 python treina.py subj01_frr_multisujeito_1sess --reconstrucao refino                # + unCLIP, refino e métricas
 ```
 
