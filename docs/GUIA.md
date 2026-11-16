@@ -77,6 +77,15 @@ sempre o mesmo para todos os modelos; o treino são as outras fotos das primeira
 | **MindEye1** | a versão anterior do MindEye, treinada do zero, com outro CLIP (ViT-L) e outro gerador | tudo | `mindeye1/src/Train_MindEye.py` |
 | MindEye2 do artigo | os modelos publicados pelos autores, baixados prontos, como referência | nada | — |
 
+**MindEye2 "com" e "sem" low-level.** Nos experimentos, nos scripts e no site, os dois pares do MindEye2 ridge-only são sempre estes:
+
+| Nome | `hidden_dim` | Ramo blurry (low-level) | Prior | Ponto de partida | Sufixo do experimento |
+|---|---|---|---|---|---|
+| **MindEye2 sem low-level** | 1024 | não | sim | `multisubject_subj01_1024hid_nolow_300ep` | `_prior` |
+| **MindEye2 (com low-level)** | 4096 | sim | sim | `final_multisubject_subj01` | `_4096blurry` |
+
+O low-level e o `hidden_dim` mudam juntos, porque o checkpoint com o ramo blurry é o de 4096 (`_valida_mindeye2`).
+
 ## 4. O pipeline
 
 Do dado bruto ao site, com o arquivo que cada etapa grava (o nome do modelo é `<m>`):
