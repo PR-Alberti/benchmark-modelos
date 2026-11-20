@@ -29,7 +29,7 @@
   "modelo": "mindeye2"
  },
  "config_descritiva": false,
- "config_erro": null,
+ "config_erro": "No module named 'h5py'",
  "config_fonte": "a de subj01_ridgeonly_1sess_prior (src/experimentos.py)",
  "curva": null,
  "espaco_clip": "ViT-bigG/14",

@@ -209,6 +209,37 @@ for _n, _ep in EPOCAS_POR_SESSOES.items():
 
 
 # =============================================================================================
+# MindEye2 ridge-only com imagens unicas x repeticoes a 6.000 exibicoes fixas (branch
+# Image-per-repetition, scripts/run_imagens_repeticoes.sh): 6.000 imagens x 1 exibicao, 3.000 x 2 e
+# 2.000 x 3, sorteadas (semente 0) das 40 sessoes, com e sem low-level (os pares do benchmark: 4096 +
+# blurry e 1024 + prior). Com 2 e 3 exibicoes por imagem, os trials separados ("exibicoes") e a media
+# das repeticoes ("media"); com 1 exibicao os dois modos sao o mesmo dado, e treina uma vez so.
+#
+# Epocas: as 6.000 exibicoes equivalem a ~8,9 sessoes (675 exibicoes de treino por sessao), e a
+# interpolacao geometrica de EPOCAS_POR_SESSOES da 45 epocas. Na media a amostra e a imagem e a epoca
+# encolhe na mesma proporcao, entao as epocas sao multiplicadas pelas repeticoes (90 e 135): todos
+# os modelos dao o mesmo numero de passos (~18,7 mil no batch 16).
+# =============================================================================================
+EPOCAS_EXIBICOES = 45
+IMAGENS_REPETICOES = ((6000, 1), (3000, 2), (2000, 3))
+
+for _n, _r in IMAGENS_REPETICOES:
+    for _modo in (("exibicoes",) if _r == 1 else ("exibicoes", "media")):
+        _base = f"subj01_me2_{_n}img_{_r}rep" + ("" if _r == 1 else f"_{_modo}")
+        _comum = {"num_epochs": EPOCAS_EXIBICOES * (_r if _modo == "media" else 1), "frozen_fp16": True,
+                  "ckpt_interval": 1}
+        _dataset = {"sessoes": 40, "n_imagens": _n, "repeticoes": _r, "semente": 0, "agregacao": _modo}
+        _desc = f"{_n // 1000} mil imagens × {_r}" + ("" if _r == 1 else
+                                                     (" · trials separados" if _modo == "exibicoes" else " · média"))
+        EXPERIMENTOS[f"{_base}_prior"] = {
+            "modelo": "mindeye2", "hiper": dict(_comum), "dataset": dict(_dataset),
+            "rotulo": f"MindEye2 sem low-level · {_desc}"}
+        EXPERIMENTOS[f"{_base}_4096blurry"] = {
+            "modelo": "mindeye2", "hiper": {**_comum, "hidden_dim": 4096, "blurry": True},
+            "dataset": dict(_dataset), "rotulo": f"MindEye2 · {_desc}"}
+
+
+# =============================================================================================
 # Media das repeticoes no treino, com e sem low-level, em 1, 5, 10, 20 e 40 sessoes (branch agregation,
 # scripts/run_agregacao_media.sh): os mesmos modelos das curvas de sessoes acima e do benchmark, so com
 # "agregacao": "media" (uma amostra por imagem unica, a media dos betas das exibicoes dela). O teste nao muda.

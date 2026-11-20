@@ -82,6 +82,15 @@ O FRR, o MindEye2 ridge-only e o MindEye1 foram treinados com 1, 5, 10, 20 e 40 
 1, 20 e 40; os do artigo existem com 1 e 40. Os nomes no site
 seguem o padrão `<modelo> · <N> sessões`; a tabela com os números está no README ("Combinações testadas").
 
+**MindEye2 "com" e "sem" low-level.** Nos experimentos, nos scripts e no site, os dois pares do MindEye2 ridge-only são sempre estes:
+
+| Nome | `hidden_dim` | Ramo blurry (low-level) | Prior | Ponto de partida | Sufixo do experimento |
+|---|---|---|---|---|---|
+| **MindEye2 sem low-level** | 1024 | não | sim | `multisubject_subj01_1024hid_nolow_300ep` | `_prior` |
+| **MindEye2 (com low-level)** | 4096 | sim | sim | `final_multisubject_subj01` | `_4096blurry` |
+
+O low-level e o `hidden_dim` mudam juntos, porque o checkpoint com o ramo blurry é o de 4096 (`_valida_mindeye2`).
+
 ## 4. O pipeline
 
 Do dado bruto ao site, com o arquivo que cada etapa grava (o nome do modelo é `<m>`):

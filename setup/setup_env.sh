@@ -69,7 +69,8 @@ if [[ $WITH_EXTRAS -eq 1 ]]; then
         rouge_score==0.1.2 "datasets==2.16.1" "pyarrow==15.0.2"
     # o setup.sh original pede umap==0.1.1, que nao existe mais no PyPI;
     # umap-learn fornece o mesmo modulo `umap` que o notebook importa
-    "$PIP" install umap-learn
+    # 0.5.x: a 0.6 exige numpy>=2, que quebra o torch 2.1, o h5py e o pandas
+    "$PIP" install "umap-learn==0.5.7" "numpy<2"
 fi
 
 echo "==> aplicando correcoes de compatibilidade"
