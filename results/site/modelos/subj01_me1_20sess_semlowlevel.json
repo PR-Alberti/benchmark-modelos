@@ -28,7 +28,7 @@
   "rotulo": "MindEye1 sem low-level · 20 sessões"
  },
  "config_descritiva": false,
- "config_erro": null,
+ "config_erro": "No module named 'h5py'",
  "config_fonte": "src/experimentos.py",
  "curva": {
   "epocas": [

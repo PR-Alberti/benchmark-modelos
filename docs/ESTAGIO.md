@@ -7,8 +7,9 @@ de banco de provas, e decodificar o embedding CLIP da imagem vista serve de subs
 decodificação de imagética visual. A meta é uma lei de escala: como a quantidade de dados exigida
 depende do nível de informação desejado e do modelo.
 
-A tabela diz o que já existe para essa análise; os números
-estão no [BENCHMARK.md](../BENCHMARK.md), e o que foi feito e por quê, no [EXPERIMENTO.md](EXPERIMENTO.md).
+A tabela diz o que já existe para essa análise (situação em 14/11/2026). Os números de todos os modelos estão no
+site (`results/site/index.html`) e resumidos no [README](../README.md#combinações-testadas); o que foi feito e por
+quê, no [EXPERIMENTO.md](EXPERIMENTO.md), no [FRR_MULTISUJEITO.md](FRR_MULTISUJEITO.md) e no [MINDEYE1.md](MINDEYE1.md).
 
 ## Dados
 
@@ -24,24 +25,28 @@ estão no [BENCHMARK.md](../BENCHMARK.md), e o que foi feito e por quê, no [EXP
 | Tarefa do plano | Estado | Onde |
 |---|---|---|
 | Modelo linear por sujeito (FRR, Doerig et al.) | feito | `src/mindeye_ridge/frr.py`, `src/etapas/run_frr.py`. Validado contra o pacote `fracridge` e contra uma ridge resolvida pela equação normal (`tests/test_frr.py`) |
-| Modelo não linear por sujeito, da literatura | **pendente** | Falta escolher por relevância e reprodutibilidade, e implementar |
-| MindEye2 simplificado (sem reconstrução de baixo nível e sem unCLIP), pré-treinado e adaptado ao sujeito | feito | Os ridge-only de 1024 (`scripts/run_ridgeonly_prior.sh`): só a ridge do sujeito é treinada, a partir do pré-treino nos outros 7 sujeitos |
-| Quais componentes do MindEye2 ficam mantidos, congelados ou retreinados | feito | [EXPERIMENTO.md](EXPERIMENTO.md): backbone e prior congelados, ridge treinada (2,21% dos parâmetros); o 4096 + blurry mantém o ramo de baixo nível |
-| Custo computacional e tempo de treino como dimensão de complexidade | parcial | Tempo de treino dos ridge-only e custo do FRR (tempo, GPU, RAM) no [BENCHMARK.md](../BENCHMARK.md). Falta padronizar a medida entre famílias |
+| Modelo não linear por sujeito, da literatura | feito | O MindEye1 (`mindeye1/`), treinado do zero só no subj01, com e sem o ramo de baixo nível ([MINDEYE1.md](MINDEYE1.md)) |
+| MindEye2 simplificado (sem reconstrução de baixo nível e sem unCLIP), pré-treinado e adaptado ao sujeito | feito | O MindEye2 sem low-level (ridge-only de 1024, `scripts/run_ridgeonly_prior.sh`): só a ridge do sujeito é treinada, a partir do pré-treino nos outros 7 sujeitos |
+| Quais componentes do MindEye2 ficam mantidos, congelados ou retreinados | feito | [EXPERIMENTO.md](EXPERIMENTO.md): backbone e prior congelados, ridge treinada (2,21% dos parâmetros); o MindEye2 com low-level (4096 + blurry) mantém o ramo de baixo nível |
+| Custo computacional e tempo de treino como dimensão de complexidade | parcial | O tempo já é medido igual em todas as famílias: cada etapa (treino, retrieval, reconstrução, refino, métricas) grava o próprio tempo ao rodar (`cronometra`, em `scripts/common.sh`), e a aba Tempos do site os compara (para os modelos mais antigos, que não gravaram, por estimativa do `scripts/mede_tempos.sh`). O pico de memória de GPU e RAM só é registrado no FRR e no FRR multi-sujeito |
 
 ## Comparação
 
 | Tarefa do plano | Estado | Observação |
 |---|---|---|
-| Redução de dados por sessões | parcial | 1 e 40 sessões para o FRR, o ridge 1024 e o MindEye1; as condições de 25, 35 e 50 h do plano não foram rodadas |
-| Redução de dados por imagens únicas e por repetições | **pendente** | O pipeline existe; falta rodar. A varredura de 3.000 exibições (3.000 × 1, 1.500 × 2, 1.000 × 3) já está em `src/experimentos.py` para o FRR |
+| Redução de dados por sessões | feito, em parte | 1, 5, 10, 20 e 40 sessões para o FRR, o MindEye2 (com e sem low-level) e o MindEye1; 1, 20 e 40 para o FRR multi-sujeito. O MindEye2 com 2 sessões está definido e não rodou; as condições de 25, 35 e 50 h do plano não foram rodadas (o NSD tem 40 sessões por sujeito) |
+| Redução de dados por imagens únicas e por repetições | **pendente** | O pipeline existe; falta rodar. A varredura de 3.000 exibições (3.000 × 1, 1.500 × 2, 1.000 × 3) e os quatro modos de agregação com 1.000 imagens × 3 já estão em `src/experimentos.py` |
 | Redução de variedade (por categoria, aleatória, maximizando distância) | **pendente** | Por categoria: o pipeline existe (classes semânticas), falta rodar. Maximizando distância: falta implementar |
 | Mesmo teste e mesmo sujeito em todas as condições | feito | O benchmark inteiro usa o subj01 e as mesmas 1.000 imagens |
 
 ## Extensões
 
-Espaço multi-sujeito com modelos simples, variação de SNR e ROIs estão **pendentes**. Para ROIs,
-as máscaras do NSD já estão baixadas (`brain_region_masks.hdf5`).
+| Extensão | Estado | Onde |
+|---|---|---|
+| Espaço multi-sujeito com modelos simples | feito | O FRR multi-sujeito: espaço compartilhado linear pré-ajustado nos sujeitos 2–8, com o controle de posto reduzido ([FRR_MULTISUJEITO.md](FRR_MULTISUJEITO.md)) |
+| O mesmo protocolo multi-sujeito num modelo não linear treinado do zero | em andamento | O MindEye1 multi-sujeito ([MINDEYE1.md](MINDEYE1.md#mindeye1-multi-sujeito)); ainda sem resultado no repositório |
+| Variação de SNR | **pendente** | |
+| ROIs | **pendente** | As máscaras do NSD já estão baixadas (`brain_region_masks.hdf5`) |
 
 ## Três coisas que o trabalho do FRR trouxe e que valem para os próximos modelos
 

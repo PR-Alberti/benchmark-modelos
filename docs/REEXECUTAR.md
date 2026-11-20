@@ -1,6 +1,6 @@
 # O que rodar de novo para o benchmark ficar completo
 
-Levantamento de 12/10/2026, atualizado em 16/10/2026 depois da reexecução e em 21/10/2026 com o MindEye1 sem low-level. Parte do que está no git: os
+Levantamento de 12/10/2026, atualizado em 16/10/2026 depois da reexecução, em 21/10/2026 com o MindEye1 sem low-level e em 09/11/2026 com as variantes do FRR refeitas. Parte do que está no git: os
 registros de cada modelo em `results/site/modelos/*.json` (o que o site conseguiu extrair de cada corrida)
 e o [BENCHMARK.md](../BENCHMARK.md).
 
@@ -120,9 +120,10 @@ quebrava as métricas de legenda e a reconstrução (agora pinado em 15.0.2 no `
 exige aceitar os termos da Anaconda (contornado criando o Python 3.11 pelo canal conda-forge, sem conda, com o
 `venv` que o `setup_env.sh` já prevê).
 
-Os 12 experimentos de dataset controlado de `src/experimentos.py` (`EXPERIMENTOS`) não são re-execuções, e
-sim os próximos a rodar; `python src/treina.py --lista` mostra todos, e eles aparecem em Fichas, no site,
-como planejados.
+Os experimentos de `src/experimentos.py` em `EXPERIMENTOS` não são re-execuções. Desde então rodaram, por fora
+desta fila, as sessões intermediárias (FRR, MindEye2 e MindEye1 com 5, 10 e 20 sessões) e o FRR multi-sujeito;
+os de dataset controlado e o MindEye2 com 2 sessões continuam por rodar. `python src/treina.py --lista` mostra
+todos, e os não rodados aparecem em Fichas, no site, como planejados.
 
 O low-level do MindEye1 de 40 sessões parou na época 90 de 120 (reinício da máquina em 19/10) e foi retomado do
 `last.pth`. O `results/logs/me1_benchmark.log` (fora do git) ganhou uma linha de início ajustada para o tempo

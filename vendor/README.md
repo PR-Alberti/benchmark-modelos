@@ -6,8 +6,8 @@ exemplo, `src/mindeye_ridge/decodificador.py` ajusta a configuração do unCLIP 
 
 | Pasta | O que é | Origem | Quem usa |
 |---|---|---|---|
-| `generative_models/` | SDXL e o unCLIP da Stability AI (pacote `sgm`), mais as configurações `.yaml` dos modelos | [Stability-AI/generative-models](https://github.com/Stability-AI/generative-models), como veio no [MindEye2](https://github.com/MedARC-AI/MindEyeV2) | reconstrução, refinamento, alvos CLIP bigG (`src/mindeye_ridge/decodificador.py`, `clip_targets.py`, as etapas em `src/`) |
-| `autoencoder/` | ConvNeXt usado pela perda do ramo *blurry* do MindEye2 | [MindEye2](https://github.com/MedARC-AI/MindEyeV2) | `src/train_ridgeonly.py` (só com `--blurry_recon`) |
+| `generative_models/` | SDXL e o unCLIP da Stability AI (pacote `sgm`), mais as configurações `.yaml` dos modelos | [Stability-AI/generative-models](https://github.com/Stability-AI/generative-models), como veio no [MindEye2](https://github.com/MedARC-AI/MindEyeV2) | reconstrução, refinamento, alvos CLIP bigG (`src/mindeye_ridge/decodificador.py`, `clip_targets.py`, as etapas em `src/etapas/`) |
+| `autoencoder/` | ConvNeXt usado pela perda do ramo *blurry* do MindEye2 | [MindEye2](https://github.com/MedARC-AI/MindEyeV2) | `src/etapas/train_ridgeonly.py` (só com `--blurry_recon`) |
 
 O caminho entra no `sys.path` por `mindeye_ridge.paths.add_vendored_to_path()`: o `generative_models` se
 importa tanto como `generative_models.sgm` quanto como `sgm`, e os dois precisam funcionar. Cada pasta

@@ -18,7 +18,7 @@ veja o [MINDEYE1.md](MINDEYE1.md).
 |---|---|---|
 | GPU NVIDIA | 16 GB de VRAM (testado em RTX A4500, 20 GB) | `nvidia-smi` |
 | conda **ou** python3.11 | qualquer versão do conda | `conda --version` |
-| Disco livre | **~85 GB** (ver a conta abaixo) | `df -h ~` |
+| Disco livre | **~85 GB** só para MindEye2 e FRR (a conta abaixo); **~130 GB** com tudo, MindEye1 incluído (200 GB recomendados) | `df -h ~` |
 | git | qualquer versão | `git --version` |
 
 Python 3.12+ **não funciona**: o `torch==2.1.0` não tem wheel para essa versão.
@@ -88,8 +88,8 @@ torch 2.1.0+cu121 | CUDA disponivel: True | NVIDIA RTX A4500
 modulos do repo (sgm, mindeye_ridge): OK
 ```
 
-Se sair `CUDA disponivel: False`, o problema é a GPU, não o ambiente — veja a
-seção 7.
+Se sair `CUDA disponivel: False`, o problema é a GPU, não o ambiente — rode
+`setup/bootstrap.sh --check`, que diagnostica a placa e o driver.
 
 Outras opções do `setup_env.sh`: `--path /outro/lugar`, `--venv` (usa
 `python3.11 -m venv` em vez de conda). Do `download_data.py`: `--dry-run` para ver
@@ -252,15 +252,19 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   └── restore_ckpt.py          conserta .pth que o Drive descompactou (seção 7)
 ├── scripts/
 │   ├── common.sh                caminhos e ambiente, lidos por todos os run_*.sh
-│   ├── run_ridgeonly_prior.sh   treino (fine-tune só da camada ridge)
-│   ├── run_recon.sh             reconstruções (recon + refinamento)
+│   ├── run_ridgeonly_prior.sh   MindEye2: treino (fine-tune só da camada ridge)
+│   ├── run_recon.sh             MindEye2: reconstruções (recon + refinamento)
 │   ├── run_evals.sh             métricas finais
-│   ├── run_frr.sh               baseline linear FRR
+│   ├── run_frr.sh  run_frr_ms.sh   FRR e FRR multi-sujeito
+│   ├── run_recon_embeddings.sh  FRR: reconstrução a partir do embedding, refino e métricas
 │   ├── me1_setup.sh  me1_run.sh   MindEye1: preparação e uma etapa por vez (MINDEYE1.md)
+│   ├── run_reexecutar.sh        o lote em uso: os modelos do benchmark refeitos (repro_<nome>), seção 6
+│   ├── run_sessoes_intermediarias.sh  run_me1_sessoes.sh   MindEye2 e MindEye1 nas sessões intermediárias
 │   ├── run_me1_benchmark.sh     MindEye1 no benchmark: 1 e 40 sessões, do treino às métricas
-│   ├── run_benchmark.sh         roda tudo o que o benchmark precisa (seção 6)
-│   └── me1_fake_data.py  inspect_ckpt.py   utilitários: dados sintéticos do MindEye1, flags de um checkpoint
-├── mindeye1/                    MindEye1: src/ (código original + ajustes), download.py,
+│   ├── run_benchmark.sh         o lote original do benchmark (registro; substituído pelo run_reexecutar.sh)
+│   ├── mede_tempos.sh           estimativa do custo de cada etapa (aba Tempos do site)
+│   └── me1_fake_data.py  inspect_ckpt.py  remapeia_commits.py   utilitários (scripts/README.md)
+├── mindeye1/                    MindEye1: src/ (código original + ajustes, e o multi-sujeito), download.py,
 │                                train_logs/ (links e saídas, fora do git)
 ├── src/
 │   ├── treina.py                roda um experimento (dataset + script de treino do modelo)
@@ -269,6 +273,7 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   ├── make_benchmark.py        monta results/benchmark/ e BENCHMARK.md
 │   ├── make_comparison.py       figura imagem vista × reconstruções
 │   ├── etapas/                  as etapas do pipeline, chamadas pelos scripts/run_*.sh
+│   │   ├── mede_tempos.py       testes curtos do custo de cada etapa
 │   │   ├── train_ridgeonly.py   MindEye2: treino
 │   │   ├── recon_inference.py   MindEye2: gera as reconstruções
 │   │   ├── recon_embeddings.py  reconstrói a partir de um embedding pronto (FRR)
@@ -278,23 +283,24 @@ O cache fica em `$HF_HOME`, que os scripts apontam para `~/mindeyev2/.cache`.
 │   │   ├── run_frr.py           FRR: voxels → embedding CLIP
 │   │   └── run_frr_ms.py        FRR multi-sujeito
 │   ├── mindeye_ridge/           biblioteca (utils, models, modeling_git, paths, nsd_data,
-│   │                            clip_targets, frr, embedding_metrics, semantica,
-│   │                            dataset_controlado, agregacao, resultados)
-│   └── report/                  o código da página e do BENCHMARK.md (dados, tabelas, textos,
-│                                markdown e, em assets/, o CSS e o JavaScript)
+│   │                            clip_targets, frr, multisujeito, embedding_metrics, decodificador,
+│   │                            semantica, dataset_controlado, agregacao, resultados)
+│   └── report/                  o código do site, da apresentação e do BENCHMARK.md (src/README.md)
 ├── vendor/                      código de terceiros, como veio (não editar)
 │   ├── generative_models/       código da Stability AI (SDXL, unCLIP)
 │   └── autoencoder/             ConvNeXt do MindEye2
 ├── results/
+│   ├── site/                    o site e a apresentação, com o registro de cada modelo (gerado; no git)
 │   ├── tables/                  CSVs e JSONs com as métricas finais        (no git)
 │   ├── benchmark/index.html     benchmark completo com galeria (gerado, abre offline; no git)
 │   ├── metrics/  figs/          curvas e figuras de corridas antigas       (no git)
 │   ├── evals/<modelo>/          tensores de reconstrução e de embedding    (fora do git)
-│   └── logs/                    logs do run_benchmark.sh e do run_me1_benchmark.sh (fora do git)
-├── tests/                       testes (python -m unittest discover -s tests)
+│   └── logs/                    uma linha por etapa de cada lote (run_*.sh)  (fora do git)
+├── tests/                       221 testes, sem GPU (python -m unittest discover -s tests)
 ├── notebooks/                   treino.ipynb (como treinar), classificacao_semantica.ipynb;
 │                                mindeye2_original/ (os notebooks e o README do MindEye2, de referência)
-└── train_logs/<modelo>/         saída: last.pth + metrics.csv + train.log  (fora do git)
+└── train_logs/<modelo>/         saída: last.pth + metrics.csv + train.log + experimento.json,
+                                 dataset.json e tempos.jsonl  (fora do git)
 
 ~/mindeyev2/                 ← dados externos (seção 4.1), 62 GB
 ├── coco_images_224_float16.hdf5
@@ -371,12 +377,19 @@ oposto do que o comentário do `final_evaluations.py` (`fwd: brain, clip`) e o a
 
 ### Benchmark de todos os modelos
 
+O lote em uso é o `scripts/run_reexecutar.sh`: refaz os modelos do benchmark pelo `src/treina.py`, com o nome
+`repro_<nome>`, do treino às métricas ([REEXECUTAR.md](REEXECUTAR.md)). As sessões intermediárias têm lotes
+próprios (`run_sessoes_intermediarias.sh`, `run_me1_sessoes.sh`; [scripts/README.md](../scripts/README.md)). O
+`run_benchmark.sh`, abaixo, é o lote original, com os nomes antigos; os resultados dele foram substituídos pelas
+reproduções, e ele fica como registro de como o benchmark foi montado e pelas opções que introduziu.
+
 ```bash
-scripts/run_benchmark.sh              # ~40 h numa A4500; uma linha por etapa em results/logs/benchmark.log
+COMMITA=1 scripts/run_reexecutar.sh   # o lote em uso (~55 h numa A4500); SO="frr 1sess" roda só alguns blocos
+scripts/run_benchmark.sh              # o original (~40 h); uma linha por etapa em results/logs/benchmark.log
 python src/make_benchmark.py             # só remonta a página com o que já existe
 ```
 
-Treina o que falta (4096 + blurry e 40 sessões), reconstrói e avalia os quatro ridge-only
+O `run_benchmark.sh` treina o que falta (4096 + blurry e 40 sessões), reconstrói e avalia os quatro ridge-only
 e os dois modelos do artigo (1 e 40 sessões; `download_data.py --stage paper paper40 blurry`),
 roda o baseline linear FRR (próxima seção), e monta `results/benchmark/index.html` e `BENCHMARK.md`.
 Pode ser interrompido e rodado de novo:
@@ -401,13 +414,16 @@ Opções novas que ele usa, úteis também sozinhas:
 Regressão ridge fracionária (Rokem & Kay, 2020) dos 15.724 voxels direto para o embedding CLIP
 ViT-bigG/14 achatado (256 × 1.664), seguindo Doerig et al. (2025): validação cruzada de 5
 dobras agrupada por imagem e uma fração escolhida para cada uma das 425.984 dimensões do alvo.
-Sem rede, sem prior e sem reconstrução; mesmo sujeito, mesmas sessões de treino e mesmo teste
-(1.000 imagens) do ridge-only, avaliado com o mesmo retrieval (`embedding_metrics.py`).
+Sem rede e sem prior; mesmo sujeito, mesmas sessões de treino e mesmo teste (1.000 imagens) do ridge-only,
+avaliado com o mesmo retrieval (`embedding_metrics.py`). O embedding previsto pode seguir direto para o unCLIP
+e o refino, com as mesmas métricas de imagem (`scripts/run_recon_embeddings.sh <modelo> unclip|refino`, ou
+`--reconstrucao` no `treina.py`).
 
 ```bash
 scripts/run_frr.sh                                   # 1 sessão   -> results/evals/subj01_frr_1sess   (~1 min)
 NUM_SESSIONS=40 scripts/run_frr.sh                   # 40 sessões -> results/evals/subj01_frr_40sess (~30 min)
 MODEL_NAME=subj01_frr_1sess_ext EXTRA="--grid extended" scripts/run_frr.sh    # grade estendida (sensibilidade)
+scripts/run_recon_embeddings.sh subj01_frr_1sess refino          # imagens e métricas a partir do embedding
 python -m unittest discover -s tests                            # testes
 ```
 

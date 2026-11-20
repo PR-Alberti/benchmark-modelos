@@ -96,7 +96,7 @@ em `~/envs/fmri` (`MINDEYE_ENV`). Exporte as mesmas variáveis em todos os coman
 Confira no fim:
 
 ```bash
-~/envs/fmri/bin/python -m unittest discover -s tests      # 176 testes, ~30 s; "OK (skipped=4)"
+~/envs/fmri/bin/python -m unittest discover -s tests      # 221 testes, ~35 s; "OK (skipped=3)"
 setup/bootstrap.sh --check                                # o resumo diz o que ainda falta
 ```
 
@@ -184,7 +184,8 @@ dataset ou outros hiperparâmetros, ele para, para não misturar configurações
 
 Quanto leva, numa A4500: FRR ~1 min (1 sessão) a ~30 min (40 sessões); MindEye2 ridge-only ~2 h (1 sessão)
 a ~8 h (40 sessões, 20 épocas); MindEye1 ~1 h 40 (1 sessão) a ~16 h (40 sessões), mais ~1 h e ~13 h do low-level
-(medidos no [REEXECUTAR.md](REEXECUTAR.md)).
+(medidos no [REEXECUTAR.md](REEXECUTAR.md)). A aba Tempos do site tem o tempo de cada etapa de cada modelo já
+treinado, inclusive as sessões intermediárias.
 Num subconjunto, o tempo cai com o número de exibições.
 
 ## 5. Ver o resultado
@@ -208,9 +209,10 @@ print(resultados.retrieval('meu_frr_animais'))
 ```
 
 Devolve o retrieval top-1 (`fwd`: imagem → cérebro, `bwd`: cérebro → imagem) e de onde veio o número. O FRR
-já sai com isso calculado, em `results/tables/<nome>_frr.json`. O MindEye2 e o MindEye1 precisam de mais
-duas etapas para as imagens e as métricas completas (precisam do caminho A, que baixa os pesos de
-reconstrução):
+já sai com isso calculado, em `results/tables/<nome>_frr.json`; para as imagens e as métricas dele, rode o
+treino com `--reconstrucao refino` (ou `treina.roda(..., reconstrucao="refino")`). O MindEye2 e o MindEye1
+precisam de mais duas etapas para as imagens e as métricas completas (as duas pedem os pesos de reconstrução,
+do caminho A ou do complemento do caminho B):
 
 ```bash
 cd ~/benchmark-modelos

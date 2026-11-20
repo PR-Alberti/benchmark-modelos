@@ -9,6 +9,7 @@
 #   LOWLEVEL="0" ...                                       so sem low-level (1024); "1" so com (4096 + blurry)
 #   RECON=0 ...                                            so treino e retrieval, sem reconstrucao (~39 h)
 #   COMMITA=1 ...                                          um commit com os resultados de cada modelo
+#   SUFIXO=_media SESSOES="5 10 20 40" ...                 os experimentos de nome <modelo>$SUFIXO (src/experimentos.py)
 #
 # Pode ser interrompido e rodado de novo: etapa concluida deixa um marcador em
 # train_logs/<modelo>/.sessint_<etapa> e e pulada; o treino retoma do last.pth. A falha de um modelo nao
@@ -23,6 +24,7 @@ LOG=$LOGS/sessoes_intermediarias.log
 SESSOES=${SESSOES:-2 5 10 20}
 LOWLEVEL=${LOWLEVEL:-0 1}
 RECON=${RECON:-1}
+SUFIXO=${SUFIXO:-}
 MS1024="$DATA/train_logs/multisubject_subj01_1024hid_nolow_300ep/last.pth"
 MS4096="$DATA/train_logs/final_multisubject_subj01/last.pth"
 FALHAS=0
@@ -80,8 +82,8 @@ guarda() {
 etapa "=== inicio: sessoes [$SESSOES], low-level [$LOWLEVEL], recon $RECON ==="
 for n in $SESSOES; do
     for ll in $LOWLEVEL; do
-        if [ "$ll" = 1 ]; then modelo "subj01_ridgeonly_${n}sess_4096blurry" 4096 blurry "$MS4096"
-        else modelo "subj01_ridgeonly_${n}sess_prior" 1024 noblurry "$MS1024"; fi
+        if [ "$ll" = 1 ]; then modelo "subj01_ridgeonly_${n}sess_4096blurry$SUFIXO" 4096 blurry "$MS4096"
+        else modelo "subj01_ridgeonly_${n}sess_prior$SUFIXO" 1024 noblurry "$MS1024"; fi
     done
 done
 

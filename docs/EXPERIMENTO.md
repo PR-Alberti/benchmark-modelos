@@ -1,5 +1,12 @@
 # O que foi feito
 
+> **Registro de set.–out./2026.** Este arquivo conta, em ordem, como o MindEye2 ridge-only e o FRR chegaram ao
+> benchmark, e os números são os de cada momento. Para os números atuais (inclusive as reproduções e as sessões
+> intermediárias), veja o site (`results/site/index.html`) ou o [README](../README.md#combinações-testadas). Os
+> nomes aqui são os antigos: "ridge 1024 + prior" é o que o site chama de **MindEye2 sem low-level**, "ridge
+> 4096 + blurry" é o **MindEye2** e "ridge 1024 sem prior" é o **MindEye2 sem low-level nem prior**; os ids dos
+> modelos não mudaram. Os lotes que rodam hoje estão no [scripts/README.md](../scripts/README.md).
+
 Fine-tune do MindEye2 no sujeito 1 do NSD com 1 sessão de dados, treinando
 **apenas a camada ridge** e mantendo backbone e diffusion prior congelados.
 
@@ -88,7 +95,8 @@ if ridge_only:
 Treináveis: **16.102.400 de 729.327.896 — 2,21%**. É exatamente
 `15724 × 1024 + 1024`, a matriz da ridge do subj01 mais o viés.
 
-`git diff --stat origin/upstream-base..main` mostra o conjunto todo das mudanças.
+O código veio do repositório anterior (`mindeye2-ridge`), sem o histórico de lá; aqui, as mudanças ao
+`Train.ipynb` estão concentradas no bloco acima e nas opções listadas nesta seção.
 
 ## Por que congelar era necessário aqui
 
@@ -317,8 +325,9 @@ Em 30/09/2026 os quatro braços ridge-only e os dois modelos publicados no artig
 (1 e 40 sessões) passaram pelo mesmo pipeline, com a mesma semente:
 reconstrução, refinamento e as métricas do `final_evaluations.py`. Tabelas em
 [BENCHMARK.md](../BENCHMARK.md); galeria de reconstruções lado a lado, curvas de
-treino e ruído em `results/benchmark/index.html`. Para refazer tudo:
-`./scripts/run_benchmark.sh` (~50 h numa A4500). O que cada modelo ainda deixou de
+treino e ruído em `results/benchmark/index.html`. Para refazer tudo, na época:
+`./scripts/run_benchmark.sh` (~50 h numa A4500); hoje, `scripts/run_reexecutar.sh`, que refaz os mesmos
+modelos com o nome `repro_<nome>`. O que cada modelo ainda deixou de
 registrar, e o que rodar para completar, está em [REEXECUTAR.md](REEXECUTAR.md).
 
 Reconstruções refinadas, com 25% de blurry misturado nos modelos que têm o ramo,
@@ -393,7 +402,8 @@ As tabelas da primeira rodada estão em `results/tables/pre_benchmark/`.
 
 O plano de estágio pede, entre as famílias de modelos, "um modelo linear por sujeito, provavelmente
 Fractional Ridge Regression (FRR), seguindo Doerig et al.". É o ponto mais simples da escala de
-complexidade: sem rede, sem prior, sem reconstrução, e com a mesma entrada, o mesmo treino e o mesmo
+complexidade: sem rede e sem prior (a reconstrução, que veio depois, passa o embedding previsto direto ao
+unCLIP: `scripts/run_recon_embeddings.sh`), e com a mesma entrada, o mesmo treino e o mesmo
 teste do ridge-only. Os números completos estão no [BENCHMARK.md](../BENCHMARK.md) e o que falta do
 plano, no [ESTAGIO.md](ESTAGIO.md).
 
