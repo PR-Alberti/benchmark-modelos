@@ -6,6 +6,8 @@ Quem chega agora: [GUIA.md](GUIA.md) primeiro (o problema, o glossário e o mapa
 | Arquivo | O que tem | Para quem |
 |---|---|---|
 | [GUIA.md](GUIA.md) | o problema em uma página, glossário, o pipeline de ponta a ponta, onde fica cada coisa, receitas e armadilhas | quem vai mexer no código |
+| **Esta branch** | | |
+| [PROCEDIMENTO_ME1_MULTISUJ.md](PROCEDIMENTO_ME1_MULTISUJ.md) | ordem de serviço da branch: grade de pré-treinos multi-sujeito do MindEye1 (2/4/7 sujeitos) e ajustes no subj01 | o Claude que vai executar |
 | **Instalar e rodar** | | |
 | [NOVO_COMPUTADOR.md](NOVO_COMPUTADOR.md) | do computador zerado ao primeiro treino, só com terminal | quem vai rodar |
 | [SETUP.md](SETUP.md) | referência da instalação: todas as bibliotecas, todos os arquivos externos, onde cada coisa fica, erros conhecidos | quando algo da instalação falha |
