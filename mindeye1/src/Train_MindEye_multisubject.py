@@ -54,6 +54,12 @@ def parse_args():
     p.add_argument("--multi_subject", action=B, default=False)
     p.add_argument("--multisubject_ckpt", type=str, default=None, help="dir of the pretrained model to fine-tune from")
     p.add_argument("--num_sessions", type=int, default=40)
+    # benchmark-modelos: protocolos multi-sujeito (docs/PROCEDIMENTO_ME1_MULTISUJ.md)
+    p.add_argument("--pretrain_subjs", type=int, nargs="+", default=None,
+                   help="pretrain subjects (default: all but --subj, as MindEye2)")
+    p.add_argument("--pretrain_sessions", type=int, default=None,
+                   help="first N sessions of each pretrain subject; also sets 750*N samples/epoch "
+                        "(default: all sessions and 750*40, as MindEye2)")
     p.add_argument("--batch_size", type=int, required=True, help="global batch size: 21 multi-subject, 24 single")
     p.add_argument("--hidden_dim", type=int, default=1024)
     p.add_argument("--n_blocks", type=int, default=4)
@@ -69,6 +75,36 @@ def parse_args():
     p.add_argument("--max_iters_per_epoch", type=int, default=None, help="smoke tests only")
     p.add_argument("--final_eval_only", action=B, default=False, help="skip training, evaluate last.pth")
     return p.parse_args()
+
+
+def plan_subjects(args):
+    """Subjects, sessions per subject, per-subject batch and samples/epoch for this run."""
+    if args.multi_subject:
+        subj_list = list(args.pretrain_subjs) if args.pretrain_subjs else [s for s in range(1, 9) if s != args.subj]
+        if args.subj in subj_list:
+            raise ValueError(f"test subject {args.subj} cannot be in --pretrain_subjs {subj_list}")
+        if len(set(subj_list)) != len(subj_list) or not all(1 <= s <= 8 for s in subj_list):
+            raise ValueError(f"invalid --pretrain_subjs {subj_list}")
+        if args.pretrain_sessions is None:
+            nsess = {s: int(NSESSIONS_ALLSUBJ[s - 1]) for s in subj_list}
+            num_samples_per_epoch = 750 * 40
+        else:
+            short = [s for s in subj_list if NSESSIONS_ALLSUBJ[s - 1] < args.pretrain_sessions]
+            if short:
+                raise ValueError(f"subjects {short} have fewer than {args.pretrain_sessions} sessions")
+            nsess = {s: args.pretrain_sessions for s in subj_list}
+            num_samples_per_epoch = 750 * args.pretrain_sessions
+    else:
+        if args.pretrain_subjs or args.pretrain_sessions:
+            raise ValueError("--pretrain_subjs/--pretrain_sessions only make sense with --multi_subject")
+        subj_list = [args.subj]
+        nsess = {args.subj: args.num_sessions}
+        num_samples_per_epoch = 750 * args.num_sessions
+    batch_size = args.batch_size // len(subj_list)
+    if batch_size < 1:
+        raise ValueError(f"--batch_size {args.batch_size} < number of subjects {len(subj_list)}")
+    num_iters = num_samples_per_epoch // (batch_size * len(subj_list))
+    return subj_list, nsess, batch_size, num_iters
 
 
 class MindEye1Multi(nn.Module):
@@ -204,20 +240,17 @@ def main():
     with open(os.path.join(outdir, "args.json"), "w") as f:
         json.dump(vars(args), f, indent=2)
 
-    subj_list = [s for s in range(1, 9) if s != args.subj] if args.multi_subject else [args.subj]
-    batch_size = args.batch_size // len(subj_list)
-    num_samples_per_epoch = 750 * (40 if args.multi_subject else args.num_sessions)
-    num_iters = num_samples_per_epoch // (batch_size * len(subj_list))
+    subj_list, nsess_by_subj, batch_size, num_iters = plan_subjects(args)
     if args.max_iters_per_epoch:
         num_iters = min(num_iters, args.max_iters_per_epoch)
     total_steps = args.num_epochs * num_iters
-    print(f"subj_list={subj_list} batch_per_subj={batch_size} iters/epoch={num_iters} total_steps={total_steps}", flush=True)
+    print(f"subj_list={subj_list} sessions={nsess_by_subj} batch_per_subj={batch_size} iters/epoch={num_iters} "
+          f"total_steps={total_steps}", flush=True)
 
     # data
     train_dls, voxels, num_voxels_list = [], {}, []
     for s in subj_list:
-        nsess = int(NSESSIONS_ALLSUBJ[s - 1]) if args.multi_subject else args.num_sessions
-        train_dls.append(make_train_loader(args.data_path, s, nsess, batch_size))
+        train_dls.append(make_train_loader(args.data_path, s, nsess_by_subj[s], batch_size))
         with h5py.File(f"{args.data_path}/betas_all_subj0{s}_fp32_renorm.hdf5", "r") as f:
             voxels[s] = torch.from_numpy(f["betas"][:]).to(DATA_TYPE)
         num_voxels_list.append(voxels[s].shape[1])
